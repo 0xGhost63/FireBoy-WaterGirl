@@ -18,6 +18,13 @@ if not exist "build\rcc" mkdir "build\rcc"
 if not exist "build\ui"  mkdir "build\ui"
 if not exist "bin"       mkdir "bin"
 
+rem 1b) Sync root styles to assets folder
+if exist "styles.qss" (
+    echo [*] Syncing styles...
+    copy /Y styles.qss "assets\styles\game.qss" >nul
+    copy /b resources.qrc +,, >nul
+)
+
 goto :Main
 
 rem -------------------------------------------------------
@@ -143,7 +150,8 @@ if "%EXE%"=="" if exist "release\FireboyWatergirl.exe" set "EXE=release\FireboyW
 if "%EXE%"=="" if exist "debug\FireboyWatergirl.exe"   set "EXE=debug\FireboyWatergirl.exe"
 
 if not "%EXE%"=="" (
-    start "" "%EXE%"
+    echo [*] Game is running... Close the game window to return here.
+    "%EXE%"
     goto :End
 )
 
@@ -156,6 +164,9 @@ echo =======================================================
 pause
 
 :End
+echo.
+echo [*] Script finished.
+pause
 popd
 endlocal
 exit /b 0
