@@ -15,35 +15,16 @@ QMainWindow {
 }
 
 /* ── Menu Page ──────────────────────────────────────── */
-QWidget#menuPage {
-    background: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #0d1a0d,
-        stop:0.5 #0a0a14,
-        stop:1 #0d0a1a
-    );
-}
-
-QWidget#lbPage {
-    background: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #0a0a14,
-        stop:1 #0d0a1a
-    );
+QWidget#menuPage, QWidget#lbPage, QWidget#namePage {
+    background-image: url('assets/images/bg_ruins.png');
+    background-position: center;
 }
 
 /* ── Title Labels ───────────────────────────────────── */
 QLabel#titleLabel {
-    font-size: 32px;
+    font-size: 38px;
     font-weight: 900;
-    color: transparent;
-    background: qlineargradient(
-        x1:0, y1:0, x2:1, y2:0,
-        stop:0 #ff6020,
-        stop:0.5 #ffcc00,
-        stop:1 #40b0ff
-    );
-    -qt-background-role: window;
+    color: #ffcc00;
     padding: 8px 0px;
 }
 
@@ -65,30 +46,22 @@ QLabel#controlsLabel {
 }
 
 /* ── Primary Play Button ─────────────────────────────── */
-QPushButton#btnPlay {
-    background: qlineargradient(
-        x1:0, y1:0, x2:1, y2:1,
-        stop:0 #ff6020,
-        stop:1 #ff3000
-    );
-    color: #ffffff;
-    border: none;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    padding: 10px 30px;
+QPushButton#btnPlay, QPushButton#btnSubmit {
+    background: rgba(220, 110, 40, 0.15);
+    color: #ffd0a0;
+    border: 2px solid rgba(220, 110, 40, 0.4);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 8px 24px;
 }
-QPushButton#btnPlay:hover {
-    background: qlineargradient(
-        x1:0, y1:0, x2:1, y2:1,
-        stop:0 #ff8040,
-        stop:1 #ff5020
-    );
+QPushButton#btnPlay:hover, QPushButton#btnSubmit:hover {
+    background: rgba(220, 110, 40, 0.28);
+    border-color: rgba(255, 150, 60, 0.7);
+    color: #ffeedd;
 }
-QPushButton#btnPlay:pressed {
-    background: #cc2800;
-    padding-top: 12px;
+QPushButton#btnPlay:pressed, QPushButton#btnSubmit:pressed {
+    background: rgba(180, 80, 20, 0.35);
 }
 
 /* ── Secondary Buttons ───────────────────────────────── */
@@ -188,4 +161,19 @@ QInputDialog QPushButton {
 }
 QInputDialog QPushButton:hover {
     background: rgba(80,150,230,0.45);
+}
+
+/* ── Name Entry Page ─────────────────────────────────── */QLineEdit#nameInput {
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: #ffffff;
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    selection-background-color: rgba(255,96,32,0.5);
+}
+QLineEdit#nameInput:focus {
+    border-color: #ff6020;
+    background: rgba(255,255,255,0.08);
 }

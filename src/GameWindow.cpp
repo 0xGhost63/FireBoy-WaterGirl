@@ -10,10 +10,12 @@
 #include <QFile>
 #include <QTextStream>
 #include <QApplication>
+#include <QLineEdit>
 #include <cstring>
 using namespace std;
 
 GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
+    currentPlayerName = "Anonymous";
     setWindowTitle("Fireboy & Watergirl – Forest Temple");
     resize(1000, 760);
     eng = new GameEngine(this);
@@ -55,7 +57,7 @@ void GameWindow::buildUI() {
         b->setObjectName(id); b->setFixedSize(240, 50);
         ml->addWidget(b, 0, Qt::AlignCenter); return b;
     };
-    auto* btnPlay = makeBtn("  Play Game",      "btnPrimary");
+    auto* btnPlay = makeBtn("  Play Game",      "btnPlay");
     auto* btnLB   = makeBtn("  Leaderboard",    "btnSecondary");
     auto* btnQuit = makeBtn("  Quit",           "btnQuit");
 
@@ -98,7 +100,37 @@ void GameWindow::buildUI() {
     connect(back, &QPushButton::clicked, this, &GameWindow::showMenu);
     stack->addWidget(lbPage);
 
-    stack->setCurrentIndex(1); // start on menu
+    // ── Page 3: Name Entry ───────────────────────────────────
+    QWidget* namePage = new QWidget;
+    namePage->setObjectName("namePage");
+    QVBoxLayout* nl = new QVBoxLayout(namePage);
+    nl->setAlignment(Qt::AlignCenter); nl->setSpacing(20);
+
+    QLabel* nameTitle = new QLabel("Welcome to Fireboy & Watergirl!");
+    nameTitle->setObjectName("titleLabel"); nameTitle->setAlignment(Qt::AlignCenter);
+    nl->addWidget(nameTitle);
+
+    QLabel* nameSub = new QLabel("Please enter your player name:");
+    nameSub->setObjectName("subLabel"); nameSub->setAlignment(Qt::AlignCenter);
+    nl->addWidget(nameSub);
+
+    nameInput = new QLineEdit();
+    nameInput->setObjectName("nameInput");
+    nameInput->setPlaceholderText("Enter Name...");
+    nameInput->setFixedSize(300, 50);
+    nameInput->setAlignment(Qt::AlignCenter);
+    nl->addWidget(nameInput, 0, Qt::AlignCenter);
+
+    QPushButton* btnSubmit = new QPushButton("Continue");
+    btnSubmit->setObjectName("btnSubmit");
+    btnSubmit->setFixedSize(200, 50);
+    nl->addWidget(btnSubmit, 0, Qt::AlignCenter);
+    connect(btnSubmit, &QPushButton::clicked, this, &GameWindow::submitName);
+    connect(nameInput, &QLineEdit::returnPressed, this, &GameWindow::submitName);
+
+    stack->addWidget(namePage);
+
+    stack->setCurrentIndex(3); // start on name entry screen
 }
 
 void GameWindow::startGame() {
@@ -109,17 +141,20 @@ void GameWindow::startGame() {
 void GameWindow::showMenu()        { stack->setCurrentIndex(1); }
 void GameWindow::showLeaderboard() { refreshLeaderboard(); stack->setCurrentIndex(2); }
 
+void GameWindow::submitName() {
+    QString name = nameInput->text().trimmed();
+    if (!name.isEmpty()) {
+        currentPlayerName = name;
+    }
+    stack->setCurrentIndex(1); // Go to main menu
+}
+
 void GameWindow::onFrameReady()    { renderer->update(); }
 
 void GameWindow::onStateChanged(int s) {
     renderer->update();
     if (s == STATE_WIN || s == STATE_GAMEOVER) {
-        bool ok;
-        QString name = QInputDialog::getText(this,
-            s==STATE_WIN ? "You Win!" : "Game Over",
-            "Enter your name:", QLineEdit::Normal, "Player", &ok);
-        if (!ok || name.isEmpty()) name = "Anonymous";
-        saveScore(name, eng->score,
+        saveScore(currentPlayerName, eng->score,
                   eng->levels.current ? eng->levels.current->data.num : 1,
                   eng->elapsed);
     }

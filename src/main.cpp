@@ -17,14 +17,21 @@ int main(int argc, char* argv[]) {
     if (qss.open(QFile::ReadOnly | QFile::Text))
         app.setStyleSheet(QLatin1String(qss.readAll()));
 
-    // Create a 3-second Splash Screen with Cyberpunk text
-    QPixmap splashPix(800, 600);
-    splashPix.fill(Qt::black);
-    QPainter painter(&splashPix);
-    painter.setPen(QColor(0, 255, 0)); // Cyberpunk Green
-    painter.setFont(QFont("Courier", 80, QFont::Bold));
-    painter.drawText(splashPix.rect(), Qt::AlignCenter, "YouNoob");
-    painter.end();
+    // Create a 3-second Splash Screen with an Image
+    QPixmap splashPix("assets/images/younoob.png");
+    if (splashPix.isNull()) {
+        // Fallback if the user hasn't saved the image yet
+        splashPix = QPixmap(800, 600);
+        splashPix.fill(Qt::black);
+        QPainter painter(&splashPix);
+        painter.setPen(QColor(0, 255, 0)); // Cyberpunk Green
+        painter.setFont(QFont("Courier", 80, QFont::Bold));
+        painter.drawText(splashPix.rect(), Qt::AlignCenter, "YouNoob");
+        painter.end();
+    } else {
+        // Scale it to a reasonable size if it's too large/small
+        splashPix = splashPix.scaled(800, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
 
     QSplashScreen* splash = new QSplashScreen(splashPix);
     splash->show();

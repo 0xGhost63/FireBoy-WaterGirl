@@ -19,11 +19,14 @@ private slots:
     void showMenu();
     void showLeaderboard();
     void startGame();
+    void submitName();
 private:
     GameEngine*    eng;
     GameRenderer*  renderer;
     QStackedWidget* stack;
     QTableWidget*  lbTable;
+    class QLineEdit* nameInput; // Forward declaration or include QLineEdit
+    QString currentPlayerName;
 
     // Leaderboard data (DSA: sorted with QuickSort/BubbleSort)
     ScoreEntry scores[MAX_SCORES];

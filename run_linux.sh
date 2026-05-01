@@ -7,6 +7,12 @@ echo "====================================="
 # Ensure build and bin directories exist
 mkdir -p build/obj build/moc build/rcc build/ui bin
 
+# Sync root styles to the assets folder and force resource re-compilation
+if [ -f "styles.qss" ]; then
+    cp styles.qss assets/styles/game.qss
+    touch resources.qrc
+fi
+
 # Generate Makefile using qmake
 qmake FireboyWatergirl.pro
 
