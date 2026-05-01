@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/styles">
+    <file alias="game.qss">assets/styles/game.qss</file>
+  </qresource>
+</RCC>

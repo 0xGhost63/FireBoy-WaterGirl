@@ -1,0 +1,108 @@
+/* ── Minimal QSS — only for Menu & UI widgets, NOT the game canvas ── */
+
+QWidget {
+    background-color: #0a0a14;
+    color: #e8e8f0;
+    font-family: "Segoe UI", "Ubuntu", Arial, sans-serif;
+}
+
+QWidget#menuPage, QWidget#lbPage {
+    background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+        stop:0 #0d1a0d, stop:0.5 #0a0a14, stop:1 #0d0a1a);
+}
+
+QLabel#titleLabel {
+    font-size: 28px;
+    font-weight: 900;
+    color: #ffcc00;
+    padding: 6px 0;
+}
+QLabel#subLabel {
+    font-size: 14px;
+    color: #7788aa;
+    letter-spacing: 3px;
+}
+QLabel#ctrlLabel {
+    font-size: 12px;
+    color: #556688;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 12px 18px;
+}
+
+QPushButton#btnPrimary {
+    background: qlineargradient(x1:0,y1:0,x2:1,y2:1,
+        stop:0 #ff6020, stop:1 #ff2800);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 800;
+}
+QPushButton#btnPrimary:hover  { background: #ff7040; }
+QPushButton#btnPrimary:pressed{ background: #cc2200; }
+
+QPushButton#btnSecondary {
+    background: rgba(60,120,200,0.15);
+    color: #80c0ff;
+    border: 2px solid rgba(60,120,200,0.35);
+    border-radius: 11px;
+    font-size: 13px;
+    font-weight: 700;
+}
+QPushButton#btnSecondary:hover  { background: rgba(60,120,200,0.28); }
+
+QPushButton#btnQuit {
+    background: rgba(180,30,30,0.12);
+    color: #ff7070;
+    border: 2px solid rgba(180,30,30,0.28);
+    border-radius: 11px;
+    font-size: 13px;
+    font-weight: 700;
+}
+QPushButton#btnQuit:hover { background: rgba(200,40,40,0.25); }
+
+QTableWidget#lbTable {
+    background: rgba(255,255,255,0.03);
+    alternate-background-color: rgba(255,255,255,0.055);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    gridline-color: rgba(255,255,255,0.06);
+    color: #d0d8f0;
+    selection-background-color: rgba(80,160,255,0.22);
+}
+QHeaderView::section {
+    background: rgba(40,60,100,0.5);
+    color: #80b0ff;
+    font-weight: 700;
+    border: none;
+    border-bottom: 2px solid rgba(80,130,220,0.35);
+    padding: 6px;
+}
+QScrollBar:vertical {
+    background: rgba(255,255,255,0.04);
+    width: 7px; border-radius: 4px;
+}
+QScrollBar::handle:vertical {
+    background: rgba(255,255,255,0.18);
+    border-radius: 4px; min-height: 24px;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+
+QInputDialog { background: #141424; }
+QInputDialog QLineEdit {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 7px;
+    color: #e0e8ff;
+    padding: 5px 10px;
+}
+QInputDialog QPushButton {
+    background: rgba(80,130,200,0.28);
+    color: #a0c8ff;
+    border: 1px solid rgba(80,130,200,0.45);
+    border-radius: 7px;
+    padding: 4px 16px;
+    font-weight: 700;
+}

@@ -1,0 +1,53 @@
+# C++ Objects and Archives
+*.slo
+*.lo
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# Qt-specific generated files
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+Makefile*
+*.qmake.stash
+
+# Qt Creator specific files
+*.pro.user
+*.pro.user.*
+
+# Build directories
+build/
+build-*/
+debug/
+release/
+
+# Executables
+FireboyWatergirl
+*.exe
+*.out
+*.app
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Leaderboard/Data files
+scores.txt
+
+# Python and virtual environments
+venv/
+remove_bg.py
+remove_bg_simple.py
+__pycache__/
