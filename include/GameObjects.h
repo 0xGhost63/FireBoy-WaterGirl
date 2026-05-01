@@ -101,11 +101,23 @@ struct ScoreEntry {
     float timeSec;
 };
 
+// ── Sparse Matrix Map Structures ──────────────────────────────
+struct BSTNode {
+    int key;    // row * MAP_COLS + col
+    int type;   // TILE_SOLID, TILE_LAVA, etc.
+    BSTNode* left;
+    BSTNode* right;
+};
+
+struct BSTMap {
+    BSTNode* root;
+};
+
 // ── Level (self-contained, no STL containers) ────────────────
 struct LevelData {
     int  num;
     char name[64];
-    int  tileMap[MAP_ROWS][MAP_COLS];
+    BSTMap tileTree;
 
     float fireboyStartX,   fireboyStartY;
     float watergirlStartX, watergirlStartY;

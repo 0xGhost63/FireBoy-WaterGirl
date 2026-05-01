@@ -37,7 +37,11 @@ void GameEngine::rebuildGateMap() {
 // Build effective tilemap: base tiles + closed gates overlaid as SOLID
 void GameEngine::buildEffectiveTileMap() {
     LevelData* lv = currentLevel(); if (!lv) return;
-    memcpy(effectiveTileMap, lv->tileMap, sizeof(effectiveTileMap));
+    for (int r = 0; r < MAP_ROWS; r++) {
+        for (int c = 0; c < MAP_COLS; c++) {
+            effectiveTileMap[r][c] = bstGet(&lv->tileTree, r, c);
+        }
+    }
     for (int i = 0; i < lv->gateCount; i++) {
         Gate& g = lv->gates[i];
         if (g.open) continue; // open gates are passable, skip
@@ -300,7 +304,7 @@ void GameEngine::buildGrid(int who, int grid[MAP_ROWS][MAP_COLS]) {
     LevelData* lv = currentLevel(); if (!lv) return;
     for (int r = 0; r < MAP_ROWS; r++)
         for (int c = 0; c < MAP_COLS; c++) {
-            int t = lv->tileMap[r][c];
+            int t = bstGet(&lv->tileTree, r, c);
             bool blocked = (t == TILE_SOLID) ||
                            (t == TILE_LAVA   && who == WATERGIRL) ||
                            (t == TILE_WATER  && who == FIREBOY) ||

@@ -51,3 +51,6 @@ venv/
 remove_bg.py
 remove_bg_simple.py
 __pycache__/
+
+#Linux script
+run_linux.sh

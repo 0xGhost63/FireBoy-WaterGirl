@@ -1,4 +1,5 @@
 #include "Levels.h"
+#include "../include/DSA.h"
 #include <cstring>
 using namespace std;
 
@@ -44,7 +45,8 @@ LevelData makeLevel1() {
         {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 14
         {S,S,S,S,S,L,L,S,S,S,W,W,S,S,S,S,S,S,S,S},  // 15 Bottom floor
     };
-    for(int r=0;r<MAP_ROWS;r++) for(int c=0;c<MAP_COLS;c++) lv.tileMap[r][c]=map[r][c];
+    bstInit(&lv.tileTree);
+    for(int r=0;r<MAP_ROWS;r++) for(int c=0;c<MAP_COLS;c++) bstInsert(&lv.tileTree, r, c, map[r][c]);
 
     // Players start at bottom left
     lv.fireboyStartX   = 1*TILE_SIZE;  lv.fireboyStartY   = 15*TILE_SIZE - PLAYER_H;
@@ -117,7 +119,8 @@ LevelData makeLevel2() {
         {S,S,L,L,S,E,E,E,E,P,P,E,E,E,E,S,W,W,S,S},  // 14
         {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 15
     };
-    for(int r=0;r<MAP_ROWS;r++) for(int c=0;c<MAP_COLS;c++) lv.tileMap[r][c]=map[r][c];
+    bstInit(&lv.tileTree);
+    for(int r=0;r<MAP_ROWS;r++) for(int c=0;c<MAP_COLS;c++) bstInsert(&lv.tileTree, r, c, map[r][c]);
 
     lv.fireboyStartX   = 2*TILE_SIZE;  lv.fireboyStartY   = 11*TILE_SIZE - PLAYER_H;
     lv.watergirlStartX = 16*TILE_SIZE; lv.watergirlStartY = 11*TILE_SIZE - PLAYER_H;
@@ -192,7 +195,8 @@ LevelData makeLevel3() {
         {S,S,L,L,L,S,E,E,E,P,P,E,E,E,S,W,W,W,S,S},  // 14 hazards
         {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 15
     };
-    for(int r=0;r<MAP_ROWS;r++) for(int c=0;c<MAP_COLS;c++) lv.tileMap[r][c]=map[r][c];
+    bstInit(&lv.tileTree);
+    for(int r=0;r<MAP_ROWS;r++) for(int c=0;c<MAP_COLS;c++) bstInsert(&lv.tileTree, r, c, map[r][c]);
 
     lv.fireboyStartX   = 3*TILE_SIZE;  lv.fireboyStartY   = 10*TILE_SIZE - PLAYER_H;
     lv.watergirlStartX = 15*TILE_SIZE; lv.watergirlStartY = 10*TILE_SIZE - PLAYER_H;

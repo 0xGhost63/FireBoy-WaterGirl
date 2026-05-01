@@ -2,6 +2,505 @@
 setlocal EnableDelayedExpansion
 title Fireboy ^& Watergirl Build ^& Run
 
+rem Always run relative to this script's folder
+pushd "%~dp0"
+
+echo =======================================================
+echo  [*] Welcome to the Fireboy ^& Watergirl Launcher! :)
+echo =======================================================
+echo  Let's get everything ready for you...
+echo.
+
+rem 1) Ensure build and bin directories exist
+if not exist "build\obj" mkdir "build\obj"
+if not exist "build\moc" mkdir "build\moc"
+if not exist "build\rcc" mkdir "build\rcc"
+if not exist "build\ui"  mkdir "build\ui"
+if not exist "bin"       mkdir "bin"
+
+rem Helper: given a Qt root/kit folder, add its bin to PATH
+:Main
+goto :MainStart
+
+:TryAddQtBin
+set "CAND=%~1"
+if "%CAND%"=="" exit /b 0
+if exist "%CAND%\bin\qmake.exe" (
+    set "PATH=%CAND%\bin;!PATH!"
+    exit /b 0
+)
+if exist "%CAND%\qmake.exe" (
+    set "PATH=%CAND%;!PATH!"
+    exit /b 0
+)
+exit /b 0
+
+:MainStart
+:TryAddQtBin
+set "CAND=%~1"
+if "%CAND%"=="" exit /b 0
+if exist "%CAND%\bin\qmake.exe" (
+    set "PATH=%CAND%\bin;!PATH!"
+    exit /b 0
+)
+if exist "%CAND%\qmake.exe" (
+    set "PATH=%CAND%;!PATH!"
+    exit /b 0
+)
+exit /b 0
+
+rem 2) Find qmake (Qt) from many locations
+where qmake >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [?] Couldn't find Qt (qmake) in PATH. Searching common locations...
+
+    rem Environment variables
+    if defined QTDIR    call :TryAddQtBin "%QTDIR%"
+    if defined QT_DIR   call :TryAddQtBin "%QT_DIR%"
+    if defined Qt6_DIR  call :TryAddQtBin "%Qt6_DIR%"
+    if defined Qt5_DIR  call :TryAddQtBin "%Qt5_DIR%"
+
+    rem Qt Online Installer defaults
+    for /D %%D in (C:\Qt\5.* C:\Qt\6.*) do (
+        for /D %%M in ("%%D\mingw*" "%%D\msvc*") do (
+            if exist "%%M\bin\qmake.exe" call :TryAddQtBin "%%M"
+        )
+    )
+
+    rem Extra depth: C:\Qt\<major>.<minor>.<patch>\<kit>\bin
+    for /D %%D in (C:\Qt\5.* C:\Qt\6.*) do (
+        for /D %%V in ("%%D\*") do (
+            for /D %%M in ("%%V\mingw*" "%%V\msvc*") do (
+                if exist "%%M\bin\qmake.exe" call :TryAddQtBin "%%M"
+            )
+        )
+    )
+
+    rem MSYS2 common paths
+    if exist "C:\msys64\mingw64\bin\qmake.exe" call :TryAddQtBin "C:\msys64\mingw64"
+    if exist "C:\msys64\mingw32\bin\qmake.exe" call :TryAddQtBin "C:\msys64\mingw32"
+
+    rem Re-check
+    where qmake >nul 2>nul
+    if %ERRORLEVEL% NEQ 0 (
+        echo [X] Still couldn't find qmake.exe.
+        echo [>] Fix: set QTDIR to your Qt kit folder, e.g. C:\Qt\6.6.3\mingw_64
+        echo [>] I'll try to run the game anyway if it's already built.
+        goto :RunGame
+    )
+)
+
+rem 3) Generate Makefile using qmake
+echo [*] Preparing the project files (running qmake)...
+qmake FireboyWatergirl.pro
+if %ERRORLEVEL% NEQ 0 (
+    echo [!] qmake failed. Skipping straight to launching the game if available.
+    goto :RunGame
+)
+
+rem 4) Detect Make tool (mingw32-make, jom, or nmake)
+set "MAKE_CMD="
+where mingw32-make >nul 2>nul
+if %ERRORLEVEL% EQU 0 set "MAKE_CMD=mingw32-make -j%NUMBER_OF_PROCESSORS%"
+
+if "%MAKE_CMD%"=="" (
+    where jom >nul 2>nul
+    if %ERRORLEVEL% EQU 0 set "MAKE_CMD=jom"
+)
+
+if "%MAKE_CMD%"=="" (
+    where nmake >nul 2>nul
+    if %ERRORLEVEL% EQU 0 set "MAKE_CMD=nmake"
+)
+
+if "%MAKE_CMD%"=="" (
+    echo [X] Couldn't find a build tool (mingw32-make, jom, or nmake).
+    echo [>] Skipping straight to launching the game if available.
+    goto :RunGame
+)
+
+rem 5) Build
+echo [*] Compiling... (this might take a second)
+%MAKE_CMD%
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [X] Build failed. Trying to run last built executable if present...
+    echo.
+    goto :RunGame
+)
+
+echo.
+echo =======================================================
+echo  [+] Build Successful! You're good to go! ^_^
+echo =======================================================
+echo.
+
+rem 6) Run
+:RunGame
+echo [>] Launching Fireboy ^& Watergirl...
+
+set "EXE="
+if exist "bin\FireboyWatergirl.exe"     set "EXE=bin\FireboyWatergirl.exe"
+if "%EXE%"=="" if exist "release\FireboyWatergirl.exe" set "EXE=release\FireboyWatergirl.exe"
+if "%EXE%"=="" if exist "debug\FireboyWatergirl.exe"   set "EXE=debug\FireboyWatergirl.exe"
+
+if not "%EXE%"=="" (
+    start "" "%EXE%"
+    goto :End
+)
+
+echo.
+echo =======================================================
+echo  [X] I couldn't find the compiled game executable.
+echo  Make sure your Qt kit matches your compiler (MinGW vs MSVC),
+echo  then build once in Qt Creator, or run this script again.
+echo =======================================================
+pause
+
+:End
+popd
+endlocal
+exit /b 0
+
+@echo off
+setlocal EnableDelayedExpansion
+title Fireboy ^& Watergirl Build ^& Run
+
+rem Always run relative to this script's folder
+pushd "%~dp0"
+
+echo =======================================================
+echo  [*] Welcome to the Fireboy ^& Watergirl Launcher! :)
+echo =======================================================
+echo  Let's get everything ready for you...
+echo.
+
+rem -------------------------------------------------------
+rem 1) Ensure build and bin directories exist
+rem -------------------------------------------------------
+if not exist "build\obj" mkdir "build\obj"
+if not exist "build\moc" mkdir "build\moc"
+if not exist "build\rcc" mkdir "build\rcc"
+if not exist "build\ui"  mkdir "build\ui"
+if not exist "bin"       mkdir "bin"
+
+rem -------------------------------------------------------
+rem Helper: given a Qt root/kit folder, add its bin to PATH
+rem Examples:
+rem   C:\Qt\6.6.3\mingw_64
+rem   C:\Qt\6.6.3\msvc2019_64
+rem   C:\msys64\mingw64
+rem -------------------------------------------------------
+:TryAddQtBin
+set "CAND=%~1"
+if "%CAND%"=="" exit /b 0
+if exist "%CAND%\bin\qmake.exe" (
+    set "PATH=%CAND%\bin;!PATH!"
+    exit /b 0
+)
+rem Sometimes the path already points at bin
+if exist "%CAND%\qmake.exe" (
+    set "PATH=%CAND%;!PATH!"
+    exit /b 0
+)
+exit /b 0
+
+rem -------------------------------------------------------
+rem 2) Find qmake (Qt) from many locations
+rem -------------------------------------------------------
+where qmake >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [?] Couldn't find Qt (qmake) in PATH. Searching common locations...
+
+    rem 2a) Environment variables
+    if defined QTDIR    call :TryAddQtBin "%QTDIR%"
+    if defined QT_DIR   call :TryAddQtBin "%QT_DIR%"
+    if defined Qt6_DIR  call :TryAddQtBin "%Qt6_DIR%"
+    if defined Qt5_DIR  call :TryAddQtBin "%Qt5_DIR%"
+
+    rem 2b) Online installer defaults
+    for /D %%D in (C:\Qt\5.* C:\Qt\6.*) do (
+        for /D %%M in ("%%D\mingw*" "%%D\msvc*") do (
+            if exist "%%M\bin\qmake.exe" call :TryAddQtBin "%%M"
+        )
+    )
+
+    rem 2c) Extra depth: C:\Qt\<major>.<minor>.<patch>\<kit>\bin
+    for /D %%D in (C:\Qt\5.* C:\Qt\6.*) do (
+        for /D %%V in ("%%D\*") do (
+            for /D %%M in ("%%V\mingw*" "%%V\msvc*") do (
+                if exist "%%M\bin\qmake.exe" call :TryAddQtBin "%%M"
+            )
+        )
+    )
+
+    rem 2d) MSYS2 common paths
+    if exist "C:\msys64\mingw64\bin\qmake.exe" call :TryAddQtBin "C:\msys64\mingw64"
+    if exist "C:\msys64\mingw32\bin\qmake.exe" call :TryAddQtBin "C:\msys64\mingw32"
+
+    rem Re-check after searching
+    where qmake >nul 2>nul
+    if %ERRORLEVEL% NEQ 0 (
+        echo [X] Still couldn't find qmake.exe.
+        echo [>] Fix: set QTDIR to your Qt kit folder, e.g. C:\Qt\6.6.3\mingw_64
+        echo [>] I'll try to run the game anyway if it's already built.
+        goto :RunGame
+    )
+)
+
+rem -------------------------------------------------------
+rem 3) Generate Makefile using qmake
+rem -------------------------------------------------------
+echo [*] Preparing the project files (running qmake)...
+qmake FireboyWatergirl.pro
+if %ERRORLEVEL% NEQ 0 (
+    echo [!] qmake failed. Skipping straight to launching the game if available.
+    goto :RunGame
+)
+
+rem -------------------------------------------------------
+rem 4) Detect the right Make tool (mingw32-make, jom, or nmake)
+rem -------------------------------------------------------
+set "MAKE_CMD="
+where mingw32-make >nul 2>nul
+if %ERRORLEVEL% EQU 0 set "MAKE_CMD=mingw32-make -j%NUMBER_OF_PROCESSORS%"
+
+if "%MAKE_CMD%"=="" (
+    where jom >nul 2>nul
+    if %ERRORLEVEL% EQU 0 set "MAKE_CMD=jom"
+)
+
+if "%MAKE_CMD%"=="" (
+    where nmake >nul 2>nul
+    if %ERRORLEVEL% EQU 0 set "MAKE_CMD=nmake"
+)
+
+if "%MAKE_CMD%"=="" (
+    echo [X] Couldn't find a build tool (mingw32-make, jom, or nmake).
+    echo [>] Skipping straight to launching the game if available.
+    goto :RunGame
+)
+
+rem -------------------------------------------------------
+rem 5) Build
+rem -------------------------------------------------------
+echo [*] Compiling... (this might take a second)
+%MAKE_CMD%
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [X] Build failed. Trying to run last built executable if present...
+    echo.
+    goto :RunGame
+)
+
+echo.
+echo =======================================================
+echo  [+] Build Successful! You're good to go! ^_^
+echo =======================================================
+echo.
+
+rem -------------------------------------------------------
+rem 6) Run
+rem -------------------------------------------------------
+:RunGame
+echo [>] Launching Fireboy ^& Watergirl...
+
+set "EXE="
+if exist "bin\FireboyWatergirl.exe"     set "EXE=bin\FireboyWatergirl.exe"
+if "%EXE%"=="" if exist "release\FireboyWatergirl.exe" set "EXE=release\FireboyWatergirl.exe"
+if "%EXE%"=="" if exist "debug\FireboyWatergirl.exe"   set "EXE=debug\FireboyWatergirl.exe"
+
+if not "%EXE%"=="" (
+    start "" "%EXE%"
+    goto :End
+)
+
+echo.
+echo =======================================================
+echo  [X] I couldn't find the compiled game executable.
+echo  Make sure your Qt kit matches your compiler (MinGW vs MSVC),
+echo  then build once in Qt Creator, or run this script again.
+echo =======================================================
+pause
+
+:End
+popd
+endlocal
+exit /b 0
+
+@echo off
+setlocal EnableDelayedExpansion
+title Fireboy ^& Watergirl Build ^& Run
+
+rem Always run relative to this script's folder
+pushd "%~dp0"
+
+echo =======================================================
+echo  [*] Welcome to the Fireboy ^& Watergirl Launcher! :)
+echo =======================================================
+echo  Let's get everything ready for you...
+echo.
+
+rem -------------------------------------------------------
+rem 1) Ensure build and bin directories exist
+rem -------------------------------------------------------
+if not exist "build\obj" mkdir "build\obj"
+if not exist "build\moc" mkdir "build\moc"
+if not exist "build\rcc" mkdir "build\rcc"
+if not exist "build\ui"  mkdir "build\ui"
+if not exist "bin"       mkdir "bin"
+
+rem -------------------------------------------------------
+rem Helper: given a Qt root/kit folder, add its bin to PATH
+rem Examples:
+rem   C:\Qt\6.6.3\mingw_64
+rem   C:\Qt\6.6.3\msvc2019_64
+rem   C:\msys64\mingw64
+rem -------------------------------------------------------
+:TryAddQtBin
+set "CAND=%~1"
+if "%CAND%"=="" exit /b 0
+if exist "%CAND%\bin\qmake.exe" (
+    set "PATH=%CAND%\bin;!PATH!"
+    exit /b 0
+)
+rem Sometimes the path already points at bin
+if exist "%CAND%\qmake.exe" (
+    set "PATH=%CAND%;!PATH!"
+    exit /b 0
+)
+exit /b 0
+
+rem -------------------------------------------------------
+rem 2) Find qmake (Qt) from many locations
+rem -------------------------------------------------------
+where qmake >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [?] Couldn't find Qt (qmake) in PATH. Searching common locations...
+
+    rem 2a) Environment variables (many Qt setups export one of these)
+    if defined QTDIR    call :TryAddQtBin "%QTDIR%"
+    if defined QT_DIR   call :TryAddQtBin "%QT_DIR%"
+    if defined Qt6_DIR  call :TryAddQtBin "%Qt6_DIR%"
+    if defined Qt5_DIR  call :TryAddQtBin "%Qt5_DIR%"
+
+    rem 2b) Online installer defaults
+    for /D %%D in (C:\Qt\5.* C:\Qt\6.*) do (
+        for /D %%M in ("%%D\mingw*" "%%D\msvc*") do (
+            if exist "%%M\bin\qmake.exe" call :TryAddQtBin "%%M"
+        )
+    )
+
+    rem 2c) Extra depth: C:\Qt\<major>.<minor>.<patch>\<kit>\bin
+    for /D %%D in (C:\Qt\5.* C:\Qt\6.*) do (
+        for /D %%V in ("%%D\*") do (
+            for /D %%M in ("%%V\mingw*" "%%V\msvc*") do (
+                if exist "%%M\bin\qmake.exe" call :TryAddQtBin "%%M"
+            )
+        )
+    )
+
+    rem 2d) MSYS2 common paths
+    if exist "C:\msys64\mingw64\bin\qmake.exe" call :TryAddQtBin "C:\msys64\mingw64"
+    if exist "C:\msys64\mingw32\bin\qmake.exe" call :TryAddQtBin "C:\msys64\mingw32"
+
+    rem Re-check after searching
+    where qmake >nul 2>nul
+    if %ERRORLEVEL% NEQ 0 (
+        echo [X] Still couldn't find qmake.exe.
+        echo [>] Fix: set QTDIR to your Qt kit folder, e.g. C:\Qt\6.6.3\mingw_64
+        echo [>] I'll try to run the game anyway if it's already built.
+        goto :RunGame
+    )
+)
+
+rem -------------------------------------------------------
+rem 3) Generate Makefile using qmake
+rem -------------------------------------------------------
+echo [*] Preparing the project files (running qmake)...
+qmake FireboyWatergirl.pro
+if %ERRORLEVEL% NEQ 0 (
+    echo [!] qmake failed. Skipping straight to launching the game if available.
+    goto :RunGame
+)
+
+rem -------------------------------------------------------
+rem 4) Detect the right Make tool (mingw32-make, jom, or nmake)
+rem -------------------------------------------------------
+set "MAKE_CMD="
+where mingw32-make >nul 2>nul
+if %ERRORLEVEL% EQU 0 set "MAKE_CMD=mingw32-make -j%NUMBER_OF_PROCESSORS%"
+
+if "%MAKE_CMD%"=="" (
+    where jom >nul 2>nul
+    if %ERRORLEVEL% EQU 0 set "MAKE_CMD=jom"
+)
+
+if "%MAKE_CMD%"=="" (
+    where nmake >nul 2>nul
+    if %ERRORLEVEL% EQU 0 set "MAKE_CMD=nmake"
+)
+
+if "%MAKE_CMD%"=="" (
+    echo [X] Couldn't find a build tool (mingw32-make, jom, or nmake).
+    echo [>] Skipping straight to launching the game if available.
+    goto :RunGame
+)
+
+rem -------------------------------------------------------
+rem 5) Build
+rem -------------------------------------------------------
+echo [*] Compiling... (this might take a second)
+%MAKE_CMD%
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [X] Build failed. Trying to run last built executable if present...
+    echo.
+    goto :RunGame
+)
+
+echo.
+echo =======================================================
+echo  [+] Build Successful! You're good to go! ^_^
+echo =======================================================
+echo.
+
+rem -------------------------------------------------------
+rem 6) Run
+rem -------------------------------------------------------
+:RunGame
+echo [>] Launching Fireboy ^& Watergirl...
+
+set "EXE="
+if exist "bin\FireboyWatergirl.exe"     set "EXE=bin\FireboyWatergirl.exe"
+if "%EXE%"=="" if exist "release\FireboyWatergirl.exe" set "EXE=release\FireboyWatergirl.exe"
+if "%EXE%"=="" if exist "debug\FireboyWatergirl.exe"   set "EXE=debug\FireboyWatergirl.exe"
+
+if not "%EXE%"=="" (
+    start "" "%EXE%"
+    goto :End
+)
+
+echo.
+echo =======================================================
+echo  [X] I couldn't find the compiled game executable.
+echo  Make sure your Qt kit matches your compiler (MinGW vs MSVC),
+echo  then build once in Qt Creator, or run this script again.
+echo =======================================================
+pause
+
+:End
+popd
+endlocal
+exit /b 0
+
+@echo off
+setlocal EnableDelayedExpansion
+title Fireboy ^& Watergirl Build ^& Run
+
+rem Always run relative to this script's folder
+pushd "%~dp0"
+
 echo =======================================================
 echo  [*] Welcome to the Fireboy ^& Watergirl Launcher! :)
 echo =======================================================
@@ -15,22 +514,66 @@ if not exist "build\rcc" mkdir "build\rcc"
 if not exist "build\ui" mkdir "build\ui"
 if not exist "bin" mkdir "bin"
 
+rem -------------------------------------------------------
+rem Helper: given a Qt root/kit folder, add its bin to PATH
+rem Examples:
+rem   C:\Qt\6.6.3\mingw_64
+rem   C:\Qt\6.6.3\msvc2019_64
+rem   C:\msys64\mingw64
+rem -------------------------------------------------------
+:TryAddQtBin
+set "CAND=%~1"
+if "%CAND%"=="" exit /b 0
+if exist "%CAND%\bin\qmake.exe" (
+    set "PATH=%CAND%\bin;!PATH!"
+    exit /b 0
+)
+rem Sometimes the path already points at bin
+if exist "%CAND%\qmake.exe" (
+    set "PATH=%CAND%;!PATH!"
+    exit /b 0
+)
+exit /b 0
+
 :: 2. Try to find qmake if it's not in PATH
 where qmake >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     echo [?] Hmm, I couldn't find Qt in your PATH right away. Let me look around for you...
+    
+    rem 2a) Environment variables (many Qt setups export one of these)
+    if defined QTDIR    call :TryAddQtBin "%QTDIR%"
+    if defined QT_DIR   call :TryAddQtBin "%QT_DIR%"
+    if defined Qt6_DIR  call :TryAddQtBin "%Qt6_DIR%"
+    if defined Qt5_DIR  call :TryAddQtBin "%Qt5_DIR%"
+
+    rem 2b) Common online installer locations
     for /D %%D in (C:\Qt\5.* C:\Qt\6.*) do (
-        for /D %%M in (%%D\mingw* %%D\msvc*) do (
-            if exist "%%M\bin\qmake.exe" (
-                set "PATH=%%M\bin;!PATH!"
-                echo [!] Found it! Qt is hiding at: %%M\bin
-                goto :FoundQt
+        for /D %%M in ("%%D\mingw*" "%%D\msvc*") do (
+            if exist "%%M\bin\qmake.exe" call :TryAddQtBin "%%M"
+        )
+    )
+
+    rem 2c) Some layouts put kits under version\compiler\bin (extra depth)
+    for /D %%D in (C:\Qt\5.* C:\Qt\6.*) do (
+        for /D %%V in ("%%D\*") do (
+            for /D %%M in ("%%V\mingw*" "%%V\msvc*") do (
+                if exist "%%M\bin\qmake.exe" call :TryAddQtBin "%%M"
             )
         )
     )
-    echo [:(] Oh no! I couldn't find Qt automatically. Please make sure it's installed.
-    echo [>] But don't worry! I'll try to run the game anyway if it's already built!
-    goto :RunGame
+
+    rem 2d) MSYS2 (very common MinGW Qt install)
+    if exist "C:\msys64\mingw64\bin\qmake.exe" call :TryAddQtBin "C:\msys64\mingw64"
+    if exist "C:\msys64\mingw32\bin\qmake.exe" call :TryAddQtBin "C:\msys64\mingw32"
+
+    rem Re-check after searching
+    where qmake >nul 2>nul
+    if %ERRORLEVEL% NEQ 0 (
+        echo [:(] Oh no! I couldn't find Qt (qmake.exe) automatically.
+        echo [>] Tip: set QTDIR to your Qt kit folder, e.g. C:\Qt\6.6.3\mingw_64
+        echo [>] I'll try to run the game anyway if it's already built!
+        goto :RunGame
+    )
 )
 :FoundQt
 
@@ -104,3 +647,5 @@ if exist "bin\FireboyWatergirl.exe" (
 )
 
 :End
+popd
+endlocal

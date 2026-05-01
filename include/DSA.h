@@ -143,3 +143,8 @@ void gateMapInit  (GateHashMap* m);
 void gateMapInsert(GateHashMap* m, int gateId, int index);
 int  gateMapGet   (GateHashMap* m, int gateId); // returns -1 if not found
 
+void bstInit(BSTMap* tree);
+void bstInsert(BSTMap* tree, int r, int c, int type);
+int  bstGet(BSTMap* tree, int r, int c); // Returns TILE_EMPTY if not found
+void bstFree(BSTNode* node);
+

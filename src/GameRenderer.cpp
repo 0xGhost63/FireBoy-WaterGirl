@@ -89,7 +89,7 @@ void GameRenderer::drawTiles(QPainter& p) {
     LevelData* lv = eng->currentLevel(); if (!lv) return;
     for (int r = 0; r < MAP_ROWS; r++) {
         for (int c = 0; c < MAP_COLS; c++) {
-            int t = lv->tileMap[r][c];
+            int t = bstGet(&lv->tileTree, r, c);
             if (t == TILE_EMPTY) continue;
             QRectF sr(toSX(c*TILE_SIZE), toSY(r*TILE_SIZE), toSW(TILE_SIZE), toSH(TILE_SIZE));
             if (t == TILE_SOLID) {

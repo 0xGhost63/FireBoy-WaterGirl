@@ -82,7 +82,12 @@ bool listHasNext(LevelList* lst) {
 }
 void listFree(LevelList* lst) {
     LevelNode* cur = lst->head;
-    while (cur) { LevelNode* nxt = cur->next; delete cur; cur = nxt; }
+    while (cur) { 
+        LevelNode* nxt = cur->next; 
+        bstFree(cur->data.tileTree.root); // Free the BST to prevent memory leaks
+        delete cur; 
+        cur = nxt; 
+    }
     lst->head = lst->tail = lst->current = nullptr;
     lst->count = 0;
 }
@@ -261,3 +266,47 @@ int gateMapGet(GateHashMap* m, int gateId) {
     return -1;
 }
 
+// ════════════════════════════════════════════════════════════
+// 11. SPARSE MATRIX BST (Map Layout)
+// ════════════════════════════════════════════════════════════
+void bstInit(BSTMap* tree) {
+    tree->root = nullptr;
+}
+
+static BSTNode* bstInsertNode(BSTNode* node, int key, int type) {
+    if (!node) {
+        BSTNode* n = new BSTNode();
+        n->key = key; n->type = type;
+        n->left = n->right = nullptr;
+        return n;
+    }
+    if (key < node->key) node->left = bstInsertNode(node->left, key, type);
+    else if (key > node->key) node->right = bstInsertNode(node->right, key, type);
+    else node->type = type; // update existing
+    return node;
+}
+
+void bstInsert(BSTMap* tree, int r, int c, int type) {
+    if (type == TILE_EMPTY) return; // Don't store empty space
+    int key = r * MAP_COLS + c;
+    tree->root = bstInsertNode(tree->root, key, type);
+}
+
+int bstGet(BSTMap* tree, int r, int c) {
+    if (r < 0 || r >= MAP_ROWS || c < 0 || c >= MAP_COLS) return TILE_SOLID; // out of bounds
+    int key = r * MAP_COLS + c;
+    BSTNode* curr = tree->root;
+    while (curr) {
+        if (key == curr->key) return curr->type;
+        if (key < curr->key) curr = curr->left;
+        else curr = curr->right;
+    }
+    return TILE_EMPTY; // not found means empty space
+}
+
+void bstFree(BSTNode* node) {
+    if (!node) return;
+    bstFree(node->left);
+    bstFree(node->right);
+    delete node;
+}
