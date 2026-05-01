@@ -315,15 +315,15 @@ void GameRenderer::drawOverlay(QPainter& p) {
     QString title, sub; QColor col;
     switch (eng->state) {
     case STATE_MENU:
-        title="🔥 Fireboy & 💧 Watergirl"; col=QColor(255,200,50);
+        title="Fireboy &  Watergirl"; col=QColor(255,200,50);
         sub="Press Enter to Start\n\nFireboy: ← → ↑\nWatergirl: A D W\nHint: H"; break;
     case STATE_PAUSED:
         title="PAUSED"; col=QColor(180,220,255);
         sub="Press Esc or Enter to Resume"; break;
     case STATE_WIN:
         if (eng->levels.current && eng->levels.current->next)
-             { title="Level Complete! 🎉"; sub=QString("Score: %1\nEnter → Next Level").arg(eng->score); }
-        else { title="You Win! 🏆";        sub=QString("Final Score: %1\nR → Restart").arg(eng->score); }
+             { title="FIN ! "; sub=QString("Score: %1\nEnter → Next Level").arg(eng->score); }
+        else { title="You Win! ";        sub=QString("Final Score: %1\nR → Restart").arg(eng->score); }
         col=QColor(80,255,120); break;
     case STATE_DEAD:
         title="Oh No!"; col=QColor(255,80,80);

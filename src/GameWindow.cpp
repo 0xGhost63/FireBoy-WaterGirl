@@ -41,7 +41,7 @@ void GameWindow::buildUI() {
     QVBoxLayout* ml = new QVBoxLayout(menuPage);
     ml->setAlignment(Qt::AlignCenter); ml->setSpacing(16);
 
-    QLabel* title = new QLabel("🔥 Fireboy  &  💧 Watergirl");
+    QLabel* title = new QLabel(" Fireboy  &  Watergirl");
     title->setObjectName("titleLabel"); title->setAlignment(Qt::AlignCenter);
     ml->addWidget(title);
 
@@ -55,9 +55,9 @@ void GameWindow::buildUI() {
         b->setObjectName(id); b->setFixedSize(240, 50);
         ml->addWidget(b, 0, Qt::AlignCenter); return b;
     };
-    auto* btnPlay = makeBtn("▶   Play Game",      "btnPrimary");
-    auto* btnLB   = makeBtn("🏆  Leaderboard",    "btnSecondary");
-    auto* btnQuit = makeBtn("✕   Quit",           "btnQuit");
+    auto* btnPlay = makeBtn("  Play Game",      "btnPrimary");
+    auto* btnLB   = makeBtn("  Leaderboard",    "btnSecondary");
+    auto* btnQuit = makeBtn("  Quit",           "btnQuit");
 
     connect(btnPlay, &QPushButton::clicked, this, &GameWindow::startGame);
     connect(btnLB,   &QPushButton::clicked, this, &GameWindow::showLeaderboard);
@@ -66,8 +66,8 @@ void GameWindow::buildUI() {
     ml->addSpacing(20);
     QLabel* ctrl = new QLabel(
         "<b>Controls</b><br>"
-        "🔥 Fireboy : ← ↑ →<br>"
-        "💧 Watergirl : A W D<br>"
+        " Fireboy : ← ↑ →<br>"
+        " Watergirl : A W D<br>"
         "Hint path : H &nbsp;|&nbsp; Pause : Esc");
     ctrl->setObjectName("ctrlLabel"); ctrl->setAlignment(Qt::AlignCenter);
     ml->addWidget(ctrl);
@@ -79,7 +79,7 @@ void GameWindow::buildUI() {
     QVBoxLayout* ll = new QVBoxLayout(lbPage);
     ll->setContentsMargins(40,30,40,30); ll->setSpacing(14);
 
-    QLabel* lbTitle = new QLabel("🏆  Leaderboard");
+    QLabel* lbTitle = new QLabel("  Leaderboard");
     lbTitle->setObjectName("titleLabel"); lbTitle->setAlignment(Qt::AlignCenter);
     ll->addWidget(lbTitle);
 
