@@ -38,7 +38,7 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
     bgMusic->setAudioOutput(audioOutput);
     bgMusic->setSource(QUrl("qrc:/sounds/bgm.mp3"));
     audioOutput->setVolume(0.5);
-    bgMusic->setLoops(QMediaPlayer::Infinite);
+    bgMusic->setLoops(-1); // -1 means infinite looping in Qt6
     bgMusic->play();
 #endif
 
