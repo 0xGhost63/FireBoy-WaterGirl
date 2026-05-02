@@ -23,6 +23,7 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
     connect(eng, &GameEngine::frameReady,    this, &GameWindow::onFrameReady);
     connect(eng, &GameEngine::stateChanged,  this, &GameWindow::onStateChanged);
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     playlist = new QMediaPlaylist(this);
     playlist->addMedia(QUrl("qrc:/sounds/bgm.mp3"));
     playlist->setPlaybackMode(QMediaPlaylist::Loop);
@@ -31,6 +32,15 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
     bgMusic->setPlaylist(playlist);
     bgMusic->setVolume(50);
     bgMusic->play();
+#else
+    bgMusic = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+    bgMusic->setAudioOutput(audioOutput);
+    bgMusic->setSource(QUrl("qrc:/sounds/bgm.mp3"));
+    audioOutput->setVolume(0.5);
+    bgMusic->setLoops(QMediaPlayer::Infinite);
+    bgMusic->play();
+#endif
 
     buildUI();
     loadScores();

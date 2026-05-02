@@ -5,7 +5,12 @@
 #include "../include/GameEngine.h"
 #include "../include/GameRenderer.h"
 #include <QMediaPlayer>
+#include <QtGlobal>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QMediaPlaylist>
+#else
+#include <QAudioOutput>
+#endif
 
 class GameWindow : public QMainWindow {
     Q_OBJECT
@@ -31,7 +36,11 @@ private:
     QString currentPlayerName;
 
     QMediaPlayer* bgMusic;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QMediaPlaylist* playlist;
+#else
+    QAudioOutput* audioOutput;
+#endif
 
     // Leaderboard data (DSA: sorted with QuickSort/BubbleSort)
     ScoreEntry scores[MAX_SCORES];
