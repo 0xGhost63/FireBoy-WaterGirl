@@ -4,6 +4,8 @@
 #include <QTableWidget>
 #include "../include/GameEngine.h"
 #include "../include/GameRenderer.h"
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
 
 class GameWindow : public QMainWindow {
     Q_OBJECT
@@ -27,6 +29,9 @@ private:
     QTableWidget*  lbTable;
     class QLineEdit* nameInput; // Forward declaration or include QLineEdit
     QString currentPlayerName;
+
+    QMediaPlayer* bgMusic;
+    QMediaPlaylist* playlist;
 
     // Leaderboard data (DSA: sorted with QuickSort/BubbleSort)
     ScoreEntry scores[MAX_SCORES];

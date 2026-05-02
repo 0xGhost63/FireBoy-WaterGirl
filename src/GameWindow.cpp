@@ -12,6 +12,7 @@
 #include <QApplication>
 #include <QLineEdit>
 #include <cstring>
+#include <QUrl>
 using namespace std;
 
 GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
@@ -21,6 +22,16 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
     eng = new GameEngine(this);
     connect(eng, &GameEngine::frameReady,    this, &GameWindow::onFrameReady);
     connect(eng, &GameEngine::stateChanged,  this, &GameWindow::onStateChanged);
+
+    playlist = new QMediaPlaylist(this);
+    playlist->addMedia(QUrl("qrc:/sounds/bgm.mp3"));
+    playlist->setPlaybackMode(QMediaPlaylist::Loop);
+
+    bgMusic = new QMediaPlayer(this);
+    bgMusic->setPlaylist(playlist);
+    bgMusic->setVolume(50);
+    bgMusic->play();
+
     buildUI();
     loadScores();
 }

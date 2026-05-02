@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
 
     GameWindow* win = new GameWindow();
     
-    // Close the splash screen after 3 seconds and show the main game window
-    QTimer::singleShot(3000, [splash, win]() {
+    // Close the splash screen instantly (0 ms delay) and show the main game window
+    QTimer::singleShot(0, [splash, win]() {
         splash->finish(win);
         win->show();
         splash->deleteLater();

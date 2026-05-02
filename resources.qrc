@@ -2,4 +2,7 @@
   <qresource prefix="/styles">
     <file alias="game.qss">assets/styles/game.qss</file>
   </qresource>
+  <qresource prefix="/sounds">
+    <file alias="bgm.mp3">assets/sounds/bgm.mp3</file>
+  </qresource>
 </RCC>

@@ -49,7 +49,7 @@ rem 2) Find qmake (Qt) from many locations
 rem -------------------------------------------------------
 where qmake >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
-    echo [?] Couldn't find Qt (qmake) in PATH. Searching common locations...
+    echo [?] Couldn't find Qt [qmake] in PATH. Searching common locations...
 
     rem 2a) Environment variables (many Qt setups export one of these)
     if defined QTDIR    call :TryAddQtBin "%QTDIR%"
@@ -115,7 +115,7 @@ if "%MAKE_CMD%"=="" (
 )
 
 if "%MAKE_CMD%"=="" (
-    echo [X] Couldn't find a build tool (mingw32-make, jom, or nmake).
+    echo [X] Couldn't find a build tool [mingw32-make, jom, or nmake].
     echo [>] Skipping straight to launching the game if available.
     goto :RunGame
 )
