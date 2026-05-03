@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstring>
 #include <QUrl>
+#include <QDebug>
 using namespace std;
 
 static const int TICK_MS = 16;
@@ -27,6 +28,16 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent) {
     sndDie->setSource(QUrl("qrc:/sounds/die.wav"));
     sndWin = new QSoundEffect(this);
     sndWin->setSource(QUrl("qrc:/sounds/win.wav"));
+
+    sndLavaWalk = new QSoundEffect(this);
+    sndLavaWalk->setSource(QUrl("qrc:/sounds/lava_walk.wav"));
+    sndLavaWalk->setLoopCount(QSoundEffect::Infinite);
+    sndLavaWalk->setVolume(1.0f);
+
+    sndWaterWalk = new QSoundEffect(this);
+    sndWaterWalk->setSource(QUrl("qrc:/sounds/water_walk.wav"));
+    sndWaterWalk->setLoopCount(QSoundEffect::Infinite);
+    sndWaterWalk->setVolume(1.0f);
 
     pqInit(&eventQueue);
     gateMapInit(&gateMap);
@@ -83,7 +94,15 @@ void GameEngine::start() {
     timer->start();
 }
 
-void GameEngine::pause()  { if(state==STATE_PLAYING){state=STATE_PAUSED;  timer->stop();  emit stateChanged(state);} }
+void GameEngine::pause()  { 
+    if(state==STATE_PLAYING){
+        state=STATE_PAUSED;  
+        timer->stop();  
+        sndLavaWalk->stop();
+        sndWaterWalk->stop();
+        emit stateChanged(state);
+    } 
+}
 void GameEngine::resume() { if(state==STATE_PAUSED) {state=STATE_PLAYING; timer->start(); emit stateChanged(state);} }
 
 void GameEngine::resetLevel() {
@@ -232,6 +251,9 @@ void GameEngine::updatePlatforms() {
 
 void GameEngine::checkHazards() {
     LevelData* lv = currentLevel(); if (!lv) return;
+    bool fbInLava = false;
+    bool wgInWater = false;
+
     auto check = [&](Player* p) {
         if (p->dead) return;
         for (int i = 0; i < lv->hazardCount; i++) {
@@ -247,10 +269,26 @@ void GameEngine::checkHazards() {
                 GameEvent e; e.type = EVT_PLAYER_DEAD; e.priority = 0;
                 e.x = p->x; e.y = p->y; e.intData = p->type;
                 pqPush(&eventQueue, e);
+            } else if (p->type == FIREBOY && h.type == TILE_LAVA) {
+                fbInLava = true;
+            } else if (p->type == WATERGIRL && h.type == TILE_WATER) {
+                wgInWater = true;
             }
         }
     };
     check(&fireboy); check(&watergirl);
+
+    if (fbInLava) {
+        if (!sndLavaWalk->isPlaying()) sndLavaWalk->play();
+    } else {
+        if (sndLavaWalk->isPlaying()) sndLavaWalk->stop();
+    }
+
+    if (wgInWater) {
+        if (!sndWaterWalk->isPlaying()) sndWaterWalk->play();
+    } else {
+        if (sndWaterWalk->isPlaying()) sndWaterWalk->stop();
+    }
 }
 
 void GameEngine::checkGems() {
@@ -315,6 +353,8 @@ void GameEngine::processEvents() {
 }
 
 void GameEngine::handleDeath() {
+    sndLavaWalk->stop();
+    sndWaterWalk->stop();
     lives--;
     if (lives <= 0) { state = STATE_GAMEOVER; timer->stop(); emit stateChanged(state); return; }
     bool fb = playerRestoreCheckpoint(&fireboy);

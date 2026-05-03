@@ -7,7 +7,9 @@
     <file alias="die.wav">assets/sounds/die.wav</file>
     <file alias="female_jump.wav">assets/sounds/female_jump.wav</file>
     <file alias="gem_collect.wav">assets/sounds/gem_collect.wav</file>
+    <file alias="lava_walk.wav">assets/sounds/lava_walk.wav</file>
     <file alias="male_jump.wav">assets/sounds/male_jump.wav</file>
+    <file alias="water_walk.wav">assets/sounds/water_walk.wav</file>
     <file alias="win.wav">assets/sounds/win.wav</file>
   </qresource>
 </RCC>

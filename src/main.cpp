@@ -21,9 +21,11 @@ int main(int argc, char* argv[]) {
 
     if (splashTimeMs > 0) 
     {
+        QPixmap splashPix("assets/images/splash.png");
 
-        
+       
         splashPix = splashPix.scaled(800, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        
 
         QSplashScreen* splash = new QSplashScreen(splashPix);
         splash->show();

@@ -1,6 +1,6 @@
 1-Splash Screen (DONE)
-2-Sound effects 
+2-Sound effects (DONE)
 3-Screen for entering the player name (DONE)
 4-Load the highscores into a BSt
 and when i will traverse the tree it will automatically sort the 
-scores + it will also help me to search the player 
+scores + it will also help me to search the player by their names...etc

@@ -1,7 +1,0 @@
-## splash.png  (Game Splash Screen)
-A breathtaking and highly detailed splash screen for a "Fireboy and Watergirl" style game. 
-In the center, a magical ancient temple door glowing with half red fire and half blue water. 
-Surrounding the door are mysterious ruins, glowing amber torches on the left, and shimmering blue crystals on the right. 
-Dynamic lighting, cinematic composition. 
-No text, no UI elements. 
-Size: 800×600 px (generate at 1600×1200 for quality).

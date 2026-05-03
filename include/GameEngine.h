@@ -77,4 +77,6 @@ private:
     QSoundEffect* sndGemCollect;
     QSoundEffect* sndDie;
     QSoundEffect* sndWin;
+    QSoundEffect* sndLavaWalk;
+    QSoundEffect* sndWaterWalk;
 };
