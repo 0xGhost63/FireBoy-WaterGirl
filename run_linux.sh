@@ -4,6 +4,13 @@ echo "====================================="
 echo " Building Fireboy & Watergirl..."
 echo "====================================="
 
+if [ "$1" == "clean" ]; then
+    echo " [*] Clean requested! Wiping build cache..."
+    rm -rf build/ bin/
+    echo " [*] Cache cleared."
+    echo ""
+fi
+
 # Ensure build and bin directories exist
 mkdir -p build/obj build/moc build/rcc build/ui bin
 

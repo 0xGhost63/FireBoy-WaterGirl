@@ -2,6 +2,9 @@
 setlocal EnableDelayedExpansion
 title Fireboy ^& Watergirl Build ^& Run
 
+rem Explicitly add Qt and MinGW to PATH for instant compilation
+set "PATH=C:\Qt\6.11.0\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;%PATH%"
+
 rem Always run relative to this script's folder
 pushd "%~dp0"
 
@@ -10,6 +13,14 @@ echo  [*] Welcome to the Fireboy ^& Watergirl Launcher! :)
 echo =======================================================
 echo  Let's get everything ready for you...
 echo.
+
+if /I "%~1"=="clean" (
+    echo [*] Clean requested! Wiping build cache...
+    if exist "build" rmdir /S /Q "build"
+    if exist "bin" rmdir /S /Q "bin"
+    echo [*] Cache cleared.
+    echo.
+)
 
 rem 1) Ensure build and bin directories exist
 if not exist "build\obj" mkdir "build\obj"
