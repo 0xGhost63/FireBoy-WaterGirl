@@ -46,6 +46,19 @@ Here is a quick breakdown of what every major file in the project does:
 
 ---
 
+## Data Structures and Algorithms (DSA) Usage
+
+A core highlight of this project is the custom implementation of classical Data Structures and Algorithms directly into the game's mechanics:
+
+*   **Stacks (LIFO):** Used for keeping track of the player's position history.
+*   **Queues (FIFO) & Priority Queues:** Used for an event buffer pipeline, ensuring that game events (like opening gates, collecting gems, and dying) execute in the correct order based on priority.
+*   **Doubly Linked Lists:** Maintains a chained catalogue of all playable levels for easy forward/backward traversal.
+*   **Binary Search Trees (BST):** Used for storing the sparse 2D map grids to heavily optimize collision detection and tile lookups. A secondary BST is also used to automatically sort the highscore leaderboard upon insertion!
+*   **Breadth-First Search (BFS):** Implemented for pathfinding on the tile grid to find the shortest, safest path from a starting point to an objective (Hint System).
+*   **Sorting & Searching:** Includes `Bubble Sort` and `Quick Sort` for small and large leaderboard management, `Binary Search` for extremely fast rank lookups, and `Linear Search` for real-time proximity-based gem collection.
+
+---
+
 ## How to Set Up and Play
 
 ### Prerequisites
