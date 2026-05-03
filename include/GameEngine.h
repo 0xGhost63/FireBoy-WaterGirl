@@ -1,6 +1,7 @@
 #pragma once
 #include <QObject>
 #include <QTimer>
+#include <QSoundEffect>
 #include "../include/GameObjects.h"
 #include "../include/DSA.h"
 #include "../include/Player.h"
@@ -70,4 +71,10 @@ private:
     void computeHints();
     void handleDeath();
     void buildGrid(int who, int grid[MAP_ROWS][MAP_COLS]);
+
+    QSoundEffect* sndMaleJump;
+    QSoundEffect* sndFemaleJump;
+    QSoundEffect* sndGemCollect;
+    QSoundEffect* sndDie;
+    QSoundEffect* sndWin;
 };

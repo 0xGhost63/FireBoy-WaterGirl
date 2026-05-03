@@ -2,6 +2,7 @@
 #include "../levels/Levels.h"
 #include <cmath>
 #include <cstring>
+#include <QUrl>
 using namespace std;
 
 static const int TICK_MS = 16;
@@ -15,6 +16,17 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent) {
     listAppend(&levels, makeLevel1());
     listAppend(&levels, makeLevel2());
     listAppend(&levels, makeLevel3());
+
+    sndMaleJump = new QSoundEffect(this);
+    sndMaleJump->setSource(QUrl("qrc:/sounds/male_jump.wav"));
+    sndFemaleJump = new QSoundEffect(this);
+    sndFemaleJump->setSource(QUrl("qrc:/sounds/female_jump.wav"));
+    sndGemCollect = new QSoundEffect(this);
+    sndGemCollect->setSource(QUrl("qrc:/sounds/gem_collect.wav"));
+    sndDie = new QSoundEffect(this);
+    sndDie->setSource(QUrl("qrc:/sounds/die.wav"));
+    sndWin = new QSoundEffect(this);
+    sndWin->setSource(QUrl("qrc:/sounds/win.wav"));
 
     pqInit(&eventQueue);
     gateMapInit(&gateMap);
@@ -141,8 +153,15 @@ void GameEngine::tick() {
     buildEffectiveTileMap();
 
     updatePlatforms();
+
+    bool fbJumping = fireboy.jumpWanted && fireboy.onGround;
+    bool wgJumping = watergirl.jumpWanted && watergirl.onGround;
+
     playerUpdate(&fireboy,   effectiveTileMap, lv->platforms, lv->platformCount);
     playerUpdate(&watergirl, effectiveTileMap, lv->platforms, lv->platformCount);
+
+    if (fbJumping) sndMaleJump->play();
+    if (wgJumping) sndFemaleJump->play();
 
     checkHazards();
     checkGems();
@@ -282,12 +301,16 @@ void GameEngine::processEvents() {
     while (!pqEmpty(&eventQueue)) {
         GameEvent e = pqPop(&eventQueue);
         if (e.type == EVT_PLAYER_DEAD) {
+            sndDie->play();
             handleDeath(); return; // stop processing after death
         }
         if (e.type == EVT_LEVEL_COMPLETE) {
+            sndWin->play();
             state = STATE_WIN; timer->stop(); emit stateChanged(state); return;
         }
-        // EVT_GEM_COLLECT is handled inline in checkGems, just drain it here
+        if (e.type == EVT_GEM_COLLECT) {
+            sndGemCollect->play();
+        }
     }
 }
 

@@ -1,69 +1,7 @@
-# Image Generation Prompts
-# Replace placeholder PNGs in assets/images/ with AI-generated versions.
-# Recommended size: 512×512 or larger, then resize for the game.
-# All images must have TRANSPARENT backgrounds (PNG with alpha).
-
-## fireboy.png  (Player character)
-A cute cartoon boy made entirely of fire and flame. Glowing orange-red body
-with a bright flame for hair shooting upward. Large expressive white eyes
-with black pupils. Small arms and legs. Simple bold outlines. Transparent
-background. Pixel-art / cartoon game sprite style. Facing slightly right.
-Size hint: 40×60 px game use (generate at 256×384 for quality).
-
-## watergirl.png  (Player character)
-A cute cartoon girl made entirely of water and ice. Glowing blue translucent
-body with flowing blue hair. Large expressive white eyes with dark pupils.
-Small arms and legs. Simple bold outlines. Transparent background.
-Pixel-art / cartoon game sprite style. Facing slightly right.
-Size hint: 40×60 px game use (generate at 256×384 for quality).
-
-## gem_fire.png  (Collectible for Fireboy)
-A glowing red-orange gemstone / diamond shape. Faceted crystal with inner
-glow effect. Bright highlights. Transparent background. Game asset style.
-Size: 24×24 px use (generate at 128×128).
-
-## gem_water.png  (Collectible for Watergirl)
-A glowing blue sapphire / diamond shape. Faceted crystal with inner glow.
-Cool blue highlights. Transparent background. Game asset style.
-Size: 24×24 px use (generate at 128×128).
-
-## door_fire.png  (Fireboy's exit door)
-An ornate temple door with fire/lava theme. Deep red and orange tones.
-Arched top with flame carvings. Dark interior. Glowing orange border.
-Transparent background. 2D side-view game door sprite.
-Size: 40×80 px use (generate at 256×512).
-
-## door_water.png  (Watergirl's exit door)
-An ornate temple door with water/ice theme. Deep blue tones.
-Arched top with wave and crystal carvings. Dark interior. Glowing blue border.
-Transparent background. 2D side-view game door sprite.
-Size: 40×80 px use (generate at 256×512).
-
-## tile_solid.png  (Repeating ground/wall tile)
-A dark stone brick tile. Mossy green cracks. Ancient temple stonework.
-Slightly uneven edges for texture. NO transparent background (opaque).
-Seamless tileable texture. Size: 40×40 px use (generate at 128×128).
-
-## bg_forest.png  (Level 1 background)
-Dark lush forest temple interior. Ancient stone columns. Dense green
-canopy visible far behind. Mysterious glowing mushrooms. Atmospheric
-depth with dark foreground and slightly lighter midground.
-No game UI elements. Size: 800×640 px.
-
-## bg_cave.png  (Level 2 background)
-Dark crystal cave interior. Glowing blue and purple crystals embedded
-in walls. Stalactites and stalagmites. Mysterious underground atmosphere.
-Dark grey and indigo colour palette. No game UI elements. Size: 800×640 px.
-
-## bg_ruins.png  (Level 3 background)
-Ancient ruined temple interior. Crumbling stone arches. Warm amber
-torchlight. Vines and overgrowth. Mysterious ancient carvings on walls.
-Dark brown and gold colour palette. No game UI elements. Size: 800×640 px.
-
-# ── How to use ────────────────────────────────────────────────
-# 1. Generate each image using an AI tool (Midjourney, DALL-E, Stable
-#    Diffusion, Adobe Firefly, etc.) using the prompts above.
-# 2. Export as PNG with transparency where specified.
-# 3. Resize to the "game use" dimensions (keep originals in a /raw folder).
-# 4. Replace the placeholder files in:  assets/images/<filename>.png
-# 5. Rebuild the project: qmake && make
+## splash.png  (Game Splash Screen)
+A breathtaking and highly detailed splash screen for a "Fireboy and Watergirl" style game. 
+In the center, a magical ancient temple door glowing with half red fire and half blue water. 
+Surrounding the door are mysterious ruins, glowing amber torches on the left, and shimmering blue crystals on the right. 
+Dynamic lighting, cinematic composition. 
+No text, no UI elements. 
+Size: 800×600 px (generate at 1600×1200 for quality).

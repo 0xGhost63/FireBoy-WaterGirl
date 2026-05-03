@@ -4,5 +4,10 @@
   </qresource>
   <qresource prefix="/sounds">
     <file alias="bgm.mp3">assets/sounds/bgm.mp3</file>
+    <file alias="die.wav">assets/sounds/die.wav</file>
+    <file alias="female_jump.wav">assets/sounds/female_jump.wav</file>
+    <file alias="gem_collect.wav">assets/sounds/gem_collect.wav</file>
+    <file alias="male_jump.wav">assets/sounds/male_jump.wav</file>
+    <file alias="win.wav">assets/sounds/win.wav</file>
   </qresource>
 </RCC>
