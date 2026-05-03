@@ -23,8 +23,7 @@ int main(int argc, char* argv[]) {
     {
 
         
-            splashPix = splashPix.scaled(800, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        }
+        splashPix = splashPix.scaled(800, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
         QSplashScreen* splash = new QSplashScreen(splashPix);
         splash->show();
