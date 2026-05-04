@@ -48,7 +48,7 @@ Here is a quick breakdown of what every major file in the project does:
 
 ## Data Structures and Algorithms (DSA) Usage
 
-A core highlight of this project is the custom implementation of classical Data Structures and Algorithms directly into the game's mechanics:
+A core highlight of this project is the custom implementation of classical Data Structures and Algorithms directly into the game's mechanics :
 
 *   **Stacks (LIFO):** Used for keeping track of the player's position history.
 *   **Queues (FIFO) & Priority Queues:** Used for an event buffer pipeline, ensuring that game events (like opening gates, collecting gems, and dying) execute in the correct order based on priority.
@@ -90,7 +90,8 @@ We have provided automated scripts to make building and running the game as easy
 ## Ending Note
 
 Building a game from scratch using pure C++ and custom Data Structures is a challenging but incredibly rewarding journey. Whether you are a player looking to solve some nostalgic puzzles, or a developer diving into the code to see how custom physics and BSTs can be applied to game design, we hope you find this project both fun and educational. 
-Feel free to add new levels to the game and enjoy !
+Feel free to add new levels to the game and enjoy 
+!
 
 Grab a friend, share your keyboard, and enjoy the adventure! :)
 

@@ -161,10 +161,25 @@ if "%EXE%"=="" if exist "release\FireboyWatergirl.exe" set "EXE=release\FireboyW
 if "%EXE%"=="" if exist "debug\FireboyWatergirl.exe"   set "EXE=debug\FireboyWatergirl.exe"
 
 if not "%EXE%"=="" (
+    rem -------------------------------------------------------
+    rem Deploy Qt DLLs so the game doesn't crash on Windows
+    rem windeployqt copies all required Qt .dll files next to the .exe
+    rem -------------------------------------------------------
+    where windeployqt >nul 2>&1
+    if %errorlevel%==0 (
+        echo [*] Running windeployqt to bundle Qt DLLs...
+        windeployqt "%EXE%" >nul 2>&1
+        echo [*] DLLs deployed successfully.
+    ) else (
+        echo [!] Warning: windeployqt not found in PATH.
+        echo     If the game crashes, open a Qt MinGW terminal and run:
+        echo     windeployqt %EXE%
+    )
     echo [*] Game is running... Close the game window to return here.
     "%EXE%"
     goto :End
 )
+
 
 echo.
 echo =======================================================

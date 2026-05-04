@@ -13,6 +13,7 @@
 #include <QLineEdit>
 #include <cstring>
 #include <QUrl>
+#include <QTimer>
 using namespace std;
 
 GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
@@ -23,6 +24,11 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
     connect(eng, &GameEngine::frameReady,    this, &GameWindow::onFrameReady);
     connect(eng, &GameEngine::stateChanged,  this, &GameWindow::onStateChanged);
 
+    // Initialise media objects but do NOT call play() yet.
+    // Deferring play() via singleShot(0) ensures the Qt event loop is
+    // running before the multimedia backend is touched — prevents a
+    // crash on Windows Qt5 where the DirectShow/WMF backend isn't ready
+    // during the constructor.
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     playlist = new QMediaPlaylist(this);
     playlist->addMedia(QUrl("qrc:/sounds/bgm.mp3"));
@@ -31,20 +37,27 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
     bgMusic = new QMediaPlayer(this);
     bgMusic->setPlaylist(playlist);
     bgMusic->setVolume(50);
-    bgMusic->play();
+
+    QTimer::singleShot(0, this, [this]() {
+        if (bgMusic) bgMusic->play();
+    });
 #else
     bgMusic = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
     bgMusic->setAudioOutput(audioOutput);
     bgMusic->setSource(QUrl("qrc:/sounds/bgm.mp3"));
     audioOutput->setVolume(0.5);
-    bgMusic->setLoops(-1); // -1 means infinite looping in Qt6
-    bgMusic->play();
+    bgMusic->setLoops(-1);
+
+    QTimer::singleShot(0, this, [this]() {
+        if (bgMusic) bgMusic->play();
+    });
 #endif
 
     buildUI();
     loadScores();
 }
+
 
 void GameWindow::buildUI() {
     stack = new QStackedWidget(this);
