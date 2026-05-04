@@ -41,6 +41,7 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent) {
 
     pqInit(&eventQueue);
     gateMapInit(&gateMap);
+    cheatInit(&skipCheat, "SKIP"); // initialize our cheat code!
     state = STATE_MENU; score = 0; lives = 3; elapsed = 0; showHint = false;
     fireboyHint.len = 0; watergirlHint.len = 0;
 }
@@ -140,6 +141,16 @@ void GameEngine::nextLevel() {
 
 void GameEngine::keyPress(int key) {
     if (state != STATE_PLAYING) return;
+    
+    // Check for "SKIP" cheat code
+    if (key >= Qt::Key_A && key <= Qt::Key_Z) {
+        if (cheatUpdate(&skipCheat, (char)key)) {
+            skipCheat.isUnlocked = false; // Reset it immediately
+            nextLevel();
+            return;
+        }
+    }
+
     switch (key) {
     case Qt::Key_Left:   fireboy.moveLeft    = true; break;
     case Qt::Key_Right:  fireboy.moveRight   = true; break;

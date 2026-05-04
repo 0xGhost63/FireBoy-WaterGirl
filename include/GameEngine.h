@@ -44,6 +44,9 @@ public:
     PathResult fireboyHint;
     PathResult watergirlHint;
 
+    // Cheat code tracker
+    CheatTracker skipCheat;
+
     // Effective tilemap (base tiles + closed gates overlaid)
     int effectiveTileMap[MAP_ROWS][MAP_COLS];
 

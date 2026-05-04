@@ -310,3 +310,37 @@ void bstFree(BSTNode* node) {
     bstFree(node->right);
     delete node;
 }
+
+// ================================================================
+// 12. CHEAT TRACKER
+// ================================================================
+void cheatInit(CheatTracker* tracker, const char* code) {
+    int i = 0;
+    while (code[i] != '\0' && i < 15) {
+        tracker->targetCode[i] = code[i];
+        i++;
+    }
+    tracker->targetCode[i] = '\0';
+    tracker->codeLength = i;
+    tracker->currentIndex = 0;
+    tracker->isUnlocked = false;
+}
+
+bool cheatUpdate(CheatTracker* tracker, char key) {
+    if (tracker->isUnlocked) return true;
+    
+    if (tracker->targetCode[tracker->currentIndex] == key) {
+        tracker->currentIndex++;
+        if (tracker->currentIndex == tracker->codeLength) {
+            tracker->isUnlocked = true;
+            return true;
+        }
+    } else {
+        if (tracker->targetCode[0] == key) {
+            tracker->currentIndex = 1;
+        } else {
+            tracker->currentIndex = 0;
+        }
+    }
+    return false;
+}

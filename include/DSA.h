@@ -148,3 +148,16 @@ void bstInsert(BSTMap* tree, int r, int c, int type);
 int  bstGet(BSTMap* tree, int r, int c); // Returns TILE_EMPTY if not found
 void bstFree(BSTNode* node);
 
+// ================================================================
+// 12. CHEAT TRACKER
+// Used to track sequence of characters typed by user
+// ================================================================
+struct CheatTracker {
+    char targetCode[16];
+    int currentIndex;
+    int codeLength;
+    bool isUnlocked;
+};
+
+void cheatInit(CheatTracker* tracker, const char* code);
+bool cheatUpdate(CheatTracker* tracker, char key);
