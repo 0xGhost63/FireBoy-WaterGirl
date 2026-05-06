@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     if (qss.open(QFile::ReadOnly | QFile::Text))
         app.setStyleSheet(QLatin1String(qss.readAll()));
 
-    int splashTimeMs = 3000;
+    int splashTimeMs = 0;
 
     if (splashTimeMs > 0) 
     {
