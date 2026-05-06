@@ -21,6 +21,10 @@ private:
     QPixmap pmDoorFire, pmDoorWater;
     QPixmap pmTile;
     QPixmap pmBg[3];    // 0=forest 1=cave 2=ruins
+    
+    QPixmap pmBtnBlue, pmBtnOrange;
+    QPixmap pmGateBlue, pmGateOrange;
+    QPixmap pmConveyor;
 
     // Viewport scale & offset (letterbox fit)
     float sx, sy;
@@ -39,6 +43,7 @@ private:
     void drawGates     (QPainter& p);
     void drawButtons   (QPainter& p);
     void drawHazards   (QPainter& p);
+    void drawConveyors (QPainter& p);
     void drawPlatforms (QPainter& p);
     void drawGems      (QPainter& p);
     void drawDoors     (QPainter& p);

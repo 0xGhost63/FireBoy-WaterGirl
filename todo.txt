@@ -3,17 +3,18 @@
 3-Screen for entering the player name (DONE)
 3.5-Add new levels in the game 
 3.9-Add Checkpoints logic
-4-Load the highscores into a BSt
+4-Load the highscores into a BST
 and when i will traverse the tree it will automatically sort the 
 scores + it will also help me to search the player by their names...etc
-5-Add a cheatcode for the testing
+
+5-Add a cheatcode for the testing (DONE-ADDED SKIP)
 
 6-Queues: Conveyor Belts
 The Idea: A floor that slowly pushes players or items towards lava.
 How to do it: Items on the belt are stored in a Queue. 
 Every tick, you dequeue the item, add +1 to its X coordinate,
 and enqueue it back. It naturally manages the movement of multiple items
-without complex collision checks between them!
+without complex collision checks between them! (DONE)
 
 7-Doubly Linked List: Undo/Redo System
 The Idea: Let players press 'U' to go back 5 seconds in time.
@@ -21,3 +22,9 @@ How to do it: Every 500ms, you add the current GameState (player positions, gem 
 When they press Undo, you navigate the list backward (prev pointer) and restore the state. 
 Use a 'Current' pointer to track where you are in history so Redo also works!
 
+
+8-Remove the cheatcode functionality
+
+9-Remove the level-editor logic from the code
+
+10-Make sure the hint function works in all levels

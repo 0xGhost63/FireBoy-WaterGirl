@@ -21,6 +21,12 @@ GameRenderer::GameRenderer(GameEngine* e, QWidget* parent)
     pmBg[0]     = QPixmap("assets/images/bg_forest.png");
     pmBg[1]     = QPixmap("assets/images/bg_cave.png");
     pmBg[2]     = QPixmap("assets/images/bg_ruins.png");
+    
+    pmBtnBlue    = QPixmap("assets/images/blue_button.png");
+    pmBtnOrange  = QPixmap("assets/images/orange_button.png");
+    pmGateBlue   = QPixmap("assets/images/blue_gate.png");
+    pmGateOrange = QPixmap("assets/images/orange_gate.png");
+    pmConveyor   = QPixmap("assets/images/conveyor_small.png");
 
     computeScale();
 }
@@ -55,6 +61,7 @@ void GameRenderer::paintEvent(QPaintEvent*) {
         drawTiles(p);
         drawGates(p);
         drawHazards(p);
+        drawConveyors(p);
         drawPlatforms(p);
         drawButtons(p);
         drawGems(p);
@@ -140,19 +147,26 @@ void GameRenderer::drawGates(QPainter& p) {
         float visH = g.h * (1.0f - g.openAnim); // visible height shrinks
         if (visH < 2.0f) continue; // fully open — nothing to draw
         QRectF sr(toSX(g.x), toSY(g.y + g.h - visH), toSW(g.w), toSH(visH));
-        // Alternating orange/blue based on which button controls it
-        QColor col = (g.id % 2 == 0) ? QColor(220, 120, 20) : QColor(40, 140, 220);
-        QLinearGradient grad(sr.topLeft(), sr.bottomLeft());
-        grad.setColorAt(0, col.lighter(130));
-        grad.setColorAt(1, col.darker(130));
-        p.fillRect(sr, grad);
-        // Draw bars on the gate for a grate look
-        p.setPen(QPen(col.lighter(170), 1.5f * sy));
-        float barH = toSH(8);
-        for (float yy = sr.top(); yy < sr.bottom(); yy += barH * 2)
-            p.drawLine(QPointF(sr.left(), yy), QPointF(sr.right(), yy));
-        p.setPen(QPen(col.darker(150), 2.0f));
-        p.drawRect(sr);
+        QPixmap* pm = (g.id % 2 == 0) ? &pmGateOrange : &pmGateBlue;
+        if (!pm->isNull()) {
+            float ratio = visH / g.h;
+            QRect sourceRect(0, pm->height() * (1.0f - ratio), pm->width(), pm->height() * ratio);
+            p.drawPixmap(sr, *pm, sourceRect);
+        } else {
+            // Alternating orange/blue based on which button controls it
+            QColor col = (g.id % 2 == 0) ? QColor(220, 120, 20) : QColor(40, 140, 220);
+            QLinearGradient grad(sr.topLeft(), sr.bottomLeft());
+            grad.setColorAt(0, col.lighter(130));
+            grad.setColorAt(1, col.darker(130));
+            p.fillRect(sr, grad);
+            // Draw bars on the gate for a grate look
+            p.setPen(QPen(col.lighter(170), 1.5f * sy));
+            float barH = toSH(8);
+            for (float yy = sr.top(); yy < sr.bottom(); yy += barH * 2)
+                p.drawLine(QPointF(sr.left(), yy), QPointF(sr.right(), yy));
+            p.setPen(QPen(col.darker(150), 2.0f));
+            p.drawRect(sr);
+        }
     }
 }
 
@@ -162,19 +176,29 @@ void GameRenderer::drawButtons(QPainter& p) {
     for (int i = 0; i < lv->buttonCount; i++) {
         Button& btn = lv->buttons[i];
         QRectF sr(toSX(btn.x), toSY(btn.y), toSW(btn.w), toSH(btn.h));
-        // Orange buttons open gate 1, blue buttons open gate 0
-        QColor col = (btn.gateId % 2 == 0) ? QColor(220, 120, 20) : QColor(40, 140, 220);
-        if (btn.pressed) col = col.lighter(160); // bright when pressed
-        p.fillRect(sr, col);
-        // Recessed look when pressed
-        p.setPen(QPen(btn.pressed ? col.darker(130) : col.lighter(160), 1.5f));
-        p.drawRect(sr);
-        // Small arrow pointing up to hint the player
-        p.setPen(QPen(Qt::white, 1.2f));
-        float mx = sr.center().x(), my = sr.center().y();
-        p.drawLine(QPointF(mx, my+2), QPointF(mx, my-4));
-        p.drawLine(QPointF(mx-3, my-1), QPointF(mx, my-4));
-        p.drawLine(QPointF(mx+3, my-1), QPointF(mx, my-4));
+        QPixmap* pm = (btn.gateId % 2 == 0) ? &pmBtnOrange : &pmBtnBlue;
+        if (!pm->isNull()) {
+            QRectF drawRect = sr;
+            if (btn.pressed) {
+                float pressOffset = sr.height() * 0.4f;
+                drawRect.setTop(sr.top() + pressOffset);
+            }
+            p.drawPixmap(drawRect.toRect(), *pm);
+        } else {
+            // Orange buttons open gate 1, blue buttons open gate 0
+            QColor col = (btn.gateId % 2 == 0) ? QColor(220, 120, 20) : QColor(40, 140, 220);
+            if (btn.pressed) col = col.lighter(160); // bright when pressed
+            p.fillRect(sr, col);
+            // Recessed look when pressed
+            p.setPen(QPen(btn.pressed ? col.darker(130) : col.lighter(160), 1.5f));
+            p.drawRect(sr);
+            // Small arrow pointing up to hint the player
+            p.setPen(QPen(Qt::white, 1.2f));
+            float mx = sr.center().x(), my = sr.center().y();
+            p.drawLine(QPointF(mx, my+2), QPointF(mx, my-4));
+            p.drawLine(QPointF(mx-3, my-1), QPointF(mx, my-4));
+            p.drawLine(QPointF(mx+3, my-1), QPointF(mx, my-4));
+        }
     }
 }
 
@@ -190,6 +214,65 @@ void GameRenderer::drawPlatforms(QPainter& p) {
         g.setColorAt(0, col.lighter(130)); g.setColorAt(1, col);
         p.fillRect(sr, g);
         p.setPen(QPen(col.lighter(160), 1.5f)); p.drawRect(sr);
+    }
+}
+
+// ── Conveyor Belts (animated directional arrows) ─────────────
+void GameRenderer::drawConveyors(QPainter& p) {
+    LevelData* lv = eng->currentLevel(); if (!lv) return;
+    static float conveyorAnim = 0; conveyorAnim += 0.08f;
+
+    // Helper lambda to draw one belt region
+    auto drawBelt = [&](QRectF sr, float speed) {
+        if (!pmConveyor.isNull()) {
+            p.setClipRect(sr);
+            float dir = (speed > 0) ? 1.0f : -1.0f;
+            float offset = fmodf(conveyorAnim * toSW(40) * dir, toSW(TILE_SIZE));
+            
+            // Loop the drawn pixmap across the conveyor width
+            for (float xx = sr.left() - toSW(TILE_SIZE) + offset; xx < sr.right() + toSW(TILE_SIZE); xx += toSW(TILE_SIZE)) {
+                QRectF tileRect(xx, sr.top(), toSW(TILE_SIZE), toSH(TILE_SIZE));
+                p.drawPixmap(tileRect.toRect(), pmConveyor, pmConveyor.rect());
+            }
+            p.setClipping(false);
+        } else {
+            QLinearGradient bg(sr.topLeft(), sr.bottomLeft());
+            bg.setColorAt(0, QColor(60, 60, 70));
+            bg.setColorAt(0.5, QColor(80, 80, 90));
+            bg.setColorAt(1, QColor(50, 50, 60));
+            p.fillRect(sr, bg);
+            p.setPen(QPen(QColor(200, 180, 50, 180), 2.0f * sx));
+            float dir = (speed > 0) ? 1.0f : -1.0f;
+            float spacing = toSW(20);
+            float offset = fmodf(conveyorAnim * toSW(40) * dir, spacing);
+            for (float xx = sr.left() - spacing + offset; xx < sr.right() + spacing; xx += spacing) {
+                if (xx < sr.left() || xx > sr.right()) continue;
+                float cy = sr.center().y();
+                float arrowW = toSW(6) * dir;
+                float arrowH = toSH(5);
+                p.drawLine(QPointF(xx - arrowW, cy - arrowH), QPointF(xx, cy));
+                p.drawLine(QPointF(xx - arrowW, cy + arrowH), QPointF(xx, cy));
+            }
+            p.setPen(QPen(QColor(100, 100, 110), 1.5f));
+            p.setBrush(Qt::NoBrush);
+            p.drawRect(sr);
+        }
+    };
+
+    // Draw conveyors[] array (backward compat with old levels)
+    for (int i = 0; i < lv->conveyorCount; i++) {
+        ConveyorBelt& belt = lv->conveyors[i];
+        drawBelt(QRectF(toSX(belt.x), toSY(belt.y), toSW(belt.w), toSH(belt.h)), belt.speed);
+    }
+
+    // Draw tilemap-based conveyor tiles (TILE_CONVEYOR_R / TILE_CONVEYOR_L)
+    for (int r = 0; r < MAP_ROWS; r++) {
+        for (int c = 0; c < MAP_COLS; c++) {
+            int t = bstGet(&lv->tileTree, r, c);
+            if (t != TILE_CONVEYOR_R && t != TILE_CONVEYOR_L) continue;
+            float spd = (t == TILE_CONVEYOR_R) ? 60.0f : -60.0f;
+            drawBelt(QRectF(toSX(c*TILE_SIZE), toSY(r*TILE_SIZE), toSW(TILE_SIZE), toSH(TILE_SIZE)), spd);
+        }
     }
 }
 
@@ -222,10 +305,10 @@ void GameRenderer::drawDoors(QPainter& p) {
     LevelData* lv = eng->currentLevel(); if (!lv) return;
     for (int i = 0; i < 2; i++) {
         Door& d = lv->doors[i];
-        QRectF sr(toSX(d.x), toSY(d.y), toSW(TILE_SIZE), toSH(TILE_SIZE*2));
+        QRectF sr(toSX(d.x), toSY(d.y), toSW(TILE_SIZE), toSH(d.h));
         QPixmap& pm = (d.owner == FIREBOY) ? pmDoorFire : pmDoorWater;
         if (!pm.isNull()) {
-            p.drawPixmap(sr.toRect(), pm);
+            p.drawPixmap(sr.toRect(), pm, pm.rect());
             if (d.open) {
                 p.fillRect(sr, QColor(255,255,255,60));
             }

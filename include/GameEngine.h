@@ -70,6 +70,8 @@ private:
     void checkGems();
     void checkDoors();
     void updatePlatforms();
+    void updateConveyors();
+    void updateConveyorTiles();
     void processEvents();
     void computeHints();
     void handleDeath();

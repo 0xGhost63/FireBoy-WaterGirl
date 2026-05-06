@@ -4,7 +4,7 @@ using namespace std;
 
 static const float GRAVITY  = 0.55f;
 static const float MAX_FALL = 16.0f;
-static const float WALK_SPD = 5.0f;
+static const float WALK_SPD = 4.5f;
 static const float JUMP_VEL = -13.0f;
 
 void playerInit(Player* p, int type, float x, float y) {
@@ -34,7 +34,7 @@ bool playerRestoreCheckpoint(Player* p) {
     return true;
 }
 
-static bool isSolid(int t) { return t == TILE_SOLID; }
+static bool isSolid(int t) { return t == TILE_SOLID || t == TILE_CONVEYOR_R || t == TILE_CONVEYOR_L; }
 
 static int tileAt(int map[MAP_ROWS][MAP_COLS], float wx, float wy) {
     int c = (int)(wx / TILE_SIZE), r = (int)(wy / TILE_SIZE);

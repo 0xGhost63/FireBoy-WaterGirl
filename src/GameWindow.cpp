@@ -18,7 +18,7 @@ using namespace std;
 
 GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0) {
     currentPlayerName = "Anonymous";
-    setWindowTitle("Fireboy & Watergirl – Forest Temple");
+    setWindowTitle("Fireboy & Watergirl :)");
     resize(1000, 760);
     eng = new GameEngine(this);
     connect(eng, &GameEngine::frameReady,    this, &GameWindow::onFrameReady);

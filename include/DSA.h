@@ -143,6 +143,17 @@ void gateMapInit  (GateHashMap* m);
 void gateMapInsert(GateHashMap* m, int gateId, int index);
 int  gateMapGet   (GateHashMap* m, int gateId); // returns -1 if not found
 
+// ================================================================
+// 11. CONVEYOR QUEUE (FIFO – Circular Array for Conveyor Belt)
+// Items on the belt are enqueued/dequeued each tick.
+// Dequeue → move X by belt speed → Enqueue back.
+// ================================================================
+void         conveyorQueueInit   (ConveyorQueue* q);
+bool         conveyorQueueEmpty  (ConveyorQueue* q);
+bool         conveyorQueueFull   (ConveyorQueue* q);
+void         conveyorQueueEnqueue(ConveyorQueue* q, ConveyorItem item);
+ConveyorItem conveyorQueueDequeue(ConveyorQueue* q);
+
 void bstInit(BSTMap* tree);
 void bstInsert(BSTMap* tree, int r, int c, int type);
 int  bstGet(BSTMap* tree, int r, int c); // Returns TILE_EMPTY if not found

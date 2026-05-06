@@ -7,6 +7,8 @@ using namespace std;
 #define TILE_LAVA     2   // kills Watergirl, safe for Fireboy
 #define TILE_WATER    3   // kills Fireboy, safe for Watergirl
 #define TILE_POISON   4   // kills both
+#define TILE_CONVEYOR_R 5 // conveyor pushing right (solid + pushes player)
+#define TILE_CONVEYOR_L 6 // conveyor pushing left  (solid + pushes player)
 
 // ── Character types ─────────────────────────────────────────
 #define FIREBOY   0
@@ -32,11 +34,13 @@ using namespace std;
 #define MAP_COLS      20
 #define MAP_W         (MAP_COLS * TILE_SIZE)
 #define MAP_H         (MAP_ROWS * TILE_SIZE)
-#define MAX_GEMS      20
-#define MAX_HAZARDS   8
-#define MAX_PLATFORMS 4
-#define MAX_BUTTONS   6
-#define MAX_GATES     6
+#define MAX_GEMS      50
+#define MAX_HAZARDS   50
+#define MAX_PLATFORMS 20
+#define MAX_BUTTONS   20
+#define MAX_CONVEYORS 50
+#define CONVEYOR_QUEUE_MAX 8
+#define MAX_GATES     20
 #define MAX_SCORES    10
 #define PLAYER_W      28
 #define PLAYER_H      40
@@ -51,7 +55,7 @@ struct Gem {
 };
 
 struct Door {
-    float x, y;
+    float x, y, h;
     int   owner;
     bool  open;
 };
@@ -85,6 +89,25 @@ struct MovingPlatform {
     float speed;
     bool  active;
     bool  towardsB;
+};
+
+// ── Conveyor Belt (Queue-based DSA) ──────────────────────────
+// Items on the belt are stored in a Queue. Every tick, dequeue
+// the item, add speed to its X, and enqueue it back.
+struct ConveyorItem {
+    int   id;         // 0=fireboy, 1=watergirl
+    float x, y;
+};
+
+struct ConveyorQueue {
+    ConveyorItem items[CONVEYOR_QUEUE_MAX];
+    int front, rear, count;
+};
+
+struct ConveyorBelt {
+    float x, y, w, h;   // belt region (world coordinates)
+    float speed;         // positive = push right, negative = push left
+    ConveyorQueue queue; // queue tracking items on this belt
 };
 
 struct GameEvent {
@@ -129,6 +152,10 @@ struct LevelData {
     int            hazardCount;
     MovingPlatform platforms[MAX_PLATFORMS];
     int            platformCount;
+
+    // Conveyor belts (Queue DSA)
+    ConveyorBelt   conveyors[MAX_CONVEYORS];
+    int            conveyorCount;
 
     // Cooperative interactive elements
     Button         buttons[MAX_BUTTONS];

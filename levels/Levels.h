@@ -12,6 +12,8 @@
 #define L  TILE_LAVA
 #define W  TILE_WATER
 #define P  TILE_POISON
+#define R  TILE_CONVEYOR_R
+#define Q  TILE_CONVEYOR_L
 
 LevelData makeLevel1();
 LevelData makeLevel2();

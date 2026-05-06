@@ -267,6 +267,32 @@ int gateMapGet(GateHashMap* m, int gateId) {
 }
 
 // ════════════════════════════════════════════════════════════
+// 11. CONVEYOR QUEUE (Circular Array FIFO for Conveyor Belt)
+// Each tick: dequeue item → modify X by belt speed → enqueue back
+// ════════════════════════════════════════════════════════════
+void conveyorQueueInit(ConveyorQueue* q) {
+    q->front = 0; q->rear = -1; q->count = 0;
+}
+bool conveyorQueueEmpty(ConveyorQueue* q) { return q->count == 0; }
+bool conveyorQueueFull(ConveyorQueue* q)  { return q->count == CONVEYOR_QUEUE_MAX; }
+
+void conveyorQueueEnqueue(ConveyorQueue* q, ConveyorItem item) {
+    if (conveyorQueueFull(q)) return;
+    q->rear = (q->rear + 1) % CONVEYOR_QUEUE_MAX;
+    q->items[q->rear] = item;
+    q->count++;
+}
+
+ConveyorItem conveyorQueueDequeue(ConveyorQueue* q) {
+    ConveyorItem item; item.id = -1; item.x = 0; item.y = 0;
+    if (conveyorQueueEmpty(q)) return item;
+    item = q->items[q->front];
+    q->front = (q->front + 1) % CONVEYOR_QUEUE_MAX;
+    q->count--;
+    return item;
+}
+
+// ════════════════════════════════════════════════════════════
 // 11. SPARSE MATRIX BST (Map Layout)
 // ════════════════════════════════════════════════════════════
 void bstInit(BSTMap* tree) {

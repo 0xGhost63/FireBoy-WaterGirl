@@ -87,6 +87,7 @@ void GameEngine::start() {
     for (int i = 0; i < 2;               i++) lv->doors[i].open     = false;
     for (int i = 0; i < lv->gateCount;   i++) { lv->gates[i].open = false; lv->gates[i].openAnim = 0; }
     for (int i = 0; i < lv->buttonCount; i++) lv->buttons[i].pressed = false;
+    for (int i = 0; i < lv->conveyorCount; i++) conveyorQueueInit(&lv->conveyors[i].queue);
     score = 0; lives = 3; elapsed = 0;
     rebuildGateMap();
     buildEffectiveTileMap();
@@ -114,6 +115,7 @@ void GameEngine::resetLevel() {
     for (int i = 0; i < 2;               i++) lv->doors[i].open     = false;
     for (int i = 0; i < lv->gateCount;   i++) { lv->gates[i].open = false; lv->gates[i].openAnim = 0; }
     for (int i = 0; i < lv->buttonCount; i++) lv->buttons[i].pressed = false;
+    for (int i = 0; i < lv->conveyorCount; i++) conveyorQueueInit(&lv->conveyors[i].queue);
     elapsed = 0;
     rebuildGateMap();
     buildEffectiveTileMap();
@@ -132,6 +134,7 @@ void GameEngine::nextLevel() {
     for (int i = 0; i < 2;               i++) lv->doors[i].open     = false;
     for (int i = 0; i < lv->gateCount;   i++) { lv->gates[i].open = false; lv->gates[i].openAnim = 0; }
     for (int i = 0; i < lv->buttonCount; i++) lv->buttons[i].pressed = false;
+    for (int i = 0; i < lv->conveyorCount; i++) conveyorQueueInit(&lv->conveyors[i].queue);
     elapsed = 0;
     rebuildGateMap();
     buildEffectiveTileMap();
@@ -183,6 +186,8 @@ void GameEngine::tick() {
     buildEffectiveTileMap();
 
     updatePlatforms();
+    updateConveyors();
+    updateConveyorTiles();
 
     bool fbJumping = fireboy.jumpWanted && fireboy.onGround;
     bool wgJumping = watergirl.jumpWanted && watergirl.onGround;
@@ -260,6 +265,72 @@ void GameEngine::updatePlatforms() {
     }
 }
 
+// ── Conveyor Belt update (Queue DSA) ──────────────────────────
+void GameEngine::updateConveyors() {
+    LevelData* lv = currentLevel(); if (!lv) return;
+    for (int i = 0; i < lv->conveyorCount; i++) {
+        ConveyorBelt& belt = lv->conveyors[i];
+
+        // Clear the queue each tick and re-detect who's on the belt
+        conveyorQueueInit(&belt.queue);
+
+        // Check if Fireboy is on this conveyor belt
+        if (!fireboy.dead) {
+            bool fbOn = (fireboy.x + PLAYER_W > belt.x) && (fireboy.x < belt.x + belt.w) &&
+                        (fireboy.y + PLAYER_H > belt.y) && (fireboy.y < belt.y + belt.h);
+            if (fbOn) {
+                ConveyorItem item; item.id = 0; item.x = fireboy.x; item.y = fireboy.y;
+                conveyorQueueEnqueue(&belt.queue, item);
+            }
+        }
+
+        // Check if Watergirl is on this conveyor belt
+        if (!watergirl.dead) {
+            bool wgOn = (watergirl.x + PLAYER_W > belt.x) && (watergirl.x < belt.x + belt.w) &&
+                        (watergirl.y + PLAYER_H > belt.y) && (watergirl.y < belt.y + belt.h);
+            if (wgOn) {
+                ConveyorItem item; item.id = 1; item.x = watergirl.x; item.y = watergirl.y;
+                conveyorQueueEnqueue(&belt.queue, item);
+            }
+        }
+
+        // Process the queue: dequeue → move → enqueue back
+        int count = belt.queue.count;
+        for (int j = 0; j < count; j++) {
+            ConveyorItem item = conveyorQueueDequeue(&belt.queue);
+            if (item.id < 0) continue;
+
+            // Apply conveyor speed to the player's X position
+            float newX = item.x + belt.speed * 0.016f;
+            item.x = newX;
+
+            // Update the actual player position
+            if (item.id == 0) fireboy.x = newX;
+            else              watergirl.x = newX;
+
+        conveyorQueueEnqueue(&belt.queue, item);
+        }
+    }
+}
+
+// ── Conveyor tiles: push players standing on TILE_CONVEYOR_R/L ─
+void GameEngine::updateConveyorTiles() {
+    LevelData* lv = currentLevel(); if (!lv) return;
+    auto push = [&](Player& pl) {
+        if (!pl.onGround || pl.dead) return;
+        int footRow = (int)((pl.y + PLAYER_H + 1) / TILE_SIZE);
+        int colL    = (int)(pl.x / TILE_SIZE);
+        int colR    = (int)((pl.x + PLAYER_W - 1) / TILE_SIZE);
+        for (int c = colL; c <= colR; c++) {
+            int tile = bstGet(&lv->tileTree, footRow, c);
+            if      (tile == TILE_CONVEYOR_R) { pl.x += 1.8f; break; }
+            else if (tile == TILE_CONVEYOR_L) { pl.x -= 1.8f; break; }
+        }
+    };
+    push(fireboy);
+    push(watergirl);
+}
+
 void GameEngine::checkHazards() {
     LevelData* lv = currentLevel(); if (!lv) return;
     bool fbInLava = false;
@@ -331,7 +402,7 @@ void GameEngine::checkDoors() {
             Door& d = lv->doors[i];
             if (d.owner != p->type) continue;
             bool inX = p->x < d.x+TILE_SIZE   && p->x+PLAYER_W > d.x;
-            bool inY = p->y < d.y+TILE_SIZE*2  && p->y+PLAYER_H > d.y;
+            bool inY = p->y < d.y+d.h  && p->y+PLAYER_H > d.y;
             if (inX && inY) d.open = true;
         }
     };
