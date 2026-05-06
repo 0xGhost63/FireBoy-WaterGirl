@@ -148,7 +148,7 @@ LevelData makeLevel2() {
     lv.buttons[1] = {14*TILE_SIZE-6, (7+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};
 
     lv.gateCount = 1;
-    lv.gates[0] = {0, 8*TILE_SIZE, 5*TILE_SIZE,TILE_SIZE,3*TILE_SIZE, false, 0.0f};
+    lv.gates[0] = {0, 8*TILE_SIZE, 6*TILE_SIZE,TILE_SIZE,2*TILE_SIZE, false, 0.0f};
 
     lv.hazardCount = 16;
     lv.hazards[0] = {5*TILE_SIZE, 4*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
