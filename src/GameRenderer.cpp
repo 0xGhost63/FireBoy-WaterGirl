@@ -30,6 +30,8 @@ GameRenderer::GameRenderer(GameEngine* e, QWidget* parent)
     pmLava       = QPixmap("assets/images/lava.png").scaled(64, 64, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     pmWater      = QPixmap("assets/images/water.png").scaled(64, 64, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     pmPoison     = QPixmap("assets/images/poison.png").scaled(64, 64, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    pmUndo       = QPixmap("assets/images/undo.png");
+    pmRedo       = QPixmap("assets/images/redo.png");
 
     computeScale();
 }
@@ -73,6 +75,39 @@ void GameRenderer::paintEvent(QPaintEvent*) {
         drawPlayer(p, &eng->fireboy);
         drawPlayer(p, &eng->watergirl);
         drawHUD(p);
+
+        // ── Undo / Redo flash banner (PNG) ──────────────────────────
+        if (eng->undoRedoFlash > 0) {
+            QPixmap& pm = eng->lastUndoWasUndo ? pmUndo : pmRedo;
+            float alpha = qMin(1.0f, eng->undoRedoFlash); // 0.0 – 1.0
+
+            // Size: 40% of game width, keep image aspect ratio
+            int bw, bh;
+            if (!pm.isNull()) {
+                bw = (int)(width() * 0.40f);
+                bh = pm.isNull() ? (int)(56 * sy)
+                                 : (int)(bw * ((float)pm.height() / pm.width()));
+            } else {
+                bw = (int)(width() * 0.38f); bh = (int)(56 * sy);
+            }
+            int bx = (width()  - bw) / 2;
+            int by = (int)(height() * 0.10f);
+            QRect bannerRect(bx, by, bw, bh);
+
+            p.setOpacity(alpha);
+            if (!pm.isNull()) {
+                p.drawPixmap(bannerRect, pm);
+            } else {
+                // Fallback text if PNG fails to load
+                p.fillRect(bannerRect, QColor(60, 0, 120));
+                p.setPen(Qt::white);
+                QFont f("Inter", 15 * sy, QFont::Bold);
+                p.setFont(f);
+                p.drawText(bannerRect, Qt::AlignCenter,
+                           eng->lastUndoWasUndo ? "UNDO" : "REDO");
+            }
+            p.setOpacity(1.0f); // restore full opacity
+        }
     }
     if (eng->state != STATE_PLAYING) drawOverlay(p);
 }
@@ -401,7 +436,7 @@ void GameRenderer::drawHUD(QPainter& p) {
     QRectF ctrl(ox, oy+MAP_H*sy-16*sy, MAP_W*sx, 16*sy);
     p.fillRect(ctrl, QColor(0,0,0,100));
     p.drawText(ctrl, Qt::AlignCenter,
-               "Fireboy: ← ↑ →    Watergirl: A W D    Hint: H    Pause: Esc");
+               "Fireboy: ← ↑ →    Watergirl: A W D    Hint: H    Undo: U    Redo: R    Pause: Esc");
 }
 
 // ── Overlay (menu / pause / win / gameover) ───────────────────
@@ -413,7 +448,7 @@ void GameRenderer::drawOverlay(QPainter& p) {
     switch (eng->state) {
     case STATE_MENU:
         title="Fireboy &  Watergirl"; col=QColor(255,200,50);
-        sub="Press Enter to Start\n\nFireboy: ← → ↑\nWatergirl: A D W\nHint: H"; break;
+        sub="Press Enter to Start\n\nFireboy: \u2190 \u2192 \u2191\nWatergirl: A D W\nHint: H    Undo: U    Redo: R"; break;
     case STATE_PAUSED:
         title="PAUSED"; col=QColor(180,220,255);
         sub="Press Esc or Enter to Resume"; break;

@@ -44,6 +44,13 @@ public:
     PathResult fireboyHint;
     PathResult watergirlHint;
 
+    // DSA: State History (Doubly Linked List – Undo / Redo)
+    StateHistory history;
+    float snapTimer;         // counts up; snapshot every 500ms
+    float undoRedoFlash;     // > 0 shows flash overlay
+    float undoCooldown;      // > 0 = block auto-snapshots (set after undo/redo)
+    bool  lastUndoWasUndo;   // true=undo, false=redo (for flash label)
+
     // Cheat code tracker
     CheatTracker skipCheat;
 

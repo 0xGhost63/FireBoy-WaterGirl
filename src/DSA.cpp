@@ -1,6 +1,6 @@
 #include "DSA.h"
 #include <cstring>
-#include <cstdlib>   // abs(int)
+#include <cstdlib>   // abs(int), malloc, free
 using namespace std;
 
 // ════════════════════════════════════════════════════════════
@@ -460,4 +460,79 @@ bool cheatUpdate(CheatTracker* tracker, char key) {
         }
     }
     return false;
+}
+
+// ════════════════════════════════════════════════════════════
+// 13. STATE HISTORY  (Doubly Linked List – Undo / Redo)
+// ════════════════════════════════════════════════════════════
+void historyInit(StateHistory* h) {
+    h->head = h->tail = h->current = nullptr;
+    h->count = 0;
+}
+
+void historyFree(StateHistory* h) {
+    HistoryNode* n = h->head;
+    while (n) {
+        HistoryNode* next = n->next;
+        free(n);
+        n = next;
+    }
+    historyInit(h);
+}
+
+// Push a new snapshot.
+// If we are NOT at the tail (i.e. the player undid some steps and then
+// continued playing), discard everything after current — just like any
+// real undo system (branching history is not supported).
+// If count reaches HISTORY_MAX, evict the oldest node from the head.
+void historyPush(StateHistory* h, const GameSnapshot& snap) {
+    // Discard future (forward) nodes when new action is taken after undo
+    if (h->current && h->current != h->tail) {
+        HistoryNode* toDelete = h->current->next;
+        h->current->next = nullptr;
+        h->tail = h->current;
+        while (toDelete) {
+            HistoryNode* nx = toDelete->next;
+            free(toDelete);
+            h->count--;
+            toDelete = nx;
+        }
+    }
+
+    // Allocate new node
+    HistoryNode* node = (HistoryNode*)malloc(sizeof(HistoryNode));
+    node->snap = snap;
+    node->next = nullptr;
+    node->prev = h->tail;
+
+    if (h->tail)  h->tail->next = node;
+    else          h->head = node;   // first ever node
+    h->tail    = node;
+    h->current = node;
+    h->count++;
+
+    // Evict oldest if over cap
+    if (h->count > HISTORY_MAX) {
+        HistoryNode* old = h->head;
+        h->head = old->next;
+        if (h->head) h->head->prev = nullptr;
+        free(old);
+        h->count--;
+    }
+}
+
+// Move current backward (undo). Returns false if already at beginning.
+bool historyUndo(StateHistory* h, GameSnapshot* out) {
+    if (!h->current || !h->current->prev) return false;
+    h->current = h->current->prev;
+    *out = h->current->snap;
+    return true;
+}
+
+// Move current forward (redo). Returns false if already at most recent.
+bool historyRedo(StateHistory* h, GameSnapshot* out) {
+    if (!h->current || !h->current->next) return false;
+    h->current = h->current->next;
+    *out = h->current->snap;
+    return true;
 }

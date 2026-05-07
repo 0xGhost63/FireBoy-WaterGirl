@@ -26,6 +26,7 @@ private:
     QPixmap pmGateBlue, pmGateOrange;
     QPixmap pmConveyor;
     QPixmap pmLava, pmWater, pmPoison;
+    QPixmap pmUndo, pmRedo;
 
     // Viewport scale & offset (letterbox fit)
     float sx, sy;

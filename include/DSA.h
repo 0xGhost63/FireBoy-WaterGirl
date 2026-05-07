@@ -13,6 +13,7 @@
 //  7. BinarySearch – find player rank in leaderboard
 //  8. BFS          – shortest-path hint (legacy tile-grid)
 //  9. Graph + Dijk – platform graph + Dijkstra hint pathfinding
+// 13. StateHistory  – Doubly Linked List Undo/Redo (U = undo, R = redo)
 // ================================================================
 
 // ── Limits ───────────────────────────────────────────────────
@@ -183,3 +184,46 @@ struct CheatTracker {
 
 void cheatInit(CheatTracker* tracker, const char* code);
 bool cheatUpdate(CheatTracker* tracker, char key);
+
+// ================================================================
+// 13. STATE HISTORY  (Doubly Linked List – Undo / Redo)
+// A snapshot is saved every 500 ms while the game is playing.
+// U  = undo  → restore the previous node (current = current->prev)
+// R  = redo  → restore the next     node (current = current->next)
+// Max 20 nodes  (~10 seconds of history). Oldest node is discarded
+// when the list exceeds the limit (like a deque with a cap).
+// ================================================================
+#define HISTORY_MAX  20
+
+struct GameSnapshot {
+    // Player state
+    float fbX,  fbY,  fbVX,  fbVY;
+    float wgX,  wgY,  wgVX,  wgVY;
+    bool  fbOnGround,  wgOnGround;
+    // Gem collected flags (mirrors lv->gems[].collected)
+    bool  gemCollected[MAX_GEMS];
+    int   gemCount;
+    // Score at snapshot time
+    int   score;
+};
+
+struct HistoryNode {
+    GameSnapshot  snap;
+    HistoryNode*  next;
+    HistoryNode*  prev;
+};
+
+struct StateHistory {
+    HistoryNode*  head;     // oldest
+    HistoryNode*  tail;     // newest
+    HistoryNode*  current;  // where we are right now
+    int           count;
+};
+
+void historyInit  (StateHistory* h);
+void historyFree  (StateHistory* h);
+void historyPush  (StateHistory* h, const GameSnapshot& snap);
+// Returns true and fills *out if there is a previous state
+bool historyUndo  (StateHistory* h, GameSnapshot* out);
+// Returns true and fills *out if there is a next state
+bool historyRedo  (StateHistory* h, GameSnapshot* out);

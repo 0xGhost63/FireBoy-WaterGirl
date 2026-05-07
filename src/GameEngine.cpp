@@ -41,11 +41,13 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent) {
 
     pqInit(&eventQueue);
     gateMapInit(&gateMap);
-    cheatInit(&skipCheat, "SKIP"); // initialize our cheat code!
+    cheatInit(&skipCheat, "SKIP");
+    historyInit(&history);
+    snapTimer = 0; undoRedoFlash = 0; undoCooldown = 0; lastUndoWasUndo = true;
     state = STATE_MENU; score = 0; lives = 3; elapsed = 0; showHint = false;
     fireboyHint.len = 0; watergirlHint.len = 0;
 }
-GameEngine::~GameEngine() { listFree(&levels); }
+GameEngine::~GameEngine() { listFree(&levels); historyFree(&history); }
 
 LevelData* GameEngine::currentLevel() {
     return levels.current ? &levels.current->data : nullptr;
@@ -91,6 +93,9 @@ void GameEngine::start() {
     score = 0; lives = 3; elapsed = 0;
     rebuildGateMap();
     buildEffectiveTileMap();
+    // Clear undo history at the start of each level
+    historyFree(&history);
+    snapTimer = 0; undoRedoFlash = 0;
     state = STATE_PLAYING;
     emit stateChanged(state);
     timer->start();
@@ -163,6 +168,48 @@ void GameEngine::keyPress(int key) {
     case Qt::Key_W:      watergirl.jumpWanted= true; break;
     case Qt::Key_H:      showHint = !showHint; computeHints(); break;
     case Qt::Key_Escape: pause(); break;
+    case Qt::Key_U: {
+        // UNDO – rewind 500ms
+        GameSnapshot snap;
+        if (historyUndo(&history, &snap)) {
+            fireboy.x   = snap.fbX;  fireboy.y   = snap.fbY;
+            fireboy.vx  = snap.fbVX; fireboy.vy  = snap.fbVY;
+            fireboy.onGround = snap.fbOnGround;
+            watergirl.x  = snap.wgX;  watergirl.y  = snap.wgY;
+            watergirl.vx = snap.wgVX; watergirl.vy = snap.wgVY;
+            watergirl.onGround = snap.wgOnGround;
+            LevelData* lv = currentLevel();
+            if (lv) for (int i = 0; i < snap.gemCount && i < lv->gemCount; i++)
+                lv->gems[i].collected = snap.gemCollected[i];
+            score = snap.score;
+            emit scoreChanged(score);
+            undoRedoFlash = 1.2f; lastUndoWasUndo = true;
+            undoCooldown  = 1.5f;  // block auto-snapshots for 1.5s
+            snapTimer     = 0;     // reset so next snap is a fresh 500ms
+        }
+        break;
+    }
+    case Qt::Key_R: {
+        // REDO – forward one snapshot
+        GameSnapshot snap;
+        if (historyRedo(&history, &snap)) {
+            fireboy.x   = snap.fbX;  fireboy.y   = snap.fbY;
+            fireboy.vx  = snap.fbVX; fireboy.vy  = snap.fbVY;
+            fireboy.onGround = snap.fbOnGround;
+            watergirl.x  = snap.wgX;  watergirl.y  = snap.wgY;
+            watergirl.vx = snap.wgVX; watergirl.vy = snap.wgVY;
+            watergirl.onGround = snap.wgOnGround;
+            LevelData* lv = currentLevel();
+            if (lv) for (int i = 0; i < snap.gemCount && i < lv->gemCount; i++)
+                lv->gems[i].collected = snap.gemCollected[i];
+            score = snap.score;
+            emit scoreChanged(score);
+            undoRedoFlash = 1.2f; lastUndoWasUndo = false;
+            undoCooldown  = 1.5f;
+            snapTimer     = 0;
+        }
+        break;
+    }
     default: break;
     }
 }
@@ -214,6 +261,34 @@ void GameEngine::tick() {
 
     // Animate gems
     for (int i = 0; i < lv->gemCount; i++) lv->gems[i].animPhase += 0.05f;
+
+    // ── Snapshot every 500ms for Undo/Redo history ────────────────
+    if (undoCooldown > 0) {
+        undoCooldown -= TICK_MS / 1000.0f;  // tick down cooldown
+    } else {
+        snapTimer += TICK_MS / 1000.0f;
+        if (snapTimer >= 0.5f) {
+            snapTimer = 0;
+            LevelData* lvSnap = currentLevel();
+            if (lvSnap) {
+                GameSnapshot snap;
+                snap.fbX = fireboy.x;   snap.fbY = fireboy.y;
+                snap.fbVX= fireboy.vx;  snap.fbVY= fireboy.vy;
+                snap.fbOnGround = fireboy.onGround;
+                snap.wgX = watergirl.x; snap.wgY = watergirl.y;
+                snap.wgVX= watergirl.vx;snap.wgVY= watergirl.vy;
+                snap.wgOnGround = watergirl.onGround;
+                snap.gemCount = lvSnap->gemCount;
+                for (int i = 0; i < lvSnap->gemCount && i < MAX_GEMS; i++)
+                    snap.gemCollected[i] = lvSnap->gems[i].collected;
+                snap.score = score;
+                historyPush(&history, snap);
+            }
+        }
+    }
+
+    // ── Tick down undo/redo flash ──────────────────────────────
+    if (undoRedoFlash > 0) undoRedoFlash -= TICK_MS / 1000.0f;
 
     emit frameReady();
 }

@@ -1,8 +1,8 @@
 1-Splash Screen (DONE)
 2-Sound effects (DONE)
 3-Screen for entering the player name (DONE)
-3.5-Add new levels in the game 
-3.9-Add Checkpoints logic
+3.5-Add new levels in the game  (DONE)
+3.9-Add Checkpoints logic (REJECTED-Added Undo-Redo Instead)
 
 4-Load the highscores into a BST
 and when i will traverse the tree it will automatically sort the 
@@ -21,11 +21,14 @@ without complex collision checks between them! (DONE)
 The Idea: Let players press 'U' to go back 5 seconds in time.
 How to do it: Every 500ms, you add the current GameState (player positions, gem counts) to a Doubly Linked List. 
 When they press Undo, you navigate the list backward (prev pointer) and restore the state. 
-Use a 'Current' pointer to track where you are in history so Redo also works!
+Use a 'Current' pointer to track where you are in history so Redo also works! (DONE)
 
 
 8-Remove the cheatcode functionality
 
 9-Remove the level-editor logic from the code
 
-10-Make sure the hint function works in all levels
+10-Make sure the hint function works in all levels ()
+
+11-REMOVE THE FALLBACKS,EXTRA CODE(MOVING TILES)AND THE extra DATA STRUCTURES
+and Simplify The Code 
