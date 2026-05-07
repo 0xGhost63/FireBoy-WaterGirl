@@ -1,5 +1,6 @@
 #include "DSA.h"
 #include <cstring>
+#include <cstdlib>   // abs(int)
 using namespace std;
 
 // ════════════════════════════════════════════════════════════
@@ -207,7 +208,97 @@ PathResult bfsFind(int grid[MAP_ROWS][MAP_COLS], int sx, int sy, int gx, int gy)
 }
 
 // ════════════════════════════════════════════════════════════
-// 9. PRIORITY QUEUE (Min-Heap)
+// 9. DIJKSTRA WEIGHTED PATHFINDING (Grid-Based)
+// ════════════════════════════════════════════════════════════
+PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
+                            int srcCol, int srcRow,
+                            int dstCol, int dstRow) {
+    PathResult res; res.len = 0;
+    if (srcCol < 0 || srcRow < 0 || dstCol < 0 || dstRow < 0) return res;
+    if (srcCol >= MAP_COLS || srcRow >= MAP_ROWS || dstCol >= MAP_COLS || dstRow >= MAP_ROWS) return res;
+
+    float dist[MAP_ROWS][MAP_COLS];
+    int parentX[MAP_ROWS][MAP_COLS];
+    int parentY[MAP_ROWS][MAP_COLS];
+    bool closed[MAP_ROWS][MAP_COLS];
+
+    for (int r = 0; r < MAP_ROWS; r++) {
+        for (int c = 0; c < MAP_COLS; c++) {
+            dist[r][c] = 1e9f;
+            parentX[r][c] = -1;
+            parentY[r][c] = -1;
+            closed[r][c] = false;
+        }
+    }
+
+    dist[srcRow][srcCol] = 0;
+
+    int dx[] = {0, 0, 1, -1};
+    int dy[] = {1, -1, 0, 0};
+
+    bool found = false;
+    int nodes = MAP_ROWS * MAP_COLS;
+    for (int iter = 0; iter < nodes; iter++) {
+        int cx = -1, cy = -1;
+        float best = 1e9f;
+        
+        // Find min dist open node
+        for (int r = 0; r < MAP_ROWS; r++) {
+            for (int c = 0; c < MAP_COLS; c++) {
+                if (!closed[r][c] && dist[r][c] < best) {
+                    best = dist[r][c];
+                    cx = c; cy = r;
+                }
+            }
+        }
+        
+        if (cx < 0 || best == 1e9f) break;
+        if (cx == dstCol && cy == dstRow) { found = true; break; }
+        
+        closed[cy][cx] = true;
+
+        for (int d = 0; d < 4; d++) {
+            int nx = cx + dx[d];
+            int ny = cy + dy[d];
+            
+            if (nx < 0 || ny < 0 || nx >= MAP_COLS || ny >= MAP_ROWS) continue;
+            if (closed[ny][nx] || grid[ny][nx] != 0) continue;
+            
+            // Uniform cost for grid tiles
+            float weight = 1.0f;
+            float alt = dist[cy][cx] + weight;
+            
+            if (alt < dist[ny][nx]) {
+                dist[ny][nx] = alt;
+                parentX[ny][nx] = cx;
+                parentY[ny][nx] = cy;
+            }
+        }
+    }
+
+    if (!found) return res;
+
+    // Reconstruct orthogonal path
+    int tmpX[MAX_HINT_PATH], tmpY[MAX_HINT_PATH], tLen = 0;
+    int cx = dstCol, cy = dstRow;
+    while (!(cx == srcCol && cy == srcRow) && tLen < MAX_HINT_PATH) {
+        tmpX[tLen] = cx; tmpY[tLen] = cy; tLen++;
+        int px = parentX[cy][cx], py = parentY[cy][cx];
+        cx = px; cy = py;
+    }
+    tmpX[tLen] = srcCol; tmpY[tLen] = srcRow; tLen++;
+    
+    // Reverse
+    for (int i = 0; i < tLen && i < MAX_HINT_PATH; i++) {
+        res.px[i] = tmpX[tLen - 1 - i];
+        res.py[i] = tmpY[tLen - 1 - i];
+    }
+    res.len = tLen;
+    return res;
+}
+
+// ════════════════════════════════════════════════════════════
+// 10. PRIORITY QUEUE (Min-Heap)
 // Ensures death events are processed before gem events, etc.
 // ════════════════════════════════════════════════════════════
 void pqInit(PriorityQueue* pq) { pq->size = 0; }

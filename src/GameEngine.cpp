@@ -449,10 +449,13 @@ void GameEngine::buildGrid(int who, int grid[MAP_ROWS][MAP_COLS]) {
     LevelData* lv = currentLevel(); if (!lv) return;
     for (int r = 0; r < MAP_ROWS; r++)
         for (int c = 0; c < MAP_COLS; c++) {
-            int t = bstGet(&lv->tileTree, r, c);
+            // Use effectiveTileMap so closed gates count as solid
+            int t = effectiveTileMap[r][c];
             bool blocked = (t == TILE_SOLID) ||
+                           (t == TILE_CONVEYOR_R) ||    // conveyors are walkable surfaces
+                           (t == TILE_CONVEYOR_L) ||
                            (t == TILE_LAVA   && who == WATERGIRL) ||
-                           (t == TILE_WATER  && who == FIREBOY) ||
+                           (t == TILE_WATER  && who == FIREBOY)  ||
                            (t == TILE_POISON);
             grid[r][c] = blocked ? 1 : 0;
         }
@@ -461,13 +464,73 @@ void GameEngine::buildGrid(int who, int grid[MAP_ROWS][MAP_COLS]) {
 void GameEngine::computeHints() {
     if (!showHint) { fireboyHint.len = 0; watergirlHint.len = 0; return; }
     LevelData* lv = currentLevel(); if (!lv) return;
+
     int fbGrid[MAP_ROWS][MAP_COLS], wgGrid[MAP_ROWS][MAP_COLS];
     buildGrid(FIREBOY,   fbGrid);
     buildGrid(WATERGIRL, wgGrid);
-    fireboyHint  = bfsFind(fbGrid,
-        (int)(fireboy.x/TILE_SIZE),   (int)(fireboy.y/TILE_SIZE),
-        (int)(lv->doors[0].x/TILE_SIZE), (int)(lv->doors[0].y/TILE_SIZE));
-    watergirlHint= bfsFind(wgGrid,
-        (int)(watergirl.x/TILE_SIZE), (int)(watergirl.y/TILE_SIZE),
-        (int)(lv->doors[1].x/TILE_SIZE), (int)(lv->doors[1].y/TILE_SIZE));
+
+    auto getPath = [&](int playerType, float startX, float startY, int doorX, int doorY, int grid[MAP_ROWS][MAP_COLS]) -> PathResult {
+        PathResult fullPath; fullPath.len = 0;
+        int curX = (int)(startX / TILE_SIZE);
+        int curY = (int)(startY / TILE_SIZE);
+        
+        bool usedGems[32] = {false};
+        
+        // Find path to all uncollected gems (greedy TSP)
+        while (true) {
+            int bestGem = -1;
+            int bestDist = 999999;
+            PathResult bestPath; bestPath.len = 0;
+            
+            for (int i = 0; i < lv->gemCount; i++) {
+                if (usedGems[i] || lv->gems[i].collected) continue;
+                if (lv->gems[i].owner != playerType) continue;
+                
+                int gx = (int)(lv->gems[i].x / TILE_SIZE);
+                int gy = (int)(lv->gems[i].y / TILE_SIZE);
+                
+                PathResult p = dijkstraGridFind(grid, curX, curY, gx, gy);
+                if (p.len > 0 && p.len < bestDist) {
+                    bestDist = p.len;
+                    bestGem = i;
+                    bestPath = p;
+                }
+            }
+            
+            if (bestGem == -1) break; // no more reachable gems
+            usedGems[bestGem] = true;
+            
+            // Append path to fullPath
+            for (int i = 0; i < bestPath.len; i++) {
+                if (fullPath.len > 0 && i == 0) continue; // skip duplicate start node
+                if (fullPath.len < MAX_HINT_PATH) {
+                    fullPath.px[fullPath.len] = bestPath.px[i];
+                    fullPath.py[fullPath.len] = bestPath.py[i];
+                    fullPath.len++;
+                }
+            }
+            curX = (int)(lv->gems[bestGem].x / TILE_SIZE);
+            curY = (int)(lv->gems[bestGem].y / TILE_SIZE);
+        }
+        
+        // Finally path to door
+        PathResult doorPath = dijkstraGridFind(grid, curX, curY, doorX, doorY);
+        for (int i = 0; i < doorPath.len; i++) {
+            if (fullPath.len > 0 && i == 0) continue;
+            if (fullPath.len < MAX_HINT_PATH) {
+                fullPath.px[fullPath.len] = doorPath.px[i];
+                fullPath.py[fullPath.len] = doorPath.py[i];
+                fullPath.len++;
+            }
+        }
+        
+        if (fullPath.len == 0) return doorPath;
+        return fullPath;
+    };
+
+    fireboyHint = getPath(FIREBOY, fireboy.x, fireboy.y, 
+        (int)(lv->doors[0].x / TILE_SIZE), (int)(lv->doors[0].y / TILE_SIZE), fbGrid);
+    
+    watergirlHint = getPath(WATERGIRL, watergirl.x, watergirl.y, 
+        (int)(lv->doors[1].x / TILE_SIZE), (int)(lv->doors[1].y / TILE_SIZE), wgGrid);
 }

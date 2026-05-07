@@ -40,7 +40,7 @@ public:
     // DSA: Gate Hash Map for O(1) button→gate lookup
     GateHashMap gateMap;
 
-    // BFS hint paths
+    // Dijkstra hint paths (via grid)
     PathResult fireboyHint;
     PathResult watergirlHint;
 

@@ -11,7 +11,8 @@
 //  5. QuickSort   – leaderboard sort (larger lists)
 //  6. LinearSearch – gem proximity detection
 //  7. BinarySearch – find player rank in leaderboard
-//  8. BFS          – shortest-path hint system
+//  8. BFS          – shortest-path hint (legacy tile-grid)
+//  9. Graph + Dijk – platform graph + Dijkstra hint pathfinding
 // ================================================================
 
 // ── Limits ───────────────────────────────────────────────────
@@ -111,6 +112,16 @@ struct PathResult {
 
 PathResult bfsFind(int grid[MAP_ROWS][MAP_COLS],
                    int sx, int sy, int gx, int gy);
+
+// ================================================================
+// 9. DIJKSTRA WEIGHTED PATHFINDING (Grid-Based)
+// Replaces BFS and Graph A*. 
+// Finds minimum-cost path on the tile grid. 
+// Provides straight, orthogonal lines for the hint system.
+// ================================================================
+PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
+                            int srcCol, int srcRow,
+                            int dstCol, int dstRow);
 
 // ================================================================
 // 9. PRIORITY QUEUE  (Min-Heap, array-based)
