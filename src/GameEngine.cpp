@@ -43,11 +43,17 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent) {
     gateMapInit(&gateMap);
     cheatInit(&skipCheat, "SKIP");
     historyInit(&history);
+    gemTrailInit(&gemTrail);
+    nearestFbGem = -1; nearestWgGem = -1;
     snapTimer = 0; undoRedoFlash = 0; undoCooldown = 0; lastUndoWasUndo = true;
     state = STATE_MENU; score = 0; lives = 3; elapsed = 0; showHint = false;
     fireboyHint.len = 0; watergirlHint.len = 0;
 }
-GameEngine::~GameEngine() { listFree(&levels); historyFree(&history); }
+GameEngine::~GameEngine() {
+    listFree(&levels);
+    historyFree(&history);
+    gemTrailFree(&gemTrail);
+}
 
 LevelData* GameEngine::currentLevel() {
     return levels.current ? &levels.current->data : nullptr;
@@ -95,6 +101,8 @@ void GameEngine::start() {
     buildEffectiveTileMap();
     // Clear undo history at the start of each level
     historyFree(&history);
+    gemTrailFree(&gemTrail);
+    nearestFbGem = -1; nearestWgGem = -1;
     snapTimer = 0; undoRedoFlash = 0;
     state = STATE_PLAYING;
     emit stateChanged(state);
@@ -210,6 +218,16 @@ void GameEngine::keyPress(int key) {
         }
         break;
     }
+    case Qt::Key_P: {
+        // Prev level (Doubly Linked List navigation)
+        if (listPrev(&levels)) { start(); }
+        break;
+    }
+    case Qt::Key_N: {
+        // Next level (Doubly Linked List navigation)
+        if (listNext(&levels)) { start(); }
+        break;
+    }
     default: break;
     }
 }
@@ -289,6 +307,16 @@ void GameEngine::tick() {
 
     // ── Tick down undo/redo flash ──────────────────────────────
     if (undoRedoFlash > 0) undoRedoFlash -= TICK_MS / 1000.0f;
+
+    // ── Min-Heap nearest gem update (when hint is on) ─────────
+    if (showHint) {
+        nearestFbGem = gemMinHeapFind(lv->gems, lv->gemCount,
+                           fireboy.x,   fireboy.y,   FIREBOY,   effectiveTileMap);
+        nearestWgGem = gemMinHeapFind(lv->gems, lv->gemCount,
+                           watergirl.x, watergirl.y, WATERGIRL, effectiveTileMap);
+    } else {
+        nearestFbGem = nearestWgGem = -1;
+    }
 
     emit frameReady();
 }
@@ -459,6 +487,8 @@ void GameEngine::checkGems() {
             lv->gems[idx].collected = true;
             p->gemsCollected++;
             score += 100;
+            // Append to unified gem trail (chronological order)
+            gemTrailAppend(&gemTrail, idx, p->type);
             // Gem events have priority 2 (lowest urgency)
             GameEvent e; e.type = EVT_GEM_COLLECT; e.priority = 2;
             e.x = lv->gems[idx].x; e.y = lv->gems[idx].y; e.intData = p->type;

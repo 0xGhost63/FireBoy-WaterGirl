@@ -1,1 +1,0 @@
-Level 2 does not display the path upon pressing h

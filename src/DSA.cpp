@@ -94,15 +94,8 @@ void listFree(LevelList* lst) {
 }
 
 // ════════════════════════════════════════════════════════════
-// 4. BUBBLE SORT
+// 4. QUICK SORT  O(n log n)  – used for ALL leaderboard sizes
 // ════════════════════════════════════════════════════════════
-void bubbleSort(ScoreEntry arr[], int n) {
-    for (int i = 0; i < n - 1; i++)
-        for (int j = 0; j < n - i - 1; j++)
-            if (arr[j].score < arr[j+1].score) {
-                ScoreEntry tmp = arr[j]; arr[j] = arr[j+1]; arr[j+1] = tmp;
-            }
-}
 
 // ════════════════════════════════════════════════════════════
 // 5. QUICK SORT
@@ -150,61 +143,6 @@ int binarySearch(ScoreEntry arr[], int n, int score) {
         else hi = mid - 1;
     }
     return lo;
-}
-
-// ════════════════════════════════════════════════════════════
-// 8. BFS PATHFINDING
-// ════════════════════════════════════════════════════════════
-PathResult bfsFind(int grid[MAP_ROWS][MAP_COLS], int sx, int sy, int gx, int gy) {
-    PathResult res; res.len = 0;
-    if (sx < 0 || sy < 0 || gx < 0 || gy < 0) return res;
-
-    bool  visited[MAP_ROWS][MAP_COLS];
-    int   parentX[MAP_ROWS][MAP_COLS];
-    int   parentY[MAP_ROWS][MAP_COLS];
-    int   qx[MAP_ROWS * MAP_COLS], qy[MAP_ROWS * MAP_COLS];
-    int   qFront = 0, qRear = -1, qCount = 0;
-
-    for (int r = 0; r < MAP_ROWS; r++)
-        for (int c = 0; c < MAP_COLS; c++) {
-            visited[r][c] = false; parentX[r][c] = -1; parentY[r][c] = -1;
-        }
-
-    int cap = MAP_ROWS * MAP_COLS;
-    qRear = (qRear + 1) % cap; qx[qRear] = sx; qy[qRear] = sy; qCount++;
-    visited[sy][sx] = true;
-
-    int dx[] = {0,0,1,-1}, dy[] = {1,-1,0,0};
-    bool found = false;
-    while (qCount > 0) {
-        int cx = qx[qFront], cy = qy[qFront];
-        qFront = (qFront + 1) % cap; qCount--;
-        if (cx == gx && cy == gy) { found = true; break; }
-        for (int d = 0; d < 4; d++) {
-            int nx = cx+dx[d], ny = cy+dy[d];
-            if (nx<0||ny<0||nx>=MAP_COLS||ny>=MAP_ROWS) continue;
-            if (visited[ny][nx] || grid[ny][nx] != 0) continue;
-            visited[ny][nx] = true;
-            parentX[ny][nx] = cx; parentY[ny][nx] = cy;
-            qRear = (qRear+1)%cap; qx[qRear]=nx; qy[qRear]=ny; qCount++;
-        }
-    }
-    if (!found) return res;
-
-    int tmpX[MAX_HINT_PATH], tmpY[MAX_HINT_PATH], tLen = 0;
-    int cx = gx, cy = gy;
-    while (!(cx==sx && cy==sy) && tLen < MAX_HINT_PATH) {
-        tmpX[tLen]=cx; tmpY[tLen]=cy; tLen++;
-        int px = parentX[cy][cx], py = parentY[cy][cx];
-        cx=px; cy=py;
-    }
-    tmpX[tLen]=sx; tmpY[tLen]=sy; tLen++;
-    for (int i = 0; i < tLen && i < MAX_HINT_PATH; i++) {
-        res.px[i] = tmpX[tLen-1-i];
-        res.py[i] = tmpY[tLen-1-i];
-    }
-    res.len = tLen;
-    return res;
 }
 
 // ════════════════════════════════════════════════════════════
@@ -295,6 +233,73 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
     }
     res.len = tLen;
     return res;
+}
+
+// ════════════════════════════════════════════════════════════
+// 8. MIN-HEAP – Nearest Gem Finder
+// Builds a min-heap of uncollected gems keyed by squared distance,
+// then pops the root to return the index of the closest gem.
+// ════════════════════════════════════════════════════════════
+struct HeapEntry { float dist; int idx; };
+
+static void heapSwap(HeapEntry a[], int i, int j) {
+    HeapEntry tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+}
+static void heapifyDown(HeapEntry a[], int n, int i) {
+    int s = i, l = 2*i+1, r = 2*i+2;
+    if (l < n && a[l].dist < a[s].dist) s = l;
+    if (r < n && a[r].dist < a[s].dist) s = r;
+    if (s != i) { heapSwap(a, i, s); heapifyDown(a, n, s); }
+}
+
+int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
+                   int grid[MAP_ROWS][MAP_COLS]) {
+    // Convert player pixel pos → tile coord
+    int pCol = (int)(px / TILE_SIZE);
+    int pRow = (int)(py / TILE_SIZE);
+    if (pCol < 0) pCol = 0; if (pCol >= MAP_COLS) pCol = MAP_COLS-1;
+    if (pRow < 0) pRow = 0; if (pRow >= MAP_ROWS) pRow = MAP_ROWS-1;
+
+    HeapEntry heap[MAX_GEMS];
+    int hn = 0;
+    for (int i = 0; i < gemCount && i < MAX_GEMS; i++) {
+        if (gems[i].collected)       continue;
+        if (gems[i].owner != playerType) continue;
+
+        // Gem tile coord
+        int gCol = (int)((gems[i].x + 16) / TILE_SIZE);
+        int gRow = (int)((gems[i].y + 16) / TILE_SIZE);
+        if (gCol < 0) gCol = 0; if (gCol >= MAP_COLS) gCol = MAP_COLS-1;
+        if (gRow < 0) gRow = 0; if (gRow >= MAP_ROWS) gRow = MAP_ROWS-1;
+
+        // DSA: Dijkstra path length = actual traversal cost (ignores walls)
+        PathResult pr = dijkstraGridFind(grid, pCol, pRow, gCol, gRow);
+        float dist = (pr.len > 0) ? (float)pr.len : 1e30f; // unreachable → ∞
+        heap[hn++] = {dist, i};
+    }
+    if (hn == 0) return -1;
+    // Build min-heap: root = gem with shortest actual path
+    for (int i = hn/2 - 1; i >= 0; i--) heapifyDown(heap, hn, i);
+    return heap[0].idx;
+}
+
+// ════════════════════════════════════════════════════════════
+// 12. SINGLY LINKED LIST – Gem Collection Trail
+// Each collected gem is appended; iterated on the win screen.
+// ════════════════════════════════════════════════════════════
+void gemTrailInit(GemTrail* t) {
+    t->head = t->tail = nullptr; t->count = 0;
+}
+void gemTrailAppend(GemTrail* t, int gemIndex, int playerType) {
+    GemTrailNode* node = (GemTrailNode*)malloc(sizeof(GemTrailNode));
+    node->gemIndex = gemIndex; node->playerType = playerType; node->next = nullptr;
+    if (!t->head) t->head = node; else t->tail->next = node;
+    t->tail = node; t->count++;
+}
+void gemTrailFree(GemTrail* t) {
+    GemTrailNode* n = t->head;
+    while (n) { GemTrailNode* nx = n->next; free(n); n = nx; }
+    gemTrailInit(t);
 }
 
 // ════════════════════════════════════════════════════════════

@@ -46,10 +46,16 @@ public:
 
     // DSA: State History (Doubly Linked List – Undo / Redo)
     StateHistory history;
-    float snapTimer;         // counts up; snapshot every 500ms
-    float undoRedoFlash;     // > 0 shows flash overlay
-    float undoCooldown;      // > 0 = block auto-snapshots (set after undo/redo)
-    bool  lastUndoWasUndo;   // true=undo, false=redo (for flash label)
+    float snapTimer;
+    float undoRedoFlash;
+    float undoCooldown;
+    bool  lastUndoWasUndo;
+
+    // DSA: Singly Linked List – Gem Collection Trail (unified, chronological order)
+    GemTrail gemTrail;
+
+    // DSA: Min-Heap – nearest gem index per player (-1 = none)
+    int nearestFbGem, nearestWgGem;
 
     // Cheat code tracker
     CheatTracker skipCheat;

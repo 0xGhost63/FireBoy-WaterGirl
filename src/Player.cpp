@@ -9,8 +9,7 @@ static const float JUMP_VEL = -13.0f;
 
 void playerInit(Player* p, int type, float x, float y) {
     p->type = type;
-    stackInit(&p->history);
-    stackInit(&p->checkpoints);
+    p->spawnX = x; p->spawnY = y;
     playerReset(p, x, y);
 }
 
@@ -25,11 +24,14 @@ void playerReset(Player* p, float x, float y) {
 float playerCenterX(Player* p) { return p->x + PLAYER_W / 2.0f; }
 float playerCenterY(Player* p) { return p->y + PLAYER_H / 2.0f; }
 
-void playerSaveCheckpoint(Player* p) { stackPush(&p->checkpoints, p->x, p->y); }
+// Save current position as the spawn point
+void playerSaveCheckpoint(Player* p) {
+    p->spawnX = p->x; p->spawnY = p->y;
+}
 
+// Restore to spawn point
 bool playerRestoreCheckpoint(Player* p) {
-    if (stackIsEmpty(&p->checkpoints)) return false;
-    stackPop(&p->checkpoints, &p->x, &p->y);
+    p->x = p->spawnX; p->y = p->spawnY;
     p->vx = p->vy = 0; p->dead = false;
     return true;
 }
@@ -102,8 +104,4 @@ void playerUpdate(Player* p, int map[MAP_ROWS][MAP_COLS],
 
     resolveCollisions(p, map);
     resolvePlatforms(p, plats, platCount);
-
-    // DSA Stack: push position every 4 frames for history
-    static int fc = 0;
-    if (++fc % 4 == 0) stackPush(&p->history, p->x, p->y);
 }

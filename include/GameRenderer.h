@@ -27,6 +27,9 @@ private:
     QPixmap pmConveyor;
     QPixmap pmLava, pmWater, pmPoison;
     QPixmap pmUndo, pmRedo;
+    QPixmap pmArrow;        // (kept for compatibility)
+    QPixmap pmFireArrow;    // nearest-gem arrow for Fireboy
+    QPixmap pmWaterArrow;   // nearest-gem arrow for Watergirl
 
     // Viewport scale & offset (letterbox fit)
     float sx, sy;

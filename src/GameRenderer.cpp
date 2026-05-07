@@ -32,6 +32,9 @@ GameRenderer::GameRenderer(GameEngine* e, QWidget* parent)
     pmPoison     = QPixmap("assets/images/poison.png").scaled(64, 64, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     pmUndo       = QPixmap("assets/images/undo.png");
     pmRedo       = QPixmap("assets/images/redo.png");
+    pmArrow      = QPixmap("assets/images/arrow.png");
+    pmFireArrow  = QPixmap("assets/images/fire_arrow.png");
+    pmWaterArrow = QPixmap("assets/images/water_arrow.png");
 
     computeScale();
 }
@@ -72,6 +75,35 @@ void GameRenderer::paintEvent(QPaintEvent*) {
         drawGems(p);
         drawDoors(p);
         if (eng->showHint) drawHints(p);
+
+        // ── Min-Heap + Dijkstra Arrow: nearest REACHABLE gem ────────
+        if (eng->showHint) {
+            LevelData* lvA = eng->currentLevel();
+            if (lvA) {
+                // Dijkstra path length is the heap key – walls and platforms
+                // are accounted for, so the arrow always points to the
+                // nearest gem the player can actually REACH.
+                int fbIdx = gemMinHeapFind(lvA->gems, lvA->gemCount,
+                                eng->fireboy.x,   eng->fireboy.y,
+                                FIREBOY,   eng->effectiveTileMap);
+                int wgIdx = gemMinHeapFind(lvA->gems, lvA->gemCount,
+                                eng->watergirl.x, eng->watergirl.y,
+                                WATERGIRL, eng->effectiveTileMap);
+
+                auto drawArrow = [&](int gemIdx, QPixmap& pm) {
+                    if (gemIdx < 0 || pm.isNull()) return;
+                    Gem& g = lvA->gems[gemIdx];
+                    if (g.collected) return;
+                    int aw = (int)(44 * sx), ah = (int)(44 * sy);
+                    int ax = (int)toSX(g.x + 16.f) - aw / 2;
+                    int ay = (int)toSY(g.y)         - ah - (int)(6 * sy);
+                    p.drawPixmap(QRect(ax, ay, aw, ah), pm);
+                };
+                drawArrow(fbIdx, pmFireArrow);
+                drawArrow(wgIdx, pmWaterArrow);
+            }
+        }
+
         drawPlayer(p, &eng->fireboy);
         drawPlayer(p, &eng->watergirl);
         drawHUD(p);
@@ -452,11 +484,12 @@ void GameRenderer::drawOverlay(QPainter& p) {
     case STATE_PAUSED:
         title="PAUSED"; col=QColor(180,220,255);
         sub="Press Esc or Enter to Resume"; break;
-    case STATE_WIN:
+    case STATE_WIN: {
         if (eng->levels.current && eng->levels.current->next)
-             { title="FIN ! "; sub=QString("Score: %1\nEnter → Next Level").arg(eng->score); }
-        else { title="You Win! ";        sub=QString("Final Score: %1\nR → Restart").arg(eng->score); }
+             { title="Level Clear!"; sub=QString("Score: %1\nEnter \u2192 Next Level   P/N \u2192 Prev/Next").arg(eng->score); }
+        else { title="You Win! ";    sub=QString("Final Score: %1\nR \u2192 Restart").arg(eng->score); }
         col=QColor(80,255,120); break;
+    }
     case STATE_DEAD:
         title="Oh No!"; col=QColor(255,80,80);
         sub=QString("Lives Left: %1\nR → Retry").arg(eng->lives); break;
@@ -470,6 +503,48 @@ void GameRenderer::drawOverlay(QPainter& p) {
     p.drawText(QRectF(area.left(), area.top()+area.height()*0.25, area.width(), area.height()*0.2),
                Qt::AlignCenter, title);
     p.setFont(med); p.setPen(Qt::white);
-    p.drawText(QRectF(area.left(), area.top()+area.height()*0.48, area.width(), area.height()*0.4),
+    p.drawText(QRectF(area.left(), area.top()+area.height()*0.48, area.width(), area.height()*0.3),
                Qt::AlignHCenter|Qt::AlignTop, sub);
+
+    // ── Gem trail: draw actual PNG icons on win screen (chronological) ──
+    if (eng->state == STATE_WIN) {
+        int totalGems = eng->gemTrail.count;
+        if (totalGems > 0) {
+            int iconW = (int)(24 * sx), iconH = (int)(24 * sy);
+            int arrowW = (int)(14 * sx);
+            int totalW = totalGems * iconW + (totalGems - 1) * arrowW;
+            int startX = (int)(area.left() + (area.width() - totalW) / 2);
+            int rowY   = (int)(area.top()  + area.height() * 0.72f);
+
+            QFont arrowFont("Arial", qMax(7, (int)(9 * sy)));
+            p.setFont(arrowFont);
+
+            int drawX = startX;
+            bool first = true;
+            GemTrailNode* n = eng->gemTrail.head;
+            while (n) {
+                if (!first) {
+                    p.setPen(QColor(200, 200, 200, 200));
+                    p.drawText(QRect(drawX, rowY, arrowW, iconH),
+                               Qt::AlignCenter, "\u2192");
+                    drawX += arrowW;
+                }
+                // Pick the correct gem PNG based on who collected it
+                QPixmap& gemPm = (n->playerType == FIREBOY) ? pmGemFire : pmGemWater;
+                if (!gemPm.isNull())
+                    p.drawPixmap(QRect(drawX, rowY, iconW, iconH), gemPm);
+                else {
+                    p.setPen(n->playerType == FIREBOY ? QColor(255,80,30) : QColor(30,140,255));
+                    p.drawText(QRect(drawX, rowY, iconW, iconH), Qt::AlignCenter, "G");
+                }
+                drawX += iconW;
+                first = false;
+                n = n->next;
+            }
+            // Final → door symbol
+            p.setPen(QColor(200, 200, 200, 180));
+            p.drawText(QRect(drawX, rowY, arrowW + iconW, iconH),
+                       Qt::AlignVCenter | Qt::AlignLeft, " \u2192 \U0001F6AA");
+        }
+    }
 }

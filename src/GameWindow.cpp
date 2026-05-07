@@ -200,9 +200,8 @@ void GameWindow::saveScore(const QString& name, int score, int level, float time
         strncpy(e.name, name.toUtf8().constData(), 31); e.name[31]=0;
         e.score = score; e.level = level; e.timeSec = time;
     }
-    // DSA: use QuickSort for larger lists, BubbleSort for small
-    if (scoreCount > 5) quickSort(scores, 0, scoreCount-1);
-    else                bubbleSort(scores, scoreCount);
+    // DSA: QuickSort for all list sizes O(n log n)
+    quickSort(scores, 0, scoreCount - 1);
 
     // Save to file
     QFile f("scores.txt");

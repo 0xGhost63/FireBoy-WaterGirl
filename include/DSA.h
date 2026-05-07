@@ -4,16 +4,18 @@
 // ================================================================
 // DSA.h  –  All Data Structures & Algorithms used in the game
 // ================================================================
-//  1. Stack       – player position history (LIFO)
+//  1. Stack       – (removed from player – see idea #22 in DSA_Ideas.md)
 //  2. Queue       – game event pipeline (FIFO / circular)
-//  3. LinkedList  – level catalogue (doubly linked)
-//  4. BubbleSort  – leaderboard sort (small lists)
-//  5. QuickSort   – leaderboard sort (larger lists)
-//  6. LinearSearch – gem proximity detection
-//  7. BinarySearch – find player rank in leaderboard
-//  8. BFS          – shortest-path hint (legacy tile-grid)
-//  9. Graph + Dijk – platform graph + Dijkstra hint pathfinding
-// 13. StateHistory  – Doubly Linked List Undo/Redo (U = undo, R = redo)
+//  3. LinkedList  – level catalogue (doubly linked) + Undo/Redo
+//  4. QuickSort   – leaderboard sort (all list sizes)
+//  5. LinearSearch– gem proximity detection
+//  6. BinarySearch– find player rank in leaderboard
+//  7. Dijkstra    – grid-based hint pathfinding through gems
+//  8. Priority Queue (Min-Heap) – events + nearest gem finder
+//  9. Hash Map    – O(1) button→gate lookup
+// 10. BST Map     – tile storage & lookup
+// 11. State History (Doubly Linked List) – Undo/Redo
+// 12. Singly Linked List – gem collection trail
 // ================================================================
 
 // ── Limits ───────────────────────────────────────────────────
@@ -22,15 +24,13 @@
 #define MAX_HINT_PATH   400
 
 // ================================================================
-// 1. STACK  (LIFO – Last In, First Out)
-// Used to save player positions for checkpoints / respawn
+// 1. STACK  (kept in codebase but no longer used for player – see DSA_Ideas.md)
 // ================================================================
 struct Stack {
     float xItems[STACK_MAX];
     float yItems[STACK_MAX];
-    int   top;              // -1 means empty
+    int   top;
 };
-
 void  stackInit   (Stack* s);
 bool  stackIsEmpty(Stack* s);
 bool  stackIsFull (Stack* s);
@@ -78,32 +78,22 @@ bool listHasNext(LevelList* lst);
 void listFree   (LevelList* lst);
 
 // ================================================================
-// 4. BUBBLE SORT  O(n²)
-// Sorts leaderboard entries highest-score first (small lists)
-// ================================================================
-void bubbleSort(ScoreEntry arr[], int n);
-
-// ================================================================
-// 5. QUICK SORT  O(n log n)
-// Faster sort used when leaderboard has many entries
+// 4. QUICK SORT  O(n log n)  – used for ALL leaderboard sorts
 // ================================================================
 void quickSort(ScoreEntry arr[], int lo, int hi);
 
 // ================================================================
-// 6. LINEAR SEARCH  O(n)
-// Checks every gem to see if a player is close enough to collect
+// 5. LINEAR SEARCH  O(n)
 // ================================================================
 int linearSearchGem(Gem gems[], int count, float px, float py);
 
 // ================================================================
-// 7. BINARY SEARCH  O(log n)
-// Finds a player's rank in a sorted leaderboard quickly
+// 6. BINARY SEARCH  O(log n)
 // ================================================================
 int binarySearch(ScoreEntry arr[], int n, int score);
 
 // ================================================================
-// 8. BFS PATHFINDING  (Breadth-First Search on tile grid)
-// Returns the shortest safe path from src to dst for hint system
+// 7. DIJKSTRA GRID-BASED PATHFINDING (Hint system)
 // ================================================================
 struct PathResult {
     int px[MAX_HINT_PATH];
@@ -111,18 +101,38 @@ struct PathResult {
     int len;
 };
 
-PathResult bfsFind(int grid[MAP_ROWS][MAP_COLS],
-                   int sx, int sy, int gx, int gy);
-
-// ================================================================
-// 9. DIJKSTRA WEIGHTED PATHFINDING (Grid-Based)
-// Replaces BFS and Graph A*. 
-// Finds minimum-cost path on the tile grid. 
-// Provides straight, orthogonal lines for the hint system.
-// ================================================================
 PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
                             int srcCol, int srcRow,
                             int dstCol, int dstRow);
+
+// ================================================================
+// 8. MIN-HEAP – Nearest Gem Finder
+// Pushes uncollected gems keyed by distance; pops the closest.
+// Returns gem index, or -1 if none reachable.
+// ================================================================
+// grid = effectiveTileMap; Dijkstra path length is used as the heap key
+int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
+                   int grid[MAP_ROWS][MAP_COLS]);
+
+// ================================================================
+// 12. SINGLY LINKED LIST – Gem Collection Trail
+// Appended every time a gem is collected; shown on win screen.
+// ================================================================
+struct GemTrailNode {
+    int   gemIndex;   // index in lv->gems[]
+    int   playerType; // FIREBOY or WATERGIRL
+    GemTrailNode* next;
+};
+
+struct GemTrail {
+    GemTrailNode* head;
+    GemTrailNode* tail;
+    int           count;
+};
+
+void gemTrailInit  (GemTrail* t);
+void gemTrailAppend(GemTrail* t, int gemIndex, int playerType);
+void gemTrailFree  (GemTrail* t);
 
 // ================================================================
 // 9. PRIORITY QUEUE  (Min-Heap, array-based)
