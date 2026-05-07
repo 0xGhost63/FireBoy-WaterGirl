@@ -64,20 +64,19 @@ A core highlight of this project is the custom implementation of classical Data 
 
 ## Data Structures
 
-1. **Stack (Array-based):** Tracks player position history for respawns.
-2. **Circular Queue:** Decouples game events (like win/gem) into a non-blocking pipeline.
-3. **Doubly Linked List:** Connects level sequences and handles State History for the Undo/Redo feature.
-4. **Priority Queue (Min-Heap):** Processes game events by importance (Death > Teleport > Win).
-5. **Hash Map (Direct Address):** Provides O(1) instant lookups for matching Buttons to Gates and pairing Teleport Pads.
-6. **Binary Search Tree (BST):** Stores the tile map sparsely, indexing tiles by flattened grid position.
-7. **Singly Linked List:** Maintains a chronological trail of collected gems for end-of-level statistics.
-8. **Conveyor Queue:** A specialized circular queue that continuously updates moving entities on conveyor belts.
+1. **Circular Queue:** Decouples game events (like win/gem) into a non-blocking pipeline.
+2. **Doubly Linked List:** Connects level sequences and handles State History for the Undo/Redo feature (which replaced the old Stack-based respawn system).
+3. **Priority Queue (Min-Heap):** Processes game events by importance (Death > Teleport > Win).
+4. **Hash Map (Direct Address):** Provides O(1) instant lookups for matching Buttons to Gates and pairing Teleport Pads.
+5. **Binary Search Tree (BST):** Stores the tile map sparsely, indexing tiles by flattened grid position.
+6. **Singly Linked List:** Maintains a chronological trail of collected gems for end-of-level statistics.
+7. **Conveyor Queue:** A specialized circular queue that continuously updates moving entities on conveyor belts.
 
 ## Algorithms
 
-1. **Quick Sort ($O(n \log n)$):** Sorts massive lists of global leaderboard scores via divide-and-conquer.
-2. **Linear Search ($O(n)$):** Checks general proximity collisions between characters and nearby objects.
-3. **Binary Search ($O(\log n)$):** Instantly finds a specific player's rank within the sorted leaderboard.
+1. **Quick Sort (O(n log n)):** Sorts massive lists of global leaderboard scores via divide-and-conquer.
+2. **Linear Search (O(n)):** Checks general proximity collisions between characters and nearby objects.
+3. **Binary Search (O(log n)):** Instantly finds a specific player's rank within the sorted leaderboard.
 4. **Dijkstra's Algorithm:** Calculates the true shortest path across the grid for the hint system, navigating around walls and evaluating zero-cost teleport jumps.
 5. **Min-Heap Key Extraction:** Evaluates all remaining gems by inserting their Dijkstra path-lengths into a Min-Heap to continuously point the hint arrow to the *truly* closest reachable gem.
 ---
