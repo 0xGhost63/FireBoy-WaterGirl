@@ -27,6 +27,9 @@ GameRenderer::GameRenderer(GameEngine* e, QWidget* parent)
     pmGateBlue   = QPixmap("assets/images/blue_gate.png");
     pmGateOrange = QPixmap("assets/images/orange_gate.png");
     pmConveyor   = QPixmap("assets/images/conveyor_small.png");
+    pmLava       = QPixmap("assets/images/lava.png").scaled(64, 64, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    pmWater      = QPixmap("assets/images/water.png").scaled(64, 64, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    pmPoison     = QPixmap("assets/images/poison.png").scaled(64, 64, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     computeScale();
 }
@@ -112,28 +115,39 @@ void GameRenderer::drawTiles(QPainter& p) {
     }
 }
 
-// ── Hazard pools (animated colour fill) ──────────────────────
+// ── Hazard pools (PNG or animated colour fill fallback) ───────
 void GameRenderer::drawHazards(QPainter& p) {
     LevelData* lv = eng->currentLevel(); if (!lv) return;
     static float wave = 0; wave += 0.05f;
     for (int i = 0; i < lv->hazardCount; i++) {
         HazardPool& h = lv->hazards[i];
         QRectF sr(toSX(h.x), toSY(h.y), toSW(h.w), toSH(h.h));
-        QColor top, bot;
-        if      (h.type == TILE_LAVA)   { top=QColor(255,80,0,220);  bot=QColor(180,20,0,255); }
-        else if (h.type == TILE_WATER)  { top=QColor(30,120,255,200);bot=QColor(0,60,180,255); }
-        else                             { top=QColor(80,220,80,200); bot=QColor(30,140,30,255); }
-        QLinearGradient g(sr.topLeft(), sr.bottomLeft());
-        g.setColorAt(0, top); g.setColorAt(1, bot);
-        p.fillRect(sr, g);
-        // Wave lines
-        p.setPen(QPen(top.lighter(140), 1.5f));
-        for (int w = 0; w < 3; w++) {
-            float yy = sr.top() + sr.height() * (0.2f + 0.3f*w);
-            QPainterPath wp; wp.moveTo(sr.left(), yy);
-            for (float x = sr.left(); x < sr.right(); x += 8)
-                wp.lineTo(x, yy + sinf((x-sr.left())*0.1f + wave + w)*3*sy);
-            p.drawPath(wp);
+
+        QPixmap* pm = nullptr;
+        if (h.type == TILE_LAVA) pm = &pmLava;
+        else if (h.type == TILE_WATER) pm = &pmWater;
+        else if (h.type == TILE_POISON) pm = &pmPoison;
+
+        if (pm && !pm->isNull()) {
+            p.drawTiledPixmap(sr.toRect(), *pm);
+        } else {
+            // Fallback gradient and waves
+            QColor top, bot;
+            if      (h.type == TILE_LAVA)   { top=QColor(255,80,0,220);  bot=QColor(180,20,0,255); }
+            else if (h.type == TILE_WATER)  { top=QColor(30,120,255,200);bot=QColor(0,60,180,255); }
+            else                             { top=QColor(80,220,80,200); bot=QColor(30,140,30,255); }
+            QLinearGradient g(sr.topLeft(), sr.bottomLeft());
+            g.setColorAt(0, top); g.setColorAt(1, bot);
+            p.fillRect(sr, g);
+            // Wave lines
+            p.setPen(QPen(top.lighter(140), 1.5f));
+            for (int w = 0; w < 3; w++) {
+                float yy = sr.top() + sr.height() * (0.2f + 0.3f*w);
+                QPainterPath wp; wp.moveTo(sr.left(), yy);
+                for (float x = sr.left(); x < sr.right(); x += 8)
+                    wp.lineTo(x, yy + sinf((x-sr.left())*0.1f + wave + w)*3*sy);
+                p.drawPath(wp);
+            }
         }
     }
 }
