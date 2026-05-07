@@ -5,6 +5,18 @@ Welcome to the C++ desktop port of **Fireboy & Watergirl**, deeply inspired by t
 
 ---
 
+## Screenshots
+
+
+
+<p align="center">
+  <img src="assets/images/splash.png.png" alt="Splash Screen" width="400" />
+  <img src="assets/images/SS_Name.png" alt="Name Screen" width="400" />
+    <img src="assets/images/SS_G1.png" alt="Gameplay Screenshot 1" width="400" />
+  <img src="assets/images/SS_G2.png" alt="Gameplay Screenshot 2" width="400" />
+</p>
+
+---
 ## Folder Structure & Main Functionality
 
 The codebase is organized cleanly to separate logic, rendering, data structures, and assets:
@@ -48,16 +60,29 @@ Here is a quick breakdown of what every major file in the project does:
 
 ## Data Structures and Algorithms (DSA) Usage
 
-A core highlight of this project is the custom implementation of classical Data Structures and Algorithms directly into the game's mechanics :
+A core highlight of this project is the custom implementation of classical Data Structures and Algorithms directly into the game's mechanics:
 
-*   **Stacks (LIFO):** Used for keeping track of the player's position history.
-*   **Queues (FIFO) & Priority Queues:** Used for an event buffer pipeline, ensuring that game events (like opening gates, collecting gems, and dying) execute in the correct order based on priority.
-*   **Doubly Linked Lists:** Maintains a chained catalogue of all playable levels for easy forward/backward traversal.
-*   **Binary Search Trees (BST):** Used for storing the sparse 2D map grids to heavily optimize collision detection and tile lookups. A secondary BST is also used to automatically sort the highscore leaderboard upon insertion!
-*   **Breadth-First Search (BFS):** Implemented for pathfinding on the tile grid to find the shortest, safest path from a starting point to an objective (Hint System).
-*   **Sorting & Searching:** Includes `Bubble Sort` and `Quick Sort` for small and large leaderboard management, `Binary Search` for extremely fast rank lookups, and `Linear Search` for real-time proximity-based gem collection.
+## Data Structures
 
+1. **Stack (Array-based):** Tracks player position history for respawns.
+2. **Circular Queue:** Decouples game events (like win/gem) into a non-blocking pipeline.
+3. **Doubly Linked List:** Connects level sequences and handles State History for the Undo/Redo feature.
+4. **Priority Queue (Min-Heap):** Processes game events by importance (Death > Teleport > Win).
+5. **Hash Map (Direct Address):** Provides O(1) instant lookups for matching Buttons to Gates and pairing Teleport Pads.
+6. **Binary Search Tree (BST):** Stores the tile map sparsely, indexing tiles by flattened grid position.
+7. **Singly Linked List:** Maintains a chronological trail of collected gems for end-of-level statistics.
+8. **Conveyor Queue:** A specialized circular queue that continuously updates moving entities on conveyor belts.
+
+## Algorithms
+
+1. **Quick Sort ($O(n \log n)$):** Sorts massive lists of global leaderboard scores via divide-and-conquer.
+2. **Linear Search ($O(n)$):** Checks general proximity collisions between characters and nearby objects.
+3. **Binary Search ($O(\log n)$):** Instantly finds a specific player's rank within the sorted leaderboard.
+4. **Dijkstra's Algorithm:** Calculates the true shortest path across the grid for the hint system, navigating around walls and evaluating zero-cost teleport jumps.
+5. **Min-Heap Key Extraction:** Evaluates all remaining gems by inserting their Dijkstra path-lengths into a Min-Heap to continuously point the hint arrow to the *truly* closest reachable gem.
 ---
+
+
 
 ## How to Set Up and Play
 

@@ -103,7 +103,8 @@ struct PathResult {
 
 PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
                             int srcCol, int srcRow,
-                            int dstCol, int dstRow);
+                            int dstCol, int dstRow,
+                            int teleportEdges[MAP_ROWS][MAP_COLS][2] = nullptr);
 
 // ================================================================
 // 8. MIN-HEAP – Nearest Gem Finder
@@ -112,7 +113,8 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
 // ================================================================
 // grid = effectiveTileMap; Dijkstra path length is used as the heap key
 int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
-                   int grid[MAP_ROWS][MAP_COLS]);
+                   int grid[MAP_ROWS][MAP_COLS],
+                   int teleportEdges[MAP_ROWS][MAP_COLS][2] = nullptr);
 
 // ================================================================
 // 12. SINGLY LINKED LIST – Gem Collection Trail
@@ -156,6 +158,7 @@ GameEvent pqPop    (PriorityQueue* pq);  // returns lowest-priority-value first
 // Maps gate ID → gate index in O(1). Faster than linear scan
 // when a button is pressed and we need to find the right gate.
 // ================================================================
+// ================================================================
 struct GateHashMap {
     int table[MAX_GATES];   // table[gateId] = index in lv->gates[]
     int size;
@@ -164,6 +167,19 @@ struct GateHashMap {
 void gateMapInit  (GateHashMap* m);
 void gateMapInsert(GateHashMap* m, int gateId, int index);
 int  gateMapGet   (GateHashMap* m, int gateId); // returns -1 if not found
+
+// ================================================================
+// 10.b HASH MAP (Direct Addressing) – Teleport Pad pairs
+// Fast O(1) lookup: teleport pad ID -> index in lv->pads[] array.
+// ================================================================
+struct TeleportHashMap {
+    int table[MAX_TELEPORTS]; // table[padId] = index in lv->pads[]
+    int size;
+};
+
+void teleportMapInit  (TeleportHashMap* m);
+void teleportMapInsert(TeleportHashMap* m, int padId, int index);
+int  teleportMapGet   (TeleportHashMap* m, int padId); // returns -1 if not found
 
 // ================================================================
 // 11. CONVEYOR QUEUE (FIFO – Circular Array for Conveyor Belt)

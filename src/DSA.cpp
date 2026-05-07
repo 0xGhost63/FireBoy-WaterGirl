@@ -150,7 +150,8 @@ int binarySearch(ScoreEntry arr[], int n, int score) {
 // ════════════════════════════════════════════════════════════
 PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
                             int srcCol, int srcRow,
-                            int dstCol, int dstRow) {
+                            int dstCol, int dstRow,
+                            int teleportEdges[MAP_ROWS][MAP_COLS][2]) {
     PathResult res; res.len = 0;
     if (srcCol < 0 || srcRow < 0 || dstCol < 0 || dstRow < 0) return res;
     if (srcCol >= MAP_COLS || srcRow >= MAP_ROWS || dstCol >= MAP_COLS || dstRow >= MAP_ROWS) return res;
@@ -212,6 +213,20 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
                 parentY[ny][nx] = cy;
             }
         }
+        
+        // ── DSA: Zero-cost Teleport Edge ────────────────────────
+        if (teleportEdges && teleportEdges[cy][cx][0] != -1) {
+            int tx = teleportEdges[cy][cx][0];
+            int ty = teleportEdges[cy][cx][1];
+            if (!closed[ty][tx]) {
+                float alt = dist[cy][cx]; // zero cost to warp
+                if (alt < dist[ty][tx]) {
+                    dist[ty][tx] = alt;
+                    parentX[ty][tx] = cx;
+                    parentY[ty][tx] = cy;
+                }
+            }
+        }
     }
 
     if (!found) return res;
@@ -253,7 +268,8 @@ static void heapifyDown(HeapEntry a[], int n, int i) {
 }
 
 int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
-                   int grid[MAP_ROWS][MAP_COLS]) {
+                   int grid[MAP_ROWS][MAP_COLS],
+                   int teleportEdges[MAP_ROWS][MAP_COLS][2]) {
     // Convert player pixel pos → tile coord
     int pCol = (int)(px / TILE_SIZE);
     int pRow = (int)(py / TILE_SIZE);
@@ -272,8 +288,8 @@ int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
         if (gCol < 0) gCol = 0; if (gCol >= MAP_COLS) gCol = MAP_COLS-1;
         if (gRow < 0) gRow = 0; if (gRow >= MAP_ROWS) gRow = MAP_ROWS-1;
 
-        // DSA: Dijkstra path length = actual traversal cost (ignores walls)
-        PathResult pr = dijkstraGridFind(grid, pCol, pRow, gCol, gRow);
+        // DSA: Dijkstra path length = actual traversal cost (ignores walls, uses teleporters)
+        PathResult pr = dijkstraGridFind(grid, pCol, pRow, gCol, gRow, teleportEdges);
         float dist = (pr.len > 0) ? (float)pr.len : 1e30f; // unreachable → ∞
         heap[hn++] = {dist, i};
     }
@@ -359,6 +375,27 @@ void gateMapInsert(GateHashMap* m, int gateId, int index) {
 
 int gateMapGet(GateHashMap* m, int gateId) {
     if (gateId >= 0 && gateId < MAX_GATES) return m->table[gateId];
+    return -1;
+}
+
+// ════════════════════════════════════════════════════════════
+// 10.b TELEPORT HASH MAP (Direct-Address Table)
+// Fast lookup of teleport pads by ID.
+// ════════════════════════════════════════════════════════════
+void teleportMapInit(TeleportHashMap* m) {
+    m->size = 0;
+    for (int i = 0; i < MAX_TELEPORTS; i++) m->table[i] = -1;
+}
+
+void teleportMapInsert(TeleportHashMap* m, int padId, int index) {
+    if (padId >= 0 && padId < MAX_TELEPORTS) {
+        m->table[padId] = index;
+        m->size++;
+    }
+}
+
+int teleportMapGet(TeleportHashMap* m, int padId) {
+    if (padId >= 0 && padId < MAX_TELEPORTS) return m->table[padId];
     return -1;
 }
 

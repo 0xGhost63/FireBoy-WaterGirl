@@ -88,6 +88,7 @@ LevelData makeLevel1() {
 
     lv.platformCount = 0;
     lv.conveyorCount = 0;
+    lv.teleportCount = 0;
     return lv;
 }
 
@@ -169,6 +170,7 @@ LevelData makeLevel2() {
     lv.hazards[15] = {15*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
 
     lv.platformCount = 0;
+    lv.teleportCount = 0;
     return lv;
 }
 
@@ -251,6 +253,70 @@ LevelData makeLevel3() {
     lv.hazards[11] = {15*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
     lv.hazards[12] = {16*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
 
+    lv.platformCount = 0;
+    lv.teleportCount = 0;
+    return lv;
+}
+/*
+O(1) Hash Map: TeleportHashMap matches pad A directly to pad B instantly.
+Dijkstra Integration: dijkstraGridFind now views teleporter pairs as zero-cost graph edges, so the nearest-gem Hint Arrows will automatically point through the portals if the gem is closer on the other side!
+Undo/Redo Stack: Integrated with the historyPush stack.
+*/
+LevelData makeLevel4() {
+    LevelData lv;
+    lv.num = 4;
+    strcpy(lv.name, "Teleport Test Chamber");
+    lv.bgStyle = 0; // Forest
+
+    int layout[MAP_ROWS][MAP_COLS] = {
+        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,S,S,S,S,E,E,E,E,S,E,E,E,E,E,S,S,S,S,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,S,S,S,S,E,E,E,E,S,E,E,E,E,E,S,S,S,S,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
+        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},
+        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S}
+    };
+    lv.tileTree.root = nullptr;
+    for (int r = 0; r < MAP_ROWS; r++) {
+        for (int c = 0; c < MAP_COLS; c++) {
+            if (layout[r][c] != E) {
+                bstInsert(&lv.tileTree, r, c, layout[r][c]);
+            }
+        }
+    }
+
+    // Players start on left side
+    lv.fireboyStartX   = 2*TILE_SIZE; lv.fireboyStartY   = 14*TILE_SIZE - PLAYER_H;
+    lv.watergirlStartX = 4*TILE_SIZE; lv.watergirlStartY = 14*TILE_SIZE - PLAYER_H;
+
+    // Doors on right side
+    lv.doors[0] = {16*TILE_SIZE, 14*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, FIREBOY, false};
+    lv.doors[1] = {12*TILE_SIZE, 14*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, WATERGIRL, false};
+
+    lv.gemCount = 2;
+    lv.gems[0] = {15*TILE_SIZE+8, 11*TILE_SIZE+8, FIREBOY, false, 0.0f};
+    lv.gems[1] = {12*TILE_SIZE+8, 11*TILE_SIZE+8, WATERGIRL, false, 0.0f};
+
+    // Teleporters! 
+    // Pad A (Left) <-> Pad B (Right)
+    lv.teleportCount = 2;
+    lv.pads[0] = {6*TILE_SIZE, 13*TILE_SIZE, 0, 1, 0.0f}; // id=0, partner=1
+    lv.pads[1] = {10*TILE_SIZE, 13*TILE_SIZE, 1, 0, 0.0f}; // id=1, partner=0
+
+    lv.conveyorCount = 0;
+    lv.buttonCount = 0;
+    lv.gateCount = 0;
+    lv.hazardCount = 0;
     lv.platformCount = 0;
     return lv;
 }

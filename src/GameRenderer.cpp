@@ -33,6 +33,7 @@ GameRenderer::GameRenderer(GameEngine* e, QWidget* parent)
     pmUndo       = QPixmap("assets/images/undo.png");
     pmRedo       = QPixmap("assets/images/redo.png");
     pmArrow      = QPixmap("assets/images/arrow.png");
+    pmTeleport   = QPixmap("assets/images/teleport.png");
     pmFireArrow  = QPixmap("assets/images/fire_arrow.png");
     pmWaterArrow = QPixmap("assets/images/water_arrow.png");
 
@@ -71,6 +72,21 @@ void GameRenderer::paintEvent(QPaintEvent*) {
         drawHazards(p);
         drawConveyors(p);
         drawPlatforms(p);
+        
+        // Draw Teleport Pads
+        for (int i = 0; i < lv->teleportCount; i++) {
+            TeleportPad& pad = lv->pads[i];
+            int px = toSX(pad.x), py = toSY(pad.y);
+            int pw = (int)(TILE_SIZE * sx), ph = (int)(TILE_SIZE * sy);
+            if (!pmTeleport.isNull()) {
+                p.drawPixmap(QRect(px, py, pw, ph), pmTeleport);
+            } else {
+                p.setBrush(QColor(150, 0, 255, 150));
+                p.setPen(Qt::white);
+                p.drawEllipse(px, py, pw, ph);
+            }
+        }
+        
         drawButtons(p);
         drawGems(p);
         drawDoors(p);

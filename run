@@ -6,12 +6,12 @@ cd "$(dirname "$0")"
 
 MOC=$(pkg-config --variable=host_bins Qt5Core)/moc
 
-echo "🔨 Generating MOC (step 1 of 2)..."
+echo "Generating MOC (step 1 of 2)..."
 # Run moc on just the class declarations by pre-processing the file
 "$MOC" leveleditor.cpp -o build/moc/leveleditor_moc.cpp \
     $(pkg-config --cflags-only-I Qt5Widgets Qt5Gui Qt5Core)
 
-echo "🔨 Compiling level editor (step 2 of 2)..."
+echo "Compiling level editor (step 2 of 2)..."
 g++ -std=c++17 -O2 \
     $(pkg-config --cflags Qt5Widgets Qt5Gui Qt5Core) \
     -fPIC \

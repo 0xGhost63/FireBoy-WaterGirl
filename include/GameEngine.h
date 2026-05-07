@@ -37,8 +37,12 @@ public:
     // DSA: Priority Queue for events (death > win > gem)
     PriorityQueue eventQueue;
 
-    // DSA: Gate Hash Map for O(1) button→gate lookup
-    GateHashMap gateMap;
+    // DSA: Hash Maps (Direct Addressing)
+    GateHashMap     gateMap;
+    TeleportHashMap teleportMap;
+
+    int effectiveTileMap[MAP_ROWS][MAP_COLS];
+    int teleportEdges[MAP_ROWS][MAP_COLS][2]; // [0]=col, [1]=row of partner
 
     // Dijkstra hint paths (via grid)
     PathResult fireboyHint;
@@ -61,7 +65,7 @@ public:
     CheatTracker skipCheat;
 
     // Effective tilemap (base tiles + closed gates overlaid)
-    int effectiveTileMap[MAP_ROWS][MAP_COLS];
+
 
     LevelData* currentLevel();
 
@@ -78,12 +82,15 @@ private:
 
     void buildEffectiveTileMap();
     void rebuildGateMap();
+    void rebuildTeleportMap();
     void checkButtons();
+    void checkConveyors();
+    void checkTeleports(Player* p);
+    void applyTeleport(int playerType, int destPadIndex);
     void checkHazards();
     void checkGems();
     void checkDoors();
     void updatePlatforms();
-    void updateConveyors();
     void updateConveyorTiles();
     void processEvents();
     void computeHints();

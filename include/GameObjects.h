@@ -27,6 +27,7 @@ using namespace std;
 #define EVT_PLAYER_DEAD    2
 #define EVT_LEVEL_COMPLETE 3
 #define EVT_GATE_TOGGLE    4
+#define EVT_TELEPORT       5
 
 // ── Map & size constants ─────────────────────────────────────
 #define TILE_SIZE     40
@@ -41,6 +42,7 @@ using namespace std;
 #define MAX_CONVEYORS 50
 #define CONVEYOR_QUEUE_MAX 8
 #define MAX_GATES     20
+#define MAX_TELEPORTS  8   // max teleport pads per level (pairs)
 #define MAX_SCORES    10
 #define PLAYER_W      28
 #define PLAYER_H      40
@@ -81,6 +83,16 @@ struct Gate {
     float x, y, w, h;   // occupies tile-aligned rectangle
     bool  open;          // current state
     float openAnim;      // 0.0 – 1.0 slide animation progress
+};
+
+// ── DSA: TeleportPad (Hash Map lookup by id) ─────────────────
+// Pairs of pads warp a player from one to its partner.
+// Uses TeleportMap (direct-address hash) for O(1) partner lookup.
+struct TeleportPad {
+    float x, y;          // world-pixel top-left (tile-aligned)
+    int   id;            // unique pad ID (used as hash key)
+    int   partnerId;     // ID of the destination pad
+    float cooldown;      // seconds before re-trigger (anti-bounce)
 };
 
 struct MovingPlatform {
@@ -162,6 +174,10 @@ struct LevelData {
     int            buttonCount;
     Gate           gates[MAX_GATES];
     int            gateCount;
+
+    // DSA: TeleportPad – Hash Map-based portal pairs
+    TeleportPad    pads[MAX_TELEPORTS];
+    int            teleportCount;
 
     int bgStyle;  // 0=forest  1=cave  2=ruins
 };

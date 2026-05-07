@@ -41,6 +41,8 @@
 #define TILE_BTN_1      41
 #define TILE_GATE_0     50
 #define TILE_GATE_1     51
+#define TILE_TELEPORT_0 60
+#define TILE_TELEPORT_1 61
 #define TILE_SPAWN_FB   60
 #define TILE_SPAWN_WG   61
 
@@ -64,6 +66,8 @@ static QColor tileColor(int t) {
         case TILE_BTN_1: return QColor(220, 120, 20);
         case TILE_GATE_0: return QColor(40, 140, 220, 150);
         case TILE_GATE_1: return QColor(220, 120, 20, 150);
+        case TILE_TELEPORT_0: return QColor(150, 0, 255);
+        case TILE_TELEPORT_1: return QColor(150, 0, 255);
         default:          return QColor(25, 25, 35);
     }
 }
@@ -84,6 +88,8 @@ static const char* tileName(int t) {
         case TILE_BTN_1: return "BUTTON ORANGE";
         case TILE_GATE_0: return "GATE BLUE";
         case TILE_GATE_1: return "GATE ORANGE";
+        case TILE_TELEPORT_0: return "TELEPORT A";
+        case TILE_TELEPORT_1: return "TELEPORT B";
         default: return "EMPTY";
     }
 }
@@ -174,8 +180,8 @@ public:
         out += QString("    lv.fireboyStartX   = %1*TILE_SIZE; lv.fireboyStartY   = %2*TILE_SIZE - PLAYER_H;\n").arg(fbCol).arg(fbRow);
         out += QString("    lv.watergirlStartX = %1*TILE_SIZE; lv.watergirlStartY = %2*TILE_SIZE - PLAYER_H;\n\n").arg(wgCol).arg(wgRow);
 
-        int gemCount=0, convCount=0, btnCount=0, gateCount=0, hazardCount=0;
-        QString gems, convs, btns, gates, hazards;
+        int gemCount=0, convCount=0, btnCount=0, gateCount=0, hazardCount=0, teleportCount=0;
+        QString gems, convs, btns, gates, hazards, teleports;
         
         // Find doors
         int dFbX=1, dFbY=1, dWgX=3, dWgY=1;
@@ -184,11 +190,12 @@ public:
                 int t = grid[r][c];
                 if (t == TILE_GEM_FB) gems += QString("    lv.gems[%1] = {%2*TILE_SIZE+8, %3*TILE_SIZE+8, FIREBOY, false, 0.0f};\n").arg(gemCount++).arg(c).arg(r);
                 if (t == TILE_GEM_WG) gems += QString("    lv.gems[%1] = {%2*TILE_SIZE+8, %3*TILE_SIZE+8, WATERGIRL, false, 0.0f};\n").arg(gemCount++).arg(c).arg(r);
-                // Conveyors are now tilemap-native (R/Q) - no separate array needed
                 if (t == TILE_BTN_0) btns += QString("    lv.buttons[%1] = {%2*TILE_SIZE-6, (%3+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};\n").arg(btnCount++).arg(c).arg(r);
                 if (t == TILE_BTN_1) btns += QString("    lv.buttons[%1] = {%2*TILE_SIZE-6, (%3+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 1, false};\n").arg(btnCount++).arg(c).arg(r);
                 if (t == TILE_GATE_0) gates += QString("    lv.gates[%1] = {0, %2*TILE_SIZE, %3*TILE_SIZE, TILE_SIZE, TILE_SIZE*%4, false, 0.0f};\n").arg(gateCount++).arg(c).arg(r).arg(gateHeight);
                 if (t == TILE_GATE_1) gates += QString("    lv.gates[%1] = {1, %2*TILE_SIZE, %3*TILE_SIZE, TILE_SIZE, TILE_SIZE*%4, false, 0.0f};\n").arg(gateCount++).arg(c).arg(r).arg(gateHeight);
+                if (t == TILE_TELEPORT_0) teleports += QString("    lv.pads[%1] = {%2*TILE_SIZE, %3*TILE_SIZE, 0, 1, 0.0f};\n").arg(teleportCount++).arg(c).arg(r);
+                if (t == TILE_TELEPORT_1) teleports += QString("    lv.pads[%1] = {%2*TILE_SIZE, %3*TILE_SIZE, 1, 0, 0.0f};\n").arg(teleportCount++).arg(c).arg(r);
                 if (t == TILE_DOOR_FB) { dFbX = c; dFbY = r; }
                 if (t == TILE_DOOR_WG) { dWgX = c; dWgY = r; }
                 
@@ -206,6 +213,7 @@ public:
         out += "    lv.conveyorCount = 0;\n";
         out += QString("    lv.buttonCount = %1;\n").arg(btnCount) + btns + "\n";
         out += QString("    lv.gateCount = %1;\n").arg(gateCount) + gates + "\n";
+        out += QString("    lv.teleportCount = %1;\n").arg(teleportCount) + teleports + "\n";
         out += QString("    lv.hazardCount = %1;\n").arg(hazardCount) + hazards + "\n";
         out += "    lv.platformCount = 0;\n";
         out += "    return lv;\n}\n";
@@ -240,12 +248,13 @@ protected:
                     int h = gateHeight;
                     QRect gateRect(c*TILE_PX, r*TILE_PX, TILE_PX, h*TILE_PX);
                     p.fillRect(gateRect, (t == TILE_GATE_0) ? QColor(40,140,220, 150) : QColor(220,120,20, 150));
+                    p.drawText(cell, Qt::AlignCenter, (t == TILE_GATE_0) ? "G0" : "G1");
                 }
                 
                 if (t == TILE_BTN_0) p.drawText(cell, Qt::AlignCenter, "B0");
                 if (t == TILE_BTN_1) p.drawText(cell, Qt::AlignCenter, "B1");
-                if (t == TILE_GATE_0) p.drawText(cell, Qt::AlignCenter, "G0");
-                if (t == TILE_GATE_1) p.drawText(cell, Qt::AlignCenter, "G1");
+                if (t == TILE_TELEPORT_0) p.drawText(cell, Qt::AlignCenter, "TP0");
+                if (t == TILE_TELEPORT_1) p.drawText(cell, Qt::AlignCenter, "TP1");
 
                 if (r == fbRow && c == fbCol) {
                     p.fillRect(cell.adjusted(4,4,-4,-4), QColor(255,80,20,200));
@@ -326,6 +335,8 @@ public:
         tileCombo->addItem("Button Orange (1)", TILE_BTN_1);
         tileCombo->addItem("Gate Blue (0)", TILE_GATE_0);
         tileCombo->addItem("Gate Orange (1)", TILE_GATE_1);
+        tileCombo->addItem("Teleport Pad A (0)", TILE_TELEPORT_0);
+        tileCombo->addItem("Teleport Pad B (1)", TILE_TELEPORT_1);
         tileCombo->insertSeparator(tileCombo->count());
         tileCombo->addItem("Set Fireboy Spawn", TILE_SPAWN_FB);
         tileCombo->addItem("Set Watergirl Spawn", TILE_SPAWN_WG);

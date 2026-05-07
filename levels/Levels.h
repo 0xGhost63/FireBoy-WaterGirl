@@ -18,3 +18,4 @@
 LevelData makeLevel1();
 LevelData makeLevel2();
 LevelData makeLevel3();
+LevelData makeLevel4();

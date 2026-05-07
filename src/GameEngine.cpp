@@ -17,6 +17,7 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent) {
     listAppend(&levels, makeLevel1());
     listAppend(&levels, makeLevel2());
     listAppend(&levels, makeLevel3());
+    listAppend(&levels, makeLevel4());
 
     sndMaleJump = new QSoundEffect(this);
     sndMaleJump->setSource(QUrl("qrc:/sounds/male_jump.wav"));
@@ -66,6 +67,13 @@ void GameEngine::rebuildGateMap() {
         gateMapInsert(&gateMap, lv->gates[i].id, i);
 }
 
+void GameEngine::rebuildTeleportMap() {
+    teleportMapInit(&teleportMap);
+    LevelData* lv = currentLevel(); if (!lv) return;
+    for (int i = 0; i < lv->teleportCount; i++)
+        teleportMapInsert(&teleportMap, lv->pads[i].id, i);
+}
+
 // Build effective tilemap: base tiles + closed gates overlaid as SOLID
 void GameEngine::buildEffectiveTileMap() {
     LevelData* lv = currentLevel(); if (!lv) return;
@@ -85,6 +93,30 @@ void GameEngine::buildEffectiveTileMap() {
             for (int c = c0; c <= c1 && c < MAP_COLS; c++)
                 effectiveTileMap[r][c] = TILE_SOLID;
     }
+
+    // Initialize teleportEdges to -1 (no teleport)
+    for (int r = 0; r < MAP_ROWS; r++) {
+        for (int c = 0; c < MAP_COLS; c++) {
+            teleportEdges[r][c][0] = -1;
+            teleportEdges[r][c][1] = -1;
+        }
+    }
+    // Populate teleportEdges for each pad to point to its partner
+    for (int i = 0; i < lv->teleportCount; i++) {
+        TeleportPad& pad = lv->pads[i];
+        int partnerIdx = teleportMapGet(&teleportMap, pad.partnerId);
+        if (partnerIdx >= 0) {
+            TeleportPad& partner = lv->pads[partnerIdx];
+            int cx = (int)(pad.x / TILE_SIZE);
+            int cy = (int)(pad.y / TILE_SIZE);
+            int px = (int)(partner.x / TILE_SIZE);
+            int py = (int)(partner.y / TILE_SIZE);
+            if (cx >= 0 && cx < MAP_COLS && cy >= 0 && cy < MAP_ROWS) {
+                teleportEdges[cy][cx][0] = px;
+                teleportEdges[cy][cx][1] = py;
+            }
+        }
+    }
 }
 
 void GameEngine::start() {
@@ -96,8 +128,10 @@ void GameEngine::start() {
     for (int i = 0; i < lv->gateCount;   i++) { lv->gates[i].open = false; lv->gates[i].openAnim = 0; }
     for (int i = 0; i < lv->buttonCount; i++) lv->buttons[i].pressed = false;
     for (int i = 0; i < lv->conveyorCount; i++) conveyorQueueInit(&lv->conveyors[i].queue);
+    for (int i = 0; i < lv->teleportCount; i++) lv->pads[i].cooldown = 0.0f;
     score = 0; lives = 3; elapsed = 0;
     rebuildGateMap();
+    rebuildTeleportMap();
     buildEffectiveTileMap();
     // Clear undo history at the start of each level
     historyFree(&history);
@@ -251,7 +285,7 @@ void GameEngine::tick() {
     buildEffectiveTileMap();
 
     updatePlatforms();
-    updateConveyors();
+    checkConveyors();
     updateConveyorTiles();
 
     bool fbJumping = fireboy.jumpWanted && fireboy.onGround;
@@ -263,6 +297,8 @@ void GameEngine::tick() {
     if (fbJumping) sndMaleJump->play();
     if (wgJumping) sndFemaleJump->play();
 
+    checkTeleports(&fireboy);
+    checkTeleports(&watergirl);
     checkHazards();
     checkGems();
     checkDoors();
@@ -311,9 +347,9 @@ void GameEngine::tick() {
     // ── Min-Heap nearest gem update (when hint is on) ─────────
     if (showHint) {
         nearestFbGem = gemMinHeapFind(lv->gems, lv->gemCount,
-                           fireboy.x,   fireboy.y,   FIREBOY,   effectiveTileMap);
+                           fireboy.x,   fireboy.y,   FIREBOY,   effectiveTileMap, teleportEdges);
         nearestWgGem = gemMinHeapFind(lv->gems, lv->gemCount,
-                           watergirl.x, watergirl.y, WATERGIRL, effectiveTileMap);
+                           watergirl.x, watergirl.y, WATERGIRL, effectiveTileMap, teleportEdges);
     } else {
         nearestFbGem = nearestWgGem = -1;
     }
@@ -369,49 +405,34 @@ void GameEngine::updatePlatforms() {
 }
 
 // ── Conveyor Belt update (Queue DSA) ──────────────────────────
-void GameEngine::updateConveyors() {
+void GameEngine::checkConveyors() {
     LevelData* lv = currentLevel(); if (!lv) return;
     for (int i = 0; i < lv->conveyorCount; i++) {
-        ConveyorBelt& belt = lv->conveyors[i];
-
-        // Clear the queue each tick and re-detect who's on the belt
-        conveyorQueueInit(&belt.queue);
-
-        // Check if Fireboy is on this conveyor belt
-        if (!fireboy.dead) {
-            bool fbOn = (fireboy.x + PLAYER_W > belt.x) && (fireboy.x < belt.x + belt.w) &&
-                        (fireboy.y + PLAYER_H > belt.y) && (fireboy.y < belt.y + belt.h);
-            if (fbOn) {
-                ConveyorItem item; item.id = 0; item.x = fireboy.x; item.y = fireboy.y;
-                conveyorQueueEnqueue(&belt.queue, item);
+        ConveyorBelt& b = lv->conveyors[i];
+        
+        // Push players onto queue if standing on belt
+        auto checkOnBelt = [&](Player* p) {
+            if (p->y + PLAYER_H >= b.y && p->y + PLAYER_H <= b.y + b.h + 2) {
+                if (p->x + PLAYER_W > b.x && p->x < b.x + b.w) {
+                    if (!conveyorQueueFull(&b.queue)) {
+                        ConveyorItem item = { p->type, p->x, p->y };
+                        conveyorQueueEnqueue(&b.queue, item);
+                    }
+                }
             }
-        }
-
-        // Check if Watergirl is on this conveyor belt
-        if (!watergirl.dead) {
-            bool wgOn = (watergirl.x + PLAYER_W > belt.x) && (watergirl.x < belt.x + belt.w) &&
-                        (watergirl.y + PLAYER_H > belt.y) && (watergirl.y < belt.y + belt.h);
-            if (wgOn) {
-                ConveyorItem item; item.id = 1; item.x = watergirl.x; item.y = watergirl.y;
-                conveyorQueueEnqueue(&belt.queue, item);
-            }
-        }
-
-        // Process the queue: dequeue → move → enqueue back
-        int count = belt.queue.count;
-        for (int j = 0; j < count; j++) {
-            ConveyorItem item = conveyorQueueDequeue(&belt.queue);
-            if (item.id < 0) continue;
-
-            // Apply conveyor speed to the player's X position
-            float newX = item.x + belt.speed * 0.016f;
-            item.x = newX;
-
-            // Update the actual player position
-            if (item.id == 0) fireboy.x = newX;
-            else              watergirl.x = newX;
-
-        conveyorQueueEnqueue(&belt.queue, item);
+        };
+        checkOnBelt(&fireboy);
+        checkOnBelt(&watergirl);
+        
+        // Process queue
+        int count = b.queue.count;
+        for (int q = 0; q < count; q++) {
+            ConveyorItem item = conveyorQueueDequeue(&b.queue);
+            // apply movement
+            Player* p = (item.id == FIREBOY) ? &fireboy : &watergirl;
+            p->x += b.speed;
+            item.x = p->x;
+            conveyorQueueEnqueue(&b.queue, item);
         }
     }
 }
@@ -432,6 +453,71 @@ void GameEngine::updateConveyorTiles() {
     };
     push(fireboy);
     push(watergirl);
+}
+
+// ── TELEPORTS (Hash Map & Stack) ──────────────────────────────────
+void GameEngine::checkTeleports(Player* p) {
+    LevelData* lv = currentLevel(); if (!lv) return;
+    float px = p->x + PLAYER_W / 2.0f;
+    float py = p->y + PLAYER_H / 2.0f;
+
+    for (int i = 0; i < lv->teleportCount; i++) {
+        TeleportPad& pad = lv->pads[i];
+        if (pad.cooldown > 0.0f) {
+            pad.cooldown -= 1.0f / 60.0f;
+            if (pad.cooldown < 0.0f) pad.cooldown = 0.0f;
+        }
+
+        // Check intersection (simple distance for pad center)
+        float cx = pad.x + TILE_SIZE / 2.0f;
+        float cy = pad.y + TILE_SIZE / 2.0f;
+        float dx = px - cx;
+        float dy = py - cy;
+
+        if (dx * dx + dy * dy < (TILE_SIZE * 0.8f) * (TILE_SIZE * 0.8f)) {
+            if (pad.cooldown <= 0.0f) {
+                // Time to warp! Find partner using O(1) hash map lookup
+                int partnerIdx = teleportMapGet(&teleportMap, pad.partnerId);
+                if (partnerIdx >= 0) {
+                    // Trigger Event Queue for teleport (highest priority after death)
+                    GameEvent e;
+                    e.type = EVT_TELEPORT;
+                    e.priority = 1; // 0=death, 1=teleport, 2=gem, 3=door
+                    e.intData = p->type;
+                    e.x = partnerIdx; // pass index of destination pad
+                    pqPush(&eventQueue, e);
+                    
+                    // Anti-bounce cooldown on both pads
+                    pad.cooldown = 2.0f;
+                    lv->pads[partnerIdx].cooldown = 2.0f;
+                }
+            }
+        }
+    }
+}
+
+void GameEngine::applyTeleport(int playerType, int destPadIndex) {
+    LevelData* lv = currentLevel(); if (!lv) return;
+    Player* p = (playerType == FIREBOY) ? &fireboy : &watergirl;
+    TeleportPad& dest = lv->pads[destPadIndex];
+    
+    // Push current position to history (stack behavior)
+    GameSnapshot snap;
+    snap.fbX = fireboy.x;   snap.fbY = fireboy.y;
+    snap.fbVX= fireboy.vx;  snap.fbVY= fireboy.vy;
+    snap.fbOnGround = fireboy.onGround;
+    snap.wgX = watergirl.x; snap.wgY = watergirl.y;
+    snap.wgVX= watergirl.vx;snap.wgVY= watergirl.vy;
+    snap.wgOnGround = watergirl.onGround;
+    snap.gemCount = lv->gemCount;
+    for (int i = 0; i < lv->gemCount && i < MAX_GEMS; i++)
+        snap.gemCollected[i] = lv->gems[i].collected;
+    snap.score = score;
+    historyPush(&history, snap); // so player can undo this warp if it was accidental
+    
+    p->x = dest.x + (TILE_SIZE - PLAYER_W) / 2.0f;
+    p->y = dest.y + TILE_SIZE - PLAYER_H;
+    p->vx = 0; p->vy = 0;
 }
 
 void GameEngine::checkHazards() {
@@ -528,6 +614,9 @@ void GameEngine::processEvents() {
         if (e.type == EVT_PLAYER_DEAD) {
             sndDie->play();
             handleDeath(); return; // stop processing after death
+        }
+        if (e.type == EVT_TELEPORT) {
+            applyTeleport(e.intData, (int)e.x);
         }
         if (e.type == EVT_LEVEL_COMPLETE) {
             sndWin->play();
