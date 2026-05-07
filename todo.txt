@@ -3,6 +3,7 @@
 3-Screen for entering the player name (DONE)
 3.5-Add new levels in the game 
 3.9-Add Checkpoints logic
+
 4-Load the highscores into a BST
 and when i will traverse the tree it will automatically sort the 
 scores + it will also help me to search the player by their names...etc

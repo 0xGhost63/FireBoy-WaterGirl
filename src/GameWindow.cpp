@@ -255,6 +255,12 @@ void GameWindow::keyPressEvent(QKeyEvent* e) {
     if (e->key()==Qt::Key_R && (s==STATE_DEAD||s==STATE_GAMEOVER||s==STATE_WIN))
         { eng->start(); return; }
     if (e->key()==Qt::Key_Escape && s==STATE_PAUSED) { eng->resume(); return; }
+    // Cheat: Ctrl+L = extra life
+    if (e->key()==Qt::Key_L && (e->modifiers() & Qt::ControlModifier) && s==STATE_PLAYING) {
+        eng->lives++;
+        emit eng->scoreChanged(eng->score); // refresh HUD
+        return;
+    }
     eng->keyPress(e->key());
 }
 void GameWindow::keyReleaseEvent(QKeyEvent* e) { eng->keyRelease(e->key()); }
