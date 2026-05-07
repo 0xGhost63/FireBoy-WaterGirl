@@ -97,7 +97,7 @@ public:
 
     int fbRow = 14, fbCol = 3;
     int wgRow = 14, wgCol = 16;
-    int doorHeight = 2;
+    int gateHeight = 2;
 
     std::vector<std::vector<std::vector<int>>> undoStack;
 
@@ -138,7 +138,7 @@ public:
         update();
     }
 
-    QString generateCode(const QString& levelName, int levelNum, int bgStyle, int doorHeight) const {
+    QString generateCode(const QString& levelName, int levelNum, int bgStyle, int gateHeight) const {
         QString out;
         out += QString("// ============================================================\n");
         out += QString("// LEVEL %1 - \"%2\"\n").arg(levelNum).arg(levelName);
@@ -187,8 +187,8 @@ public:
                 // Conveyors are now tilemap-native (R/Q) - no separate array needed
                 if (t == TILE_BTN_0) btns += QString("    lv.buttons[%1] = {%2*TILE_SIZE-6, (%3+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};\n").arg(btnCount++).arg(c).arg(r);
                 if (t == TILE_BTN_1) btns += QString("    lv.buttons[%1] = {%2*TILE_SIZE-6, (%3+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 1, false};\n").arg(btnCount++).arg(c).arg(r);
-                if (t == TILE_GATE_0) gates += QString("    lv.gates[%1] = {0, %2*TILE_SIZE, %3*TILE_SIZE, TILE_SIZE, TILE_SIZE, false, 0.0f};\n").arg(gateCount++).arg(c).arg(r);
-                if (t == TILE_GATE_1) gates += QString("    lv.gates[%1] = {1, %2*TILE_SIZE, %3*TILE_SIZE, TILE_SIZE, TILE_SIZE, false, 0.0f};\n").arg(gateCount++).arg(c).arg(r);
+                if (t == TILE_GATE_0) gates += QString("    lv.gates[%1] = {0, %2*TILE_SIZE, %3*TILE_SIZE, TILE_SIZE, TILE_SIZE*%4, false, 0.0f};\n").arg(gateCount++).arg(c).arg(r).arg(gateHeight);
+                if (t == TILE_GATE_1) gates += QString("    lv.gates[%1] = {1, %2*TILE_SIZE, %3*TILE_SIZE, TILE_SIZE, TILE_SIZE*%4, false, 0.0f};\n").arg(gateCount++).arg(c).arg(r).arg(gateHeight);
                 if (t == TILE_DOOR_FB) { dFbX = c; dFbY = r; }
                 if (t == TILE_DOOR_WG) { dWgX = c; dWgY = r; }
                 
@@ -199,8 +199,8 @@ public:
             }
         }
 
-        out += QString("    lv.doors[0] = {%1*TILE_SIZE, (%2+1)*TILE_SIZE - TILE_SIZE*%3.0f, TILE_SIZE*%3.0f, FIREBOY, false};\n").arg(dFbX).arg(dFbY).arg(doorHeight);
-        out += QString("    lv.doors[1] = {%1*TILE_SIZE, (%2+1)*TILE_SIZE - TILE_SIZE*%3.0f, TILE_SIZE*%3.0f, WATERGIRL, false};\n\n").arg(dWgX).arg(dWgY).arg(doorHeight);
+        out += QString("    lv.doors[0] = {%1*TILE_SIZE, (%2+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, FIREBOY, false};\n").arg(dFbX).arg(dFbY);
+        out += QString("    lv.doors[1] = {%1*TILE_SIZE, (%2+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, WATERGIRL, false};\n\n").arg(dWgX).arg(dWgY);
         
         out += QString("    lv.gemCount = %1;\n").arg(gemCount) + gems + "\n";
         out += "    lv.conveyorCount = 0;\n";
@@ -232,10 +232,14 @@ protected:
                 if (t == TILE_GEM_WG) p.drawText(cell, Qt::AlignCenter, "GW");
                 
                 if (t == TILE_DOOR_FB || t == TILE_DOOR_WG) {
-                    int h = doorHeight;
-                    QRect doorRect(c*TILE_PX, (r - h + 1)*TILE_PX, TILE_PX, h*TILE_PX);
+                    QRect doorRect(c*TILE_PX, (r - 2 + 1)*TILE_PX, TILE_PX, 2*TILE_PX);
                     p.fillRect(doorRect, (t == TILE_DOOR_FB) ? QColor(255,80,20, 150) : QColor(30,130,255, 150));
                     p.drawText(cell, Qt::AlignCenter, (t == TILE_DOOR_FB) ? "DF" : "DW");
+                }
+                if (t == TILE_GATE_0 || t == TILE_GATE_1) {
+                    int h = gateHeight;
+                    QRect gateRect(c*TILE_PX, r*TILE_PX, TILE_PX, h*TILE_PX);
+                    p.fillRect(gateRect, (t == TILE_GATE_0) ? QColor(40,140,220, 150) : QColor(220,120,20, 150));
                 }
                 
                 if (t == TILE_BTN_0) p.drawText(cell, Qt::AlignCenter, "B0");
@@ -358,7 +362,7 @@ public:
         wgColSpin = new QSpinBox; wgColSpin->setRange(0,MAP_COLS-1); wgColSpin->setValue(16);
         sg->addWidget(wgColSpin, 1, 3);
         
-        sg->addWidget(new QLabel("Door Height:"), 2, 0);
+        sg->addWidget(new QLabel("Gate Height:"), 2, 0);
         doorHeightSpin = new QSpinBox; doorHeightSpin->setRange(1, 10); doorHeightSpin->setValue(2);
         sg->addWidget(doorHeightSpin, 2, 1);
         
@@ -367,7 +371,7 @@ public:
             canvas->fbCol = fbColSpin->value(); 
             canvas->wgRow = wgRowSpin->value(); 
             canvas->wgCol = wgColSpin->value(); 
-            canvas->doorHeight = doorHeightSpin->value();
+            canvas->gateHeight = doorHeightSpin->value();
             canvas->update(); 
         };
         connect(fbRowSpin, QOverload<int>::of(&QSpinBox::valueChanged), syncSpawns);

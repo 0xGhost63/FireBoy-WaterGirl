@@ -185,76 +185,72 @@ LevelData makeLevel2() {
 // ============================================================
 LevelData makeLevel3() {
     LevelData lv;
-    lv.num = 3; lv.bgStyle = 2;
-    strcpy(lv.name, "The Ancient Trap");
+    lv.num = 4; lv.bgStyle = 0;
+    strcpy(lv.name, "Custom Level");
 
     int map[MAP_ROWS][MAP_COLS] = {
         {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 0
         {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 1
-        {S,E,E,S,S,S,E,E,E,E,E,E,E,E,S,S,S,E,E,S},  // 2
-        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 3
-        {S,E,E,E,E,E,E,E,S,S,S,S,E,E,E,E,E,E,E,S},  // 4 center bridge
-        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 5
-        {S,S,S,S,E,E,E,E,E,E,E,E,E,E,E,E,S,S,S,S},  // 6 side barriers
-        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 7
-        {S,E,E,E,E,S,S,S,E,E,E,E,S,S,S,E,E,E,E,S},  // 8 platforms
-        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 9
-        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 10
-        {S,S,S,S,S,S,S,E,E,E,E,E,E,S,S,S,S,S,S,S},  // 11 walls (gate gaps at 6,12)
-        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 12 secret room (between gates)
-        {S,S,S,S,S,S,S,E,E,E,E,E,E,S,S,S,S,S,S,S},  // 13 walls again
-        {S,S,L,L,L,S,E,E,E,P,P,E,E,E,S,W,W,W,S,S},  // 14 hazards
-        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 15
+        {S,E,E,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,S},  // 2
+        {S,E,E,E,E,E,E,E,E,E,E,S,E,E,S,S,S,S,S,S},  // 3
+        {S,E,E,E,E,E,S,S,S,S,E,S,E,E,S,E,E,E,E,S},  // 4
+        {S,E,E,E,W,W,E,S,E,E,E,S,E,E,S,E,E,E,E,S},  // 5
+        {S,S,E,S,S,S,S,S,E,E,E,S,E,E,S,S,E,E,E,S},  // 6
+        {S,E,E,S,E,E,E,E,E,E,E,S,E,E,S,E,E,S,S,S},  // 7
+        {S,E,E,S,E,E,E,E,E,E,E,S,E,E,S,E,E,E,E,S},  // 8
+        {S,E,S,S,E,E,E,E,E,E,E,E,E,E,S,S,S,S,E,S},  // 9
+        {S,E,E,S,E,E,E,E,E,E,S,S,S,E,E,E,S,S,E,S},  // 10
+        {S,E,E,S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 11
+        {S,S,E,S,S,S,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 12
+        {S,E,E,E,S,S,E,R,R,R,R,E,Q,Q,Q,Q,E,S,S,S},  // 13
+        {S,E,E,E,S,S,P,P,P,P,P,P,P,P,P,P,P,S,S,S},  // 14
+        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S}  // 15
     };
     bstInit(&lv.tileTree);
-    for(int r=0;r<MAP_ROWS;r++) for(int c=0;c<MAP_COLS;c++) bstInsert(&lv.tileTree, r, c, map[r][c]);
+    for(int r=0;r<MAP_ROWS;r++) for(int c=0;c<MAP_COLS;c++) bstInsert(&lv.tileTree,r,c,map[r][c]);
 
-    lv.fireboyStartX   = 3*TILE_SIZE;  lv.fireboyStartY   = 10*TILE_SIZE - PLAYER_H;
-    lv.watergirlStartX = 15*TILE_SIZE; lv.watergirlStartY = 10*TILE_SIZE - PLAYER_H;
+    lv.fireboyStartX   = 3*TILE_SIZE; lv.fireboyStartY   = 14*TILE_SIZE - PLAYER_H;
+    lv.watergirlStartX = 18*TILE_SIZE; lv.watergirlStartY = 2*TILE_SIZE - PLAYER_H;
 
-    // Doors are at the TOP
-    lv.doors[0] = {3*TILE_SIZE,  1*TILE_SIZE, TILE_SIZE*2.0f, FIREBOY,   false};
-    lv.doors[1] = {15*TILE_SIZE, 1*TILE_SIZE, TILE_SIZE*2.0f, WATERGIRL, false};
+    lv.doors[0] = {4*TILE_SIZE, (11+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, FIREBOY, false};
+    lv.doors[1] = {5*TILE_SIZE, (11+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, WATERGIRL, false};
 
-    lv.gemCount = 8;
-    lv.gems[0] = {2*TILE_SIZE+8,  2*TILE_SIZE-10, FIREBOY,   false, 0.0f};
-    lv.gems[1] = {3*TILE_SIZE+8,  2*TILE_SIZE-10, FIREBOY,   false, 0.5f};
-    lv.gems[2] = {4*TILE_SIZE+8,  2*TILE_SIZE-10, FIREBOY,   false, 1.0f};
-    lv.gems[3] = {9*TILE_SIZE+8, 12*TILE_SIZE-10, FIREBOY,   false, 1.5f}; // in secret room
-    lv.gems[4] = {15*TILE_SIZE+8, 2*TILE_SIZE-10, WATERGIRL, false, 0.0f};
-    lv.gems[5] = {16*TILE_SIZE+8, 2*TILE_SIZE-10, WATERGIRL, false, 0.7f};
-    lv.gems[6] = {14*TILE_SIZE+8, 2*TILE_SIZE-10, WATERGIRL, false, 1.4f};
-    lv.gems[7] = {10*TILE_SIZE+8,12*TILE_SIZE-10, WATERGIRL, false, 2.0f}; // in secret room
+    lv.gemCount = 10;
+    lv.gems[0] = {8*TILE_SIZE+8, 3*TILE_SIZE+8, FIREBOY, false, 0.0f};
+    lv.gems[1] = {12*TILE_SIZE+8, 4*TILE_SIZE+8, WATERGIRL, false, 0.0f};
+    lv.gems[2] = {1*TILE_SIZE+8, 5*TILE_SIZE+8, FIREBOY, false, 0.0f};
+    lv.gems[3] = {18*TILE_SIZE+8, 6*TILE_SIZE+8, WATERGIRL, false, 0.0f};
+    lv.gems[4] = {2*TILE_SIZE+8, 8*TILE_SIZE+8, FIREBOY, false, 0.0f};
+    lv.gems[5] = {12*TILE_SIZE+8, 9*TILE_SIZE+8, WATERGIRL, false, 0.0f};
+    lv.gems[6] = {1*TILE_SIZE+8, 11*TILE_SIZE+8, FIREBOY, false, 0.0f};
+    lv.gems[7] = {7*TILE_SIZE+8, 12*TILE_SIZE+8, WATERGIRL, false, 0.0f};
+    lv.gems[8] = {10*TILE_SIZE+8, 12*TILE_SIZE+8, FIREBOY, false, 0.0f};
+    lv.gems[9] = {15*TILE_SIZE+8, 12*TILE_SIZE+8, WATERGIRL, false, 0.0f};
 
-    lv.hazardCount = 3;
-    lv.hazards[0] = {2*TILE_SIZE,  14*TILE_SIZE, 3*TILE_SIZE, TILE_SIZE, TILE_LAVA};
-    lv.hazards[1] = {9*TILE_SIZE,  14*TILE_SIZE, 2*TILE_SIZE, TILE_SIZE, TILE_POISON};
-    lv.hazards[2] = {15*TILE_SIZE, 14*TILE_SIZE, 3*TILE_SIZE, TILE_SIZE, TILE_WATER};
-
-    // Gate 0: left wall gap (row 11, col 6) — Fireboy's path down
-    //         Opened by Button 0 (Fireboy holds at col 4, row 10)
-    lv.gates[0] = {0, 6*TILE_SIZE, 11*TILE_SIZE, TILE_SIZE, TILE_SIZE, false, 0.0f};
-    // Gate 1: same left gap but lower (row 13, col 6) — opened same button
-    lv.gates[1] = {1, 6*TILE_SIZE, 13*TILE_SIZE, TILE_SIZE, TILE_SIZE, false, 0.0f};
-    // Gate 2: right wall gap (row 11+13, col 12) — Watergirl's path, opened by Button 1
-    lv.gates[2] = {2, 12*TILE_SIZE, 11*TILE_SIZE, TILE_SIZE, TILE_SIZE, false, 0.0f};
-    lv.gates[3] = {3, 12*TILE_SIZE, 13*TILE_SIZE, TILE_SIZE, TILE_SIZE, false, 0.0f};
-    lv.gateCount = 4;
-
-    // Button 0: Fireboy holds (row 10 left) → opens Gate 0+1 (left path for Watergirl!)
-    lv.buttons[0] = {4*TILE_SIZE, 10*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};
-    lv.buttons[1] = {4*TILE_SIZE, 10*TILE_SIZE-20, TILE_SIZE+24, 20, 1, false}; // same button, two gates
-    // Button 1: Watergirl finds in secret room → opens Gate 2+3 (right path for Fireboy)
-    lv.buttons[2] = {9*TILE_SIZE, 12*TILE_SIZE-20, TILE_SIZE+24, 20, 2, false};
-    lv.buttons[3] = {9*TILE_SIZE, 12*TILE_SIZE-20, TILE_SIZE+24, 20, 3, false}; // same button
-    lv.buttonCount = 4;
-
-    // Two moving platforms help players reach upper gem platforms
-    lv.platformCount = 2;
-    lv.platforms[0] = {1*TILE_SIZE, 7*TILE_SIZE, 4*TILE_SIZE, 7*TILE_SIZE,
-                        1*TILE_SIZE, 7*TILE_SIZE, 60.0f, true, true};
-    lv.platforms[1] = {15*TILE_SIZE, 7*TILE_SIZE, 17*TILE_SIZE, 7*TILE_SIZE,
-                        15*TILE_SIZE, 7*TILE_SIZE, 60.0f, true, true};
     lv.conveyorCount = 0;
+    lv.buttonCount = 2;
+    lv.buttons[0] = {7*TILE_SIZE-6, (3+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};
+    lv.buttons[1] = {15*TILE_SIZE-6, (5+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 1, false};
+
+    lv.gateCount = 2;
+    lv.gates[0] = {1, 9*TILE_SIZE, 1*TILE_SIZE,TILE_SIZE,3*TILE_SIZE, false, 0.0f};
+    lv.gates[1] = {0, 16*TILE_SIZE, 1*TILE_SIZE, TILE_SIZE, TILE_SIZE*2, false, 0.0f};
+
+    lv.hazardCount = 13;
+    lv.hazards[0] = {4*TILE_SIZE, 5*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
+    lv.hazards[1] = {5*TILE_SIZE, 5*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
+    lv.hazards[2] = {6*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[3] = {7*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[4] = {8*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[5] = {9*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[6] = {10*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[7] = {11*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[8] = {12*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[9] = {13*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[10] = {14*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[11] = {15*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[12] = {16*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+
+    lv.platformCount = 0;
     return lv;
 }
