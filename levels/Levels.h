@@ -6,14 +6,9 @@
 // Edit this file to add or modify levels easily.
 // ============================================================
 
-// Tile shorthand macros (used only in this file)
-#define E  TILE_EMPTY
-#define S  TILE_SOLID
-#define L  TILE_LAVA
-#define W  TILE_WATER
-#define P  TILE_POISON
-#define R  TILE_CONVEYOR_R
-#define Q  TILE_CONVEYOR_L
+// Note: tile shorthand macros (E, S, L, W, P, R, Q) are defined
+// locally in Levels.cpp only, to avoid colliding with Qt template
+// parameter names in other translation units.
 
 LevelData makeLevel1();
 LevelData makeLevel2();

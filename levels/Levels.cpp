@@ -3,6 +3,16 @@
 #include <cstring>
 using namespace std;
 
+// Tile shorthand macros — local to this .cpp ONLY (never in the header)
+// to avoid colliding with Qt template parameter names.
+#define E  TILE_EMPTY
+#define S  TILE_SOLID
+#define L  TILE_LAVA
+#define W  TILE_WATER
+#define P  TILE_POISON
+#define R  TILE_CONVEYOR_R
+#define Q  TILE_CONVEYOR_L
+
 // ============================================================
 // LEVEL 1 – "The Crossing"
 // Both players start on opposite sides of a central wall.
@@ -320,3 +330,12 @@ LevelData makeLevel4() {
     lv.platformCount = 0;
     return lv;
 }
+
+// Clean up tile shorthand macros
+#undef E
+#undef S
+#undef L
+#undef W
+#undef P
+#undef R
+#undef Q
