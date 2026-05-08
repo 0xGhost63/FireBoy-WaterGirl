@@ -56,3 +56,5 @@ __pycache__/
 run_linux.sh
 bin/
 
+test_write.txt
+write_files.py
