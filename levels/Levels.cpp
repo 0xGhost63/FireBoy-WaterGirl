@@ -274,62 +274,67 @@ Undo/Redo Stack: Integrated with the historyPush stack.
 */
 LevelData makeLevel4() {
     LevelData lv;
-    lv.num = 4;
-    strcpy(lv.name, "Teleport Test Chamber");
-    lv.bgStyle = 0; // Forest
+    lv.num = 4; lv.bgStyle = 0;
+    strcpy(lv.name, "Custom Level");
 
-    int layout[MAP_ROWS][MAP_COLS] = {
-        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,S,S,S,S,E,E,E,E,S,E,E,E,E,E,S,S,S,S,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,S,S,S,S,E,E,E,E,S,E,E,E,E,E,S,S,S,S,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,E,S},
-        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},
-        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S}
+    int map[MAP_ROWS][MAP_COLS] = {
+        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 0
+        {S,E,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,S},  // 1
+        {S,E,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,S},  // 2
+        {S,E,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,S},  // 3
+        {S,E,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,S},  // 4
+        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 5
+        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 6
+        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 7
+        {S,S,S,S,S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 8
+        {S,E,E,S,S,S,S,S,S,S,S,S,S,S,S,E,E,E,E,S},  // 9
+        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,S,S,S,S,S,S},  // 10
+        {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 11
+        {S,S,S,S,S,S,S,S,S,S,S,S,S,E,E,E,E,E,E,S},  // 12
+        {S,E,E,E,E,E,E,E,E,E,S,E,S,S,S,E,E,E,E,S},  // 13
+        {S,E,E,E,E,E,E,E,E,E,S,E,E,E,S,E,E,E,E,S},  // 14
+        {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S}  // 15
     };
-    lv.tileTree.root = nullptr;
-    for (int r = 0; r < MAP_ROWS; r++) {
-        for (int c = 0; c < MAP_COLS; c++) {
-            if (layout[r][c] != E) {
-                bstInsert(&lv.tileTree, r, c, layout[r][c]);
-            }
-        }
-    }
+    bstInit(&lv.tileTree);
+    for(int r=0;r<MAP_ROWS;r++) for(int c=0;c<MAP_COLS;c++) bstInsert(&lv.tileTree,r,c,map[r][c]);
 
-    // Players start on left side
-    lv.fireboyStartX   = 2*TILE_SIZE; lv.fireboyStartY   = 14*TILE_SIZE - PLAYER_H;
+    lv.fireboyStartX   = 3*TILE_SIZE; lv.fireboyStartY   = 14*TILE_SIZE - PLAYER_H;
     lv.watergirlStartX = 4*TILE_SIZE; lv.watergirlStartY = 14*TILE_SIZE - PLAYER_H;
 
-    // Doors on right side
-    lv.doors[0] = {16*TILE_SIZE, 14*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, FIREBOY, false};
-    lv.doors[1] = {12*TILE_SIZE, 14*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, WATERGIRL, false};
+    lv.doors[0] = {3*TILE_SIZE, (4+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, FIREBOY, false};
+    lv.doors[1] = {14*TILE_SIZE, (4+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, WATERGIRL, false};
 
-    lv.gemCount = 2;
-    lv.gems[0] = {15*TILE_SIZE+8, 11*TILE_SIZE+8, FIREBOY, false, 0.0f};
-    lv.gems[1] = {12*TILE_SIZE+8, 11*TILE_SIZE+8, WATERGIRL, false, 0.0f};
-
-    // Teleporters! 
-    // Pad A (Left) <-> Pad B (Right)
-    lv.teleportCount = 2;
-    lv.pads[0] = {6*TILE_SIZE, 13*TILE_SIZE, 0, 1, 0.0f}; // id=0, partner=1
-    lv.pads[1] = {10*TILE_SIZE, 13*TILE_SIZE, 1, 0, 0.0f}; // id=1, partner=0
+    lv.gemCount = 0;
 
     lv.conveyorCount = 0;
-    lv.buttonCount = 0;
-    lv.gateCount = 0;
+    lv.buttonCount = 5;
+    lv.buttons[0] = {5*TILE_SIZE-6, (8+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};
+    lv.buttons[1] = {13*TILE_SIZE-6, (8+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};
+    lv.buttons[2] = {4*TILE_SIZE-6, (11+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 1, false};
+    lv.buttons[3] = {7*TILE_SIZE-6, (14+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 1, false};
+    lv.buttons[4] = {16*TILE_SIZE-6, (14+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 1, false};
+
+    lv.gateCount = 2;
+    lv.gates[0] = {0, 9*TILE_SIZE, 6*TILE_SIZE, TILE_SIZE, TILE_SIZE*3, false, 0.0f};
+    lv.gates[1] = {1, 14*TILE_SIZE, 11*TILE_SIZE, TILE_SIZE, TILE_SIZE*3, false, 0.0f};
+
+    lv.teleportCount = 8;
+    lv.pads[0] = {9*TILE_SIZE, 1*TILE_SIZE, 1, 0, 0.0f};
+    lv.pads[1] = {18*TILE_SIZE, 2*TILE_SIZE, 0, 1, 0.0f};
+    lv.pads[2] = {11*TILE_SIZE, 4*TILE_SIZE, 3, 2, 0.0f};
+    lv.pads[3] = {1*TILE_SIZE, 6*TILE_SIZE, 5, 4, 0.0f};
+    lv.pads[4] = {18*TILE_SIZE, 9*TILE_SIZE, 2, 3, 0.0f};
+    lv.pads[5] = {1*TILE_SIZE, 10*TILE_SIZE, 7, 6, 0.0f};
+    lv.pads[6] = {18*TILE_SIZE, 12*TILE_SIZE, 4, 5, 0.0f};
+    lv.pads[7] = {1*TILE_SIZE, 14*TILE_SIZE, 6, 7, 0.0f};
+
     lv.hazardCount = 0;
 
     return lv;
 }
+
+
+
 
 // Clean up tile shorthand macros
 #undef E

@@ -43,8 +43,8 @@
 #define TILE_GATE_1     51
 #define TILE_TELEPORT_0 60
 #define TILE_TELEPORT_1 61
-#define TILE_SPAWN_FB   60
-#define TILE_SPAWN_WG   61
+#define TILE_SPAWN_FB   200
+#define TILE_SPAWN_WG   201
 
 #define MAP_ROWS    16
 #define MAP_COLS    20
@@ -181,6 +181,7 @@ public:
         out += QString("    lv.watergirlStartX = %1*TILE_SIZE; lv.watergirlStartY = %2*TILE_SIZE - PLAYER_H;\n\n").arg(wgCol).arg(wgRow);
 
         int gemCount=0, convCount=0, btnCount=0, gateCount=0, hazardCount=0, teleportCount=0;
+        int t0Count = 0, t1Count = 0;
         QString gems, convs, btns, gates, hazards, teleports;
         
         // Find doors
@@ -194,8 +195,18 @@ public:
                 if (t == TILE_BTN_1) btns += QString("    lv.buttons[%1] = {%2*TILE_SIZE-6, (%3+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 1, false};\n").arg(btnCount++).arg(c).arg(r);
                 if (t == TILE_GATE_0) gates += QString("    lv.gates[%1] = {0, %2*TILE_SIZE, %3*TILE_SIZE, TILE_SIZE, TILE_SIZE*%4, false, 0.0f};\n").arg(gateCount++).arg(c).arg(r).arg(gateHeight);
                 if (t == TILE_GATE_1) gates += QString("    lv.gates[%1] = {1, %2*TILE_SIZE, %3*TILE_SIZE, TILE_SIZE, TILE_SIZE*%4, false, 0.0f};\n").arg(gateCount++).arg(c).arg(r).arg(gateHeight);
-                if (t == TILE_TELEPORT_0) teleports += QString("    lv.pads[%1] = {%2*TILE_SIZE, %3*TILE_SIZE, 0, 1, 0.0f};\n").arg(teleportCount++).arg(c).arg(r);
-                if (t == TILE_TELEPORT_1) teleports += QString("    lv.pads[%1] = {%2*TILE_SIZE, %3*TILE_SIZE, 1, 0, 0.0f};\n").arg(teleportCount++).arg(c).arg(r);
+                if (t == TILE_TELEPORT_0) {
+                    int id = t0Count * 2;
+                    int pid = t0Count * 2 + 1;
+                    teleports += QString("    lv.pads[%1] = {%2*TILE_SIZE, %3*TILE_SIZE, %4, %5, 0.0f};\n").arg(teleportCount++).arg(c).arg(r).arg(id).arg(pid);
+                    t0Count++;
+                }
+                if (t == TILE_TELEPORT_1) {
+                    int id = t1Count * 2 + 1;
+                    int pid = t1Count * 2;
+                    teleports += QString("    lv.pads[%1] = {%2*TILE_SIZE, %3*TILE_SIZE, %4, %5, 0.0f};\n").arg(teleportCount++).arg(c).arg(r).arg(id).arg(pid);
+                    t1Count++;
+                }
                 if (t == TILE_DOOR_FB) { dFbX = c; dFbY = r; }
                 if (t == TILE_DOOR_WG) { dWgX = c; dWgY = r; }
                 
@@ -498,6 +509,11 @@ private slots:
             int cx = parseCoord(m.captured(2)), cy = parseCoord(m.captured(3));
             if (cy>=0 && cy<MAP_ROWS && cx>=0 && cx<MAP_COLS) 
                 canvas->grid[cy][cx] = (m.captured(1) == "0") ? TILE_GATE_0 : TILE_GATE_1;
+        });
+        parseList("pads\\[\\d+\\]\\s*=\\s*\\{([^,]+),\\s*([^,]+),\\s*(\\d+)", [&](auto m) {
+            int cx = parseCoord(m.captured(1)), cy = parseCoord(m.captured(2));
+            if (cy>=0 && cy<MAP_ROWS && cx>=0 && cx<MAP_COLS) 
+                canvas->grid[cy][cx] = (m.captured(3).toInt() % 2 == 0) ? TILE_TELEPORT_0 : TILE_TELEPORT_1;
         });
         parseList("doors\\[0\\]\\s*=\\s*\\{([^,]+),\\s*([^,]+),\\s*(?:TILE_SIZE\\*)?([^,]+)", [&](auto m) {
             int cx = parseCoord(m.captured(1)), cy = parseCoord(m.captured(2));
