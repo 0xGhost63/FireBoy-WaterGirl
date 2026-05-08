@@ -236,6 +236,7 @@ void GameEngine::resetLevel()
 
     elapsed = 0;
     rebuildGateMap();
+    rebuildTeleportMap();
     buildEffectiveTileMap();
 
     state = STATE_PLAYING;
@@ -267,6 +268,7 @@ void GameEngine::nextLevel()
 
     elapsed = 0;
     rebuildGateMap();
+    rebuildTeleportMap();
     buildEffectiveTileMap();
 
     state = STATE_PLAYING;
