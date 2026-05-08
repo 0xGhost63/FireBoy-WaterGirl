@@ -242,6 +242,7 @@ void GameEngine::resetLevel()
     state = STATE_PLAYING;
     emit stateChanged(state);
     if (!timer->isActive()) timer->start();
+    
 }
 
 void GameEngine::nextLevel()
