@@ -50,7 +50,6 @@ private:
     void drawButtons   (QPainter& p);
     void drawHazards   (QPainter& p);
     void drawConveyors (QPainter& p);
-    void drawPlatforms (QPainter& p);
     void drawGems      (QPainter& p);
     void drawDoors     (QPainter& p);
     void drawPlayer    (QPainter& p, Player* player);

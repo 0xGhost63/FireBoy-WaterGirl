@@ -96,7 +96,7 @@ LevelData makeLevel1() {
     lv.buttons[1] = {10*TILE_SIZE-6, 3*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};
     lv.buttonCount = 2;
 
-    lv.platformCount = 0;
+
     lv.conveyorCount = 0;
     lv.teleportCount = 0;
     return lv;
@@ -179,7 +179,7 @@ LevelData makeLevel2() {
     lv.hazards[14] = {14*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
     lv.hazards[15] = {15*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
 
-    lv.platformCount = 0;
+
     lv.teleportCount = 0;
     return lv;
 }
@@ -263,7 +263,7 @@ LevelData makeLevel3() {
     lv.hazards[11] = {15*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
     lv.hazards[12] = {16*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
 
-    lv.platformCount = 0;
+
     lv.teleportCount = 0;
     return lv;
 }
@@ -327,7 +327,7 @@ LevelData makeLevel4() {
     lv.buttonCount = 0;
     lv.gateCount = 0;
     lv.hazardCount = 0;
-    lv.platformCount = 0;
+
     return lv;
 }
 

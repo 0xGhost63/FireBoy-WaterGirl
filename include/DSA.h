@@ -4,39 +4,22 @@
 // ================================================================
 // DSA.h  –  All Data Structures & Algorithms used in the game
 // ================================================================
-//  1. Stack       – (removed from player – see idea #22 in DSA_Ideas.md)
-//  2. Queue       – game event pipeline (FIFO / circular)
-//  3. LinkedList  – level catalogue (doubly linked) + Undo/Redo
-//  4. QuickSort   – leaderboard sort (all list sizes)
-//  5. LinearSearch– gem proximity detection
-//  6. BinarySearch– find player rank in leaderboard
-//  7. Dijkstra    – grid-based hint pathfinding through gems
-//  8. Priority Queue (Min-Heap) – events + nearest gem finder
-//  9. Hash Map    – O(1) button→gate lookup
-// 10. BST Map     – tile storage & lookup
-// 11. State History (Doubly Linked List) – Undo/Redo
-// 12. Singly Linked List – gem collection trail
+//  1. Queue       – game event pipeline (FIFO / circular)
+//  2. LinkedList  – level catalogue (doubly linked) + Undo/Redo
+//  3. QuickSort   – leaderboard sort (all list sizes)
+//  4. LinearSearch– gem proximity detection
+//  5. BinarySearch– find player rank in leaderboard
+//  6. Dijkstra    – grid-based hint pathfinding through gems
+//  7. Priority Queue (Min-Heap) – events + nearest gem finder
+//  8. Hash Map    – O(1) button→gate lookup
+//  9. BST Map     – tile storage & lookup
+// 10. State History (Doubly Linked List) – Undo/Redo
+// 11. Singly Linked List – gem collection trail
 // ================================================================
 
 // ── Limits ───────────────────────────────────────────────────
-#define STACK_MAX  256
 #define QUEUE_MAX  128
 #define MAX_HINT_PATH   400
-
-// ================================================================
-// 1. STACK  (kept in codebase but no longer used for player – see DSA_Ideas.md)
-// ================================================================
-struct Stack {
-    float xItems[STACK_MAX];
-    float yItems[STACK_MAX];
-    int   top;
-};
-void  stackInit   (Stack* s);
-bool  stackIsEmpty(Stack* s);
-bool  stackIsFull (Stack* s);
-void  stackPush   (Stack* s, float x, float y);
-void  stackPop    (Stack* s, float* x, float* y);
-void  stackPeek   (Stack* s, float* x, float* y);
 
 // ================================================================
 // 2. QUEUE  (FIFO – First In, First Out, circular array)

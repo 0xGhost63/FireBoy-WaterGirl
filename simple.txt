@@ -1,0 +1,48 @@
+Hello! I have simplified the core codebase for your viva presentation.
+
+The goal was to make the C++ code much easier to read, explain, and understand for a beginner, while keeping the game logic 100% identical.
+
+Here are the changes made to the files:
+
+1. src/main.cpp
+- Added clear, step-by-step comments explaining how a Qt Application starts.
+- Removed unused or overly complex code to leave only the 4 essential steps to start the game.
+
+2. src/Player.cpp
+- Added a dedicated physics constants section with clear comments (GRAVITY, WALK_SPD, etc).
+- Broke down `resolveCollisions` into four distinct, easy-to-explain sections: Floor, Ceiling, Left Wall, and Right Wall.
+- Explained what every step in `playerUpdate` does (applying movement, gravity, moving, and checking collisions).
+
+3. src/DSA.cpp
+- Added beginner-friendly comments to all the Data Structures and Algorithms.
+- Simplified loops and variable names so it reads more like pseudo-code.
+- Added clear section dividers for Queue, Linked List, Quick Sort, Binary Search, Dijkstra, Min-Heap, Hash Map, etc.
+- Removed overly terse one-liners, splitting them into easily readable standard conditional statements.
+
+4. src/GameEngine.cpp
+- Added a high-level comment explaining the 16ms Game Loop (`tick` function).
+- Split large switch-cases and keyboard input handlers into clearly labeled sections (e.g. UNDO, REDO, Cheat Code).
+- Added comments explaining exactly what `checkTeleports`, `checkHazards`, and `checkGems` do step-by-step.
+- Reorganised `buildEffectiveTileMap` to clearly show how gates are overlaid onto the tilemap to make them solid.
+
+5. src/GameWindow.cpp
+- Organised `buildUI` into clear distinct pages (Game Screen, Main Menu, Leaderboard, Name Entry).
+- Made the UI setup code much more linear and readable.
+- Added explanations for how the QStackedWidget transitions between screens.
+- Cleaned up the background music setup so the #ifdef Qt version checks are easier to ignore/explain.
+
+6. src/GameRenderer.cpp
+- Added comments explaining how drawing is split into layers (Background, Tiles, Gates, Hazards, Conveyors, Gems, Players, UI).
+- Organised the `paintEvent` to clearly show the drawing order.
+- Simplified variable names for screen coordinates to make the math easier to explain (e.g. converting world X to screen X).
+
+7. Dead Code Removal (Cleanup)
+- Completely removed the `MovingPlatform` (moving tiles) logic from `GameObjects.h`, `GameEngine`, `GameRenderer`, `Player`, and `Levels.cpp` as it was scaffolding no longer used in the actual game levels.
+- Completely removed the unused custom `Stack` DSA structure from `DSA.h` and `DSA.cpp` since the game now primarily relies on Queues and Linked Lists for event and history management.
+
+Overall:
+- Variable names were kept consistent but spacing and alignment was vastly improved.
+- No new complex C++ features were introduced.
+- Logic is preserved exactly as it was, but is now laid out in a way that allows you to easily point to a block of code during your viva and say exactly what it does.
+
+Good luck with your viva!

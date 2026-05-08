@@ -90,7 +90,6 @@ private:
     void checkHazards();
     void checkGems();
     void checkDoors();
-    void updatePlatforms();
     void updateConveyorTiles();
     void processEvents();
     void computeHints();

@@ -37,7 +37,6 @@ using namespace std;
 #define MAP_H         (MAP_ROWS * TILE_SIZE)
 #define MAX_GEMS      50
 #define MAX_HAZARDS   50
-#define MAX_PLATFORMS 20
 #define MAX_BUTTONS   20
 #define MAX_CONVEYORS 50
 #define CONVEYOR_QUEUE_MAX 8
@@ -93,14 +92,6 @@ struct TeleportPad {
     int   id;            // unique pad ID (used as hash key)
     int   partnerId;     // ID of the destination pad
     float cooldown;      // seconds before re-trigger (anti-bounce)
-};
-
-struct MovingPlatform {
-    float ax, ay, bx, by;   // waypoints
-    float cx, cy;            // current position
-    float speed;
-    bool  active;
-    bool  towardsB;
 };
 
 // ── Conveyor Belt (Queue-based DSA) ──────────────────────────
@@ -162,8 +153,6 @@ struct LevelData {
     Door           doors[2];
     HazardPool     hazards[MAX_HAZARDS];
     int            hazardCount;
-    MovingPlatform platforms[MAX_PLATFORMS];
-    int            platformCount;
 
     // Conveyor belts (Queue DSA)
     ConveyorBelt   conveyors[MAX_CONVEYORS];

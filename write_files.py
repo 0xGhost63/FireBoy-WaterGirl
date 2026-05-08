@@ -1,8 +1,49 @@
+dsa = r'''
 #include "DSA.h"
 #include <cstring>
 #include <cstdlib>
 using namespace std;
 
+// ════════════════════════════════════════════════════════════
+// 1. STACK
+// ════════════════════════════════════════════════════════════
+void stackInit(Stack* s)
+{
+    s->top = -1; // -1 means the stack is empty
+}
+
+bool stackIsEmpty(Stack* s)
+{
+    return s->top == -1;
+}
+
+bool stackIsFull(Stack* s)
+{
+    return s->top == STACK_MAX - 1;
+}
+
+void stackPush(Stack* s, float x, float y)
+{
+    if (stackIsFull(s)) return;
+    s->top++;
+    s->xItems[s->top] = x;
+    s->yItems[s->top] = y;
+}
+
+void stackPop(Stack* s, float* x, float* y)
+{
+    if (stackIsEmpty(s)) return;
+    *x = s->xItems[s->top];
+    *y = s->yItems[s->top];
+    s->top--;
+}
+
+void stackPeek(Stack* s, float* x, float* y)
+{
+    if (stackIsEmpty(s)) return;
+    *x = s->xItems[s->top];
+    *y = s->yItems[s->top];
+}
 
 // ════════════════════════════════════════════════════════════
 // 2. QUEUE (circular array)
@@ -730,3 +771,9 @@ bool historyRedo(StateHistory* h, GameSnapshot* out)
     *out = h->current->snap;
     return true;
 }
+'''
+
+with open("/home/sannan/Desktop/FBW/src/DSA.cpp", "w") as f:
+    f.write(dsa.lstrip())
+
+print("DSA.cpp written")
