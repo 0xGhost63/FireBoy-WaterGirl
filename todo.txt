@@ -24,11 +24,11 @@ When they press Undo, you navigate the list backward (prev pointer) and restore 
 Use a 'Current' pointer to track where you are in history so Redo also works! (DONE)
 
 
-8-Remove the cheatcode functionality
+8-Remove the cheatcode functionality (DONE)
 
-9-Remove the level-editor logic from the code
+9-Remove the level-editor logic from the code (DONE)
 
-10-Make sure the hint function works in all levels ()
+10-Make sure the hint function works in all levels (DONE-Only hint 1 is not working in the last level)
 
 11-REMOVE THE FALLBACKS,EXTRA CODE(MOVING TILES)AND THE extra DATA STRUCTURES
-and Simplify The Code 
+and Simplify The Code (DONE)

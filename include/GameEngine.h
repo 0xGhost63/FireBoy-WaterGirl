@@ -62,7 +62,6 @@ public:
     int nearestFbGem, nearestWgGem;
 
     // Cheat code tracker
-    CheatTracker skipCheat;
 
     // Effective tilemap (base tiles + closed gates overlaid)
 

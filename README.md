@@ -11,7 +11,7 @@ Welcome to the C++ desktop port of **Fireboy & Watergirl**, deeply inspired by t
 
 <p align="center">
   <img src="assets/images/splash.png" alt="Splash Screen" width="400" />
-  <img src="assets/images/SS_Name.png" alt="Name Screen" width="400" />
+  <img src="assets/images/SS_G0.png" alt="Name Lvl 4" width="400" />
     <img src="assets/images/SS_G1.png" alt="Gameplay Screenshot 1" width="400" />
   <img src="assets/images/SS_G2.png" alt="Gameplay Screenshot 2" width="400" />
 </p>

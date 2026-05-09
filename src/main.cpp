@@ -6,29 +6,64 @@
 
 #include <QApplication>   // Manages the whole Qt app lifecycle
 #include <QFile>          // Used to read the stylesheet file
+#include <QSplashScreen>
+#include <QPixmap>
+#include <QElapsedTimer>
+#include <QThread>
 #include "../include/GameWindow.h"  // Our main game window class
 
 int main(int argc, char* argv[])
 {
     // Step 1: Create the Qt Application object
-    // Every Qt program needs this to handle events, fonts, etc.
     QApplication app(argc, argv);
     app.setApplicationName("FireboyWatergirl");
 
     // Step 2: Load a .qss stylesheet (like CSS but for Qt widgets)
-    // This makes the menus and buttons look styled
     QFile qss(":/styles/game.qss");
     if (qss.open(QFile::ReadOnly | QFile::Text))
     {
-        // Read the file and apply it to the whole app
         app.setStyleSheet(QLatin1String(qss.readAll()));
     }
 
-    // Step 3: Create and show the game window
-    GameWindow* win = new GameWindow();
-    win->show();
+    int splash_timer = 3000; // Time in milliseconds (3 seconds)
+
+    if (splash_timer > 0) 
+    {
+        QPixmap splashPix("assets/images/splash.png");
+        if (splashPix.isNull()) {
+            splashPix = QPixmap(800, 600);
+            splashPix.fill(Qt::black);
+        } else {
+            splashPix = splashPix.scaled(800, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        }
+
+        QSplashScreen* splash = new QSplashScreen(splashPix);
+        splash->show();
+        app.processEvents();
+
+        QElapsedTimer timer;
+        timer.start();
+
+        // Initialize the game window while splash is shown
+        GameWindow* win = new GameWindow();
+
+        // Wait for the remaining time if initialization was faster than splash_timer
+        qint64 elapsed = timer.elapsed();
+        if (elapsed < splash_timer) {
+            QThread::msleep(splash_timer - elapsed);
+        }
+
+        splash->finish(win);
+        win->show();
+        splash->deleteLater();
+    } 
+    else 
+    {
+        // Step 3: Create and show the game window directly
+        GameWindow* win = new GameWindow();
+        win->show();
+    }
 
     // Step 4: Start the Qt event loop
-    // This keeps the program running and responds to keyboard/mouse events
     return app.exec();
 }

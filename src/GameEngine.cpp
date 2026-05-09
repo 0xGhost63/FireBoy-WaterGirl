@@ -47,7 +47,6 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent)
     // Initialise all DSA structures
     pqInit(&eventQueue);
     gateMapInit(&gateMap);
-    cheatInit(&skipCheat, "SKIP");
     historyInit(&history);
     gemTrailInit(&gemTrail);
 
@@ -225,8 +224,8 @@ void GameEngine::resetLevel()
     LevelData* lv = currentLevel();
     if (!lv) return;
 
-    playerReset(&fireboy,   lv->fireboyStartX,   lv->fireboyStartY);
-    playerReset(&watergirl, lv->watergirlStartX, lv->watergirlStartY);
+    playerInit(&fireboy,   FIREBOY,   lv->fireboyStartX,   lv->fireboyStartY);
+    playerInit(&watergirl, WATERGIRL, lv->watergirlStartX, lv->watergirlStartY);
 
     for (int i = 0; i < lv->gemCount;      i++) lv->gems[i].collected    = false;
     for (int i = 0; i < 2;                 i++) lv->doors[i].open        = false;
@@ -258,8 +257,8 @@ void GameEngine::nextLevel()
     }
 
     LevelData* lv = currentLevel();
-    playerReset(&fireboy,   lv->fireboyStartX,   lv->fireboyStartY);
-    playerReset(&watergirl, lv->watergirlStartX, lv->watergirlStartY);
+    playerInit(&fireboy,   FIREBOY,   lv->fireboyStartX,   lv->fireboyStartY);
+    playerInit(&watergirl, WATERGIRL, lv->watergirlStartX, lv->watergirlStartY);
 
     for (int i = 0; i < lv->gemCount;      i++) lv->gems[i].collected    = false;
     for (int i = 0; i < 2;                 i++) lv->doors[i].open        = false;
@@ -280,17 +279,6 @@ void GameEngine::nextLevel()
 void GameEngine::keyPress(int key)
 {
     if (state != STATE_PLAYING) return;
-
-    // Check for "SKIP" cheat code
-    if (key >= Qt::Key_A && key <= Qt::Key_Z)
-    {
-        if (cheatUpdate(&skipCheat, (char)key))
-        {
-            skipCheat.isUnlocked = false; // Reset it immediately
-            nextLevel();
-            return;
-        }
-    }
 
     switch (key)
     {

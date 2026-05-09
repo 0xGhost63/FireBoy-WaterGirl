@@ -181,20 +181,6 @@ int  bstGet(BSTMap* tree, int r, int c); // Returns TILE_EMPTY if not found
 void bstFree(BSTNode* node);
 
 // ================================================================
-// 12. CHEAT TRACKER
-// Used to track sequence of characters typed by user
-// ================================================================
-struct CheatTracker {
-    char targetCode[16];
-    int currentIndex;
-    int codeLength;
-    bool isUnlocked;
-};
-
-void cheatInit(CheatTracker* tracker, const char* code);
-bool cheatUpdate(CheatTracker* tracker, char key);
-
-// ================================================================
 // 13. STATE HISTORY  (Doubly Linked List – Undo / Redo)
 // A snapshot is saved every 500 ms while the game is playing.
 // U  = undo  → restore the previous node (current = current->prev)

@@ -34,7 +34,7 @@ using namespace std;
 LevelData makeLevel1() {
     LevelData lv;
     lv.num = 1; lv.bgStyle = 0;
-    strcpy(lv.name, "Custom Level");
+    strcpy(lv.name, "The Forest Temple");
 
     int map[MAP_ROWS][MAP_COLS] = {
         {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 0
@@ -106,8 +106,8 @@ LevelData makeLevel1() {
 // ============================================================
 LevelData makeLevel2() {
     LevelData lv;
-    lv.num = 4; lv.bgStyle = 0;
-    strcpy(lv.name, "Custom Level");
+    lv.num = 2; lv.bgStyle = 2;
+    strcpy(lv.name, "The Conveyor Gauntlet");
 
     int map[MAP_ROWS][MAP_COLS] = {
         {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 0
@@ -191,8 +191,8 @@ LevelData makeLevel2() {
 // ============================================================
 LevelData makeLevel3() {
     LevelData lv;
-    lv.num = 4; lv.bgStyle = 0;
-    strcpy(lv.name, "Custom Level");
+    lv.num = 3; lv.bgStyle = 1;
+    strcpy(lv.name, "The Ancient Trap");
 
     int map[MAP_ROWS][MAP_COLS] = {
         {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 0
@@ -269,7 +269,7 @@ Undo/Redo Stack: Integrated with the historyPush stack.
 LevelData makeLevel4() {
     LevelData lv;
     lv.num = 4; lv.bgStyle = 0;
-    strcpy(lv.name, "Custom Level");
+    strcpy(lv.name, "Teleportation Level");
 
     int map[MAP_ROWS][MAP_COLS] = {
         {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 0
