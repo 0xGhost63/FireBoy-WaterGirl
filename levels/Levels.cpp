@@ -33,7 +33,7 @@ using namespace std;
 // ============================================================
 LevelData makeLevel1() {
     LevelData lv;
-    lv.num = 4; lv.bgStyle = 0;
+    lv.num = 1; lv.bgStyle = 0;
     strcpy(lv.name, "Custom Level");
 
     int map[MAP_ROWS][MAP_COLS] = {
@@ -277,7 +277,7 @@ LevelData makeLevel4() {
         {S,E,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,S},  // 2
         {S,E,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,S},  // 3
         {S,E,E,E,E,E,E,E,E,E,S,E,E,E,E,E,E,E,E,S},  // 4
-        {S,S,S,S,S,S,W,W,Q,Q,S,S,L,L,S,S,S,S,S,S},  // 5
+        {S,S,S,W,W,Q,Q,Q,Q,Q,S,S,L,L,S,S,S,S,S,S},  // 5
         {S,E,E,E,E,E,E,E,E,E,E,E,S,S,E,E,E,E,E,S},  // 6
         {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 7
         {S,S,S,S,S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 8
@@ -295,11 +295,11 @@ LevelData makeLevel4() {
     lv.fireboyStartX   = 3*TILE_SIZE; lv.fireboyStartY   = 14*TILE_SIZE - PLAYER_H;
     lv.watergirlStartX = 4*TILE_SIZE; lv.watergirlStartY = 14*TILE_SIZE - PLAYER_H;
 
-    lv.doors[0] = {3*TILE_SIZE, (4+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, FIREBOY, false};
+    lv.doors[0] = {1*TILE_SIZE, (4+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, FIREBOY, false};
     lv.doors[1] = {14*TILE_SIZE, (4+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, WATERGIRL, false};
 
     lv.gemCount = 8;
-    lv.gems[0] = {8*TILE_SIZE+8, 4*TILE_SIZE+8, FIREBOY, false, 0.0f};
+    lv.gems[0] = {5*TILE_SIZE+8, 4*TILE_SIZE+8, FIREBOY, false, 0.0f};
     lv.gems[1] = {17*TILE_SIZE+8, 4*TILE_SIZE+8, FIREBOY, false, 0.0f};
     lv.gems[2] = {3*TILE_SIZE+8, 7*TILE_SIZE+8, FIREBOY, false, 0.0f};
     lv.gems[3] = {7*TILE_SIZE+8, 8*TILE_SIZE+8, WATERGIRL, false, 0.0f};
@@ -317,11 +317,11 @@ LevelData makeLevel4() {
 
     lv.gateCount = 2;
     lv.gates[0] = {0, 9*TILE_SIZE, 6*TILE_SIZE, TILE_SIZE, TILE_SIZE*3, false, 0.0f};
-    lv.gates[1] = {1, 14*TILE_SIZE, 11*TILE_SIZE, TILE_SIZE, TILE_SIZE*3, false, 0.0f};
+    lv.gates[1] = {1, 14*TILE_SIZE, 11*TILE_SIZE, TILE_SIZE, TILE_SIZE*2, false, 0.0f};
 
     lv.teleportCount = 8;
     lv.pads[0] = {9*TILE_SIZE, 1*TILE_SIZE, 1, 0, 0.0f};
-    lv.pads[1] = {11*TILE_SIZE, 2*TILE_SIZE, 3, 2, 0.0f};
+    lv.pads[1] = {11*TILE_SIZE, 1*TILE_SIZE, 3, 2, 0.0f};
     lv.pads[2] = {18*TILE_SIZE, 2*TILE_SIZE, 0, 1, 0.0f};
     lv.pads[3] = {1*TILE_SIZE, 6*TILE_SIZE, 5, 4, 0.0f};
     lv.pads[4] = {18*TILE_SIZE, 9*TILE_SIZE, 2, 3, 0.0f};
@@ -330,8 +330,8 @@ LevelData makeLevel4() {
     lv.pads[7] = {1*TILE_SIZE, 14*TILE_SIZE, 6, 7, 0.0f};
 
     lv.hazardCount = 7;
-    lv.hazards[0] = {6*TILE_SIZE, 5*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
-    lv.hazards[1] = {7*TILE_SIZE, 5*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
+    lv.hazards[0] = {3*TILE_SIZE, 5*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
+    lv.hazards[1] = {4*TILE_SIZE, 5*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
     lv.hazards[2] = {12*TILE_SIZE, 5*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_LAVA};
     lv.hazards[3] = {13*TILE_SIZE, 5*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_LAVA};
     lv.hazards[4] = {15*TILE_SIZE, 10*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
@@ -340,6 +340,7 @@ LevelData makeLevel4() {
 
     return lv;
 }
+
 
 
 

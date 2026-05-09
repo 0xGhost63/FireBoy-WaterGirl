@@ -28,7 +28,8 @@ private:
     QPixmap pmLava, pmWater, pmPoison;
     QPixmap pmUndo, pmRedo;
     QPixmap pmArrow;        // (kept for compatibility)
-    QPixmap pmTeleport;
+    QPixmap pmTeleportFire;
+    QPixmap pmTeleportWater;
     QPixmap pmFireArrow;    // nearest-gem arrow for Fireboy
     QPixmap pmWaterArrow;   // nearest-gem arrow for Watergirl
 

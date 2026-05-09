@@ -46,7 +46,8 @@ GameRenderer::GameRenderer(GameEngine* e, QWidget* parent)
     pmUndo       = QPixmap("assets/images/undo.png");
     pmRedo       = QPixmap("assets/images/redo.png");
     pmArrow      = QPixmap("assets/images/arrow.png");
-    pmTeleport   = QPixmap("assets/images/teleport.png");
+    pmTeleportFire  = QPixmap("assets/images/portal_fire.png");
+    pmTeleportWater = QPixmap("assets/images/portal_water.png");
     pmFireArrow  = QPixmap("assets/images/fire_arrow.png");
     pmWaterArrow = QPixmap("assets/images/water_arrow.png");
 
@@ -108,10 +109,11 @@ void GameRenderer::paintEvent(QPaintEvent*)
             int pw = (int)(TILE_SIZE * sx);
             int ph = (int)(TILE_SIZE * sy);
             
-            if (!pmTeleport.isNull()) {
-                p.drawPixmap(QRect(px, py, pw, ph), pmTeleport);
+            QPixmap* pm = (pad.id % 2 == 0) ? &pmTeleportFire : &pmTeleportWater;
+            if (!pm->isNull()) {
+                p.drawPixmap(QRect(px, py, pw, ph), *pm);
             } else {
-                p.setBrush(QColor(150, 0, 255, 150));
+                p.setBrush((pad.id % 2 == 0) ? QColor(255, 50, 50, 150) : QColor(50, 50, 255, 150));
                 p.setPen(Qt::white);
                 p.drawEllipse(px, py, pw, ph);
             }
