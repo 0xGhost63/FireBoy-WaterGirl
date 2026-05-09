@@ -34,3 +34,5 @@ Use a 'Current' pointer to track where you are in history so Redo also works! (D
 and Simplify The Code (DONE)
 
 12-Make the scores and high scores presentable
+
+13-Fix the level numbers on the top right corner in lvls
