@@ -32,3 +32,5 @@ Use a 'Current' pointer to track where you are in history so Redo also works! (D
 
 11-REMOVE THE FALLBACKS,EXTRA CODE(MOVING TILES)AND THE extra DATA STRUCTURES
 and Simplify The Code (DONE)
+
+12-Make the scores and high scores presentable
