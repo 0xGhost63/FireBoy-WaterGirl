@@ -21,6 +21,7 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent)
     listAppend(&levels, makeLevel2());
     listAppend(&levels, makeLevel3());
     listAppend(&levels, makeLevel4());
+    listAppend(&levels, makeLevel5());
 
     // Load all sound effects
     sndMaleJump = new QSoundEffect(this);
@@ -60,7 +61,6 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent)
     state    = STATE_MENU;
     score    = 0;
     lives    = 3;
-    elapsed  = 0;
     showHint = false;
 
     fireboyHint.len   = 0;
@@ -178,7 +178,6 @@ void GameEngine::start()
 
     score   = 0;
     lives   = 3;
-    elapsed = 0;
 
     rebuildGateMap();
     rebuildTeleportMap();
@@ -233,7 +232,6 @@ void GameEngine::resetLevel()
     for (int i = 0; i < lv->buttonCount;  i++) lv->buttons[i].pressed   = false;
     for (int i = 0; i < lv->conveyorCount;i++) conveyorQueueInit(&lv->conveyors[i].queue);
 
-    elapsed = 0;
     rebuildGateMap();
     rebuildTeleportMap();
     buildEffectiveTileMap();
@@ -266,7 +264,6 @@ void GameEngine::nextLevel()
     for (int i = 0; i < lv->buttonCount;  i++) lv->buttons[i].pressed   = false;
     for (int i = 0; i < lv->conveyorCount;i++) conveyorQueueInit(&lv->conveyors[i].queue);
 
-    elapsed = 0;
     rebuildGateMap();
     rebuildTeleportMap();
     buildEffectiveTileMap();
@@ -394,8 +391,6 @@ void GameEngine::tick()
     if (state != STATE_PLAYING) return;
     LevelData* lv = currentLevel();
     if (!lv) return;
-
-    elapsed += TICK_MS / 1000.0f;
 
     // Button -> Gate logic must happen BEFORE physics so gates are correct
     checkButtons();
@@ -806,7 +801,7 @@ void GameEngine::checkDoors()
     // If both doors are open, level is complete
     if (lv->doors[0].open && lv->doors[1].open)
     {
-        score += qMax(0, 500 - (int)(elapsed * 5));
+        score += 500;
         emit scoreChanged(score);
 
         // Win event has priority 1

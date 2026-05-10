@@ -171,8 +171,21 @@ void GameWindow::buildUI()
     btnSubmit->setObjectName("btnSubmit");
     btnSubmit->setFixedSize(200, 50);
     nl->addWidget(btnSubmit, 0, Qt::AlignCenter);
+
+    QPushButton* btnNameLB = new QPushButton("Leaderboard");
+    btnNameLB->setObjectName("btnSecondary");
+    btnNameLB->setFixedSize(200, 50);
+    nl->addWidget(btnNameLB, 0, Qt::AlignCenter);
+
+    QPushButton* btnNameQuit = new QPushButton("Quit");
+    btnNameQuit->setObjectName("btnQuit");
+    btnNameQuit->setFixedSize(200, 50);
+    nl->addWidget(btnNameQuit, 0, Qt::AlignCenter);
+
     connect(btnSubmit, &QPushButton::clicked, this, &GameWindow::submitName);
     connect(nameInput, &QLineEdit::returnPressed, this, &GameWindow::submitName);
+    connect(btnNameLB, &QPushButton::clicked, this, &GameWindow::showLeaderboard);
+    connect(btnNameQuit, &QPushButton::clicked, qApp, &QApplication::quit);
 
     stack->addWidget(namePage);
 
@@ -183,6 +196,7 @@ void GameWindow::buildUI()
 // ── Screen Transitions ────────────────────────────────────────
 void GameWindow::startGame() 
 { 
+    eng->levels.current = eng->levels.head;
     stack->setCurrentIndex(0); 
     renderer->setFocus(); // ensure key presses go to the game
     eng->start(); 
@@ -220,12 +234,12 @@ void GameWindow::onStateChanged(int s)
     // If the game ended, save the score automatically
     if (s == STATE_WIN || s == STATE_GAMEOVER) {
         int levelNum = eng->levels.current ? eng->levels.current->data.num : 1;
-        saveScore(currentPlayerName, eng->score, levelNum, eng->elapsed);
+        saveScore(currentPlayerName, eng->score, levelNum);
     }
 }
 
 // ── Leaderboard Logic ─────────────────────────────────────────
-void GameWindow::saveScore(const QString& name, int score, int level, float time) 
+void GameWindow::saveScore(const QString& name, int score, int level) 
 {
     // Add new score if we have room
     if (scoreCount < MAX_SCORES) {
@@ -234,7 +248,14 @@ void GameWindow::saveScore(const QString& name, int score, int level, float time
         e.name[31] = 0;
         e.score   = score; 
         e.level   = level; 
-        e.timeSec = time;
+    } else {
+        if (score > scores[MAX_SCORES - 1].score) {
+            ScoreEntry& e = scores[MAX_SCORES - 1];
+            strncpy(e.name, name.toUtf8().constData(), 31); 
+            e.name[31] = 0;
+            e.score   = score; 
+            e.level   = level; 
+        }
     }
     
     // Sort all scores highest to lowest using QuickSort
@@ -246,7 +267,7 @@ void GameWindow::saveScore(const QString& name, int score, int level, float time
         QTextStream out(&f);
         for (int i = 0; i < scoreCount; i++) {
             out << scores[i].name << "," << scores[i].score << "," 
-                << scores[i].level << "," << scores[i].timeSec << "\n";
+                << scores[i].level << "\n";
         }
     }
 }
@@ -260,11 +281,10 @@ void GameWindow::loadScores()
     QTextStream in(&f);
     while (!in.atEnd() && scoreCount < MAX_SCORES) {
         QStringList p = in.readLine().split(",");
-        if (p.size() < 4) continue;
+        if (p.size() < 3) continue;
         strncpy(scores[scoreCount].name, p[0].toUtf8().constData(), 31);
         scores[scoreCount].score   = p[1].toInt();
         scores[scoreCount].level   = p[2].toInt();
-        scores[scoreCount].timeSec = p[3].toFloat();
         scoreCount++;
     }
     if (scoreCount > 0) quickSort(scores, 0, scoreCount - 1);
@@ -300,8 +320,13 @@ void GameWindow::keyPressEvent(QKeyEvent* e)
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Space) {
         if (s == STATE_MENU)   { startGame(); return; }
         if (s == STATE_PAUSED) { eng->resume(); return; }
-        if (s == STATE_WIN && eng->levels.current && eng->levels.current->next) { 
-            eng->nextLevel(); 
+        if (s == STATE_WIN) {
+            if (eng->levels.current && eng->levels.current->next) { 
+                eng->nextLevel(); 
+            } else {
+                stack->setCurrentIndex(3); // Go to name screen
+                eng->state = STATE_MENU;
+            }
             return; 
         }
     }

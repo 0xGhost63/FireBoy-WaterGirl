@@ -24,7 +24,6 @@ public:
     int   state;
     int   score;
     int   lives;
-    float elapsed;
     bool  showHint;
 
     // Players

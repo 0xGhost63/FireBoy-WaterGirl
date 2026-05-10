@@ -48,6 +48,6 @@ private:
 
     void buildUI();
     void refreshLeaderboard();
-    void saveScore(const QString& name, int score, int level, float time);
+    void saveScore(const QString& name, int score, int level);
     void loadScores();
 };

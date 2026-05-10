@@ -26,6 +26,7 @@ QLabel#titleLabel {
     font-weight: 900;
     color: #ffcc00;
     padding: 8px 0px;
+    background: transparent;
 }
 
 QLabel#subLabel {
@@ -33,6 +34,7 @@ QLabel#subLabel {
     color: #8899aa;
     letter-spacing: 3px;
     font-weight: 600;
+    background: transparent;
 }
 
 QLabel#controlsLabel {

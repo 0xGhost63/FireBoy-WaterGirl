@@ -477,7 +477,7 @@ void GameRenderer::drawHUD(QPainter& p)
     p.setPen(QColor(160,210,255));
     LevelData* lv = eng->currentLevel();
     p.drawText(bar.adjusted(0,2,-8,0), Qt::AlignVCenter|Qt::AlignRight,
-               QString("Lvl %1  |  %2s").arg(lv ? lv->num : 0).arg((int)eng->elapsed));
+               QString("Lvl %1").arg(lv ? lv->num : 0));
                
     // Controls bar at bottom
     QFont sf("Arial", qMax(6,(int)(8*sy)));
@@ -512,11 +512,11 @@ void GameRenderer::drawOverlay(QPainter& p)
         break;
     case STATE_WIN:
         if (eng->levels.current && eng->levels.current->next) { 
-            title = "Level Clear!"; 
+            title = "FIN !"; 
             sub   = QString("Score: %1\nEnter \u2192 Next Level   P/N \u2192 Prev/Next").arg(eng->score); 
         } else { 
             title = "You Win! ";    
-            sub   = QString("Final Score: %1\nR \u2192 Restart").arg(eng->score); 
+            sub   = QString("Final Score: %1\nEnter \u2192 Continue").arg(eng->score); 
         }
         col = QColor(80,255,120); 
         break;

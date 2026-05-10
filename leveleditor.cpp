@@ -444,7 +444,7 @@ public:
 
 private slots:
     void generateCode() {
-        codeView->setPlainText(canvas->generateCode("Custom Level", 4, 0, doorHeightSpin->value()));
+        codeView->setPlainText(canvas->generateCode("Custom Level", 5, 0, doorHeightSpin->value()));
     }
 
     void loadCode() {

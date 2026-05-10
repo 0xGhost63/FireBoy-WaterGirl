@@ -124,7 +124,6 @@ struct ScoreEntry {
     char  name[32];
     int   score;
     int   level;
-    float timeSec;
 };
 
 // ── Sparse Matrix Map Structures ──────────────────────────────
