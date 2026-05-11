@@ -486,7 +486,7 @@ void GameRenderer::drawHUD(QPainter& p)
     QRectF ctrl(ox, oy+MAP_H*sy-16*sy, MAP_W*sx, 16*sy);
     p.fillRect(ctrl, QColor(0,0,0,100));
     p.drawText(ctrl, Qt::AlignCenter,
-               "Fireboy: ← ↑ →    Watergirl: A W D    Hint: H    Undo: U    Redo: R    Pause: Esc");
+               "Fireboy: \u2190 \u2191 \u2192    Watergirl: A W D    Hint: H    Undo: U    Redo: R    Pause: Esc");
 }
 
 void GameRenderer::drawOverlay(QPainter& p) 
@@ -512,23 +512,23 @@ void GameRenderer::drawOverlay(QPainter& p)
         break;
     case STATE_WIN:
         if (eng->levels.current && eng->levels.current->next) { 
-            title = "FIN !"; 
-            sub   = QString("Score: %1\nEnter \u2192 Next Level   P/N \u2192 Prev/Next").arg(eng->score); 
+            title = "Level Complete!"; 
+            sub   = QString("Total Score: %1\nEnter \u2192 Next Level   P/N \u2192 Prev/Next").arg(eng->score); 
         } else { 
             title = "You Win! ";    
-            sub   = QString("Final Score: %1\nEnter \u2192 Continue").arg(eng->score); 
+            sub   = QString("Total Score: %1\nEnter \u2192 Continue").arg(eng->score); 
         }
         col = QColor(80,255,120); 
         break;
     case STATE_DEAD:
         title = "Oh No!"; 
         col   = QColor(255,80,80);
-        sub   = QString("Lives Left: %1\nR → Retry").arg(eng->lives); 
+        sub   = QString("Lives Left: %1\nR \u2192 Retry").arg(eng->lives); 
         break;
     case STATE_GAMEOVER:
         title = "Game Over"; 
         col   = QColor(255,60,60);
-        sub   = QString("Final Score: %1\nR → Restart").arg(eng->score); 
+        sub   = QString("Final Score: %1\nR \u2192 Restart").arg(eng->score); 
         break;
     default: 
         return;

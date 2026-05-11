@@ -178,6 +178,7 @@ void GameEngine::start()
 
     score   = 0;
     lives   = 3;
+    levelBaseScore = 0;
 
     rebuildGateMap();
     rebuildTeleportMap();
@@ -257,6 +258,9 @@ void GameEngine::nextLevel()
     LevelData* lv = currentLevel();
     playerInit(&fireboy,   FIREBOY,   lv->fireboyStartX,   lv->fireboyStartY);
     playerInit(&watergirl, WATERGIRL, lv->watergirlStartX, lv->watergirlStartY);
+
+    // New level starts — record the score baseline so we can show per-level gain
+    levelBaseScore = score;
 
     for (int i = 0; i < lv->gemCount;      i++) lv->gems[i].collected    = false;
     for (int i = 0; i < 2;                 i++) lv->doors[i].open        = false;

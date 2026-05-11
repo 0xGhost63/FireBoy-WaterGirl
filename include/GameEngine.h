@@ -23,6 +23,7 @@ public:
     // State
     int   state;
     int   score;
+    int   levelBaseScore; // Cumulative score at the start of the current level
     int   lives;
     bool  showHint;
 

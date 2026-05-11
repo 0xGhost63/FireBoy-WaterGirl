@@ -231,8 +231,10 @@ void GameWindow::onFrameReady()
 void GameWindow::onStateChanged(int s) 
 {
     renderer->update();
-    // If the game ended, save the score automatically
-    if (s == STATE_WIN || s == STATE_GAMEOVER) {
+    // Save score only on game over OR on final level win (no next level)
+    bool isFinalWin = (s == STATE_WIN) &&
+                      !(eng->levels.current && eng->levels.current->next);
+    if (isFinalWin || s == STATE_GAMEOVER) {
         int levelNum = eng->levels.current ? eng->levels.current->data.num : 1;
         saveScore(currentPlayerName, eng->score, levelNum);
     }
@@ -321,13 +323,15 @@ void GameWindow::keyPressEvent(QKeyEvent* e)
         if (s == STATE_MENU)   { startGame(); return; }
         if (s == STATE_PAUSED) { eng->resume(); return; }
         if (s == STATE_WIN) {
-            if (eng->levels.current && eng->levels.current->next) { 
-                eng->nextLevel(); 
+            if (eng->levels.current && eng->levels.current->next) {
+                // More levels remain — advance
+                eng->nextLevel();
             } else {
-                stack->setCurrentIndex(3); // Go to name screen
+                // Final level complete — go straight to the leaderboard
                 eng->state = STATE_MENU;
+                showLeaderboard();
             }
-            return; 
+            return;
         }
     }
     
