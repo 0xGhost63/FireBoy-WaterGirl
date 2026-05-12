@@ -1,9 +1,3 @@
-Hello! I have simplified the core codebase for your viva presentation.
-
-The goal was to make the C++ code much easier to read, explain, and understand for a beginner, while keeping the game logic 100% identical.
-
-Here are the changes made to the files:
-
 1. src/main.cpp
 - Added clear, step-by-step comments explaining how a Qt Application starts.
 - Removed unused or overly complex code to leave only the 4 essential steps to start the game.
@@ -40,9 +34,17 @@ Here are the changes made to the files:
 - Completely removed the `MovingPlatform` (moving tiles) logic from `GameObjects.h`, `GameEngine`, `GameRenderer`, `Player`, and `Levels.cpp` as it was scaffolding no longer used in the actual game levels.
 - Completely removed the unused custom `Stack` DSA structure from `DSA.h` and `DSA.cpp` since the game now primarily relies on Queues and Linked Lists for event and history management.
 
+8. Removed the Queue from DSA.h and DSA.cpp
+as we are using priority queue for event processing
+
+9. Removed event "Toggle_Gate"
+as we are using buttons to open and close gates
+
+10. Removed all unused variables
+
 Overall:
 - Variable names were kept consistent but spacing and alignment was vastly improved.
 - No new complex C++ features were introduced.
 - Logic is preserved exactly as it was, but is now laid out in a way that allows you to easily point to a block of code during your viva and say exactly what it does.
 
-Good luck with your viva!
+
