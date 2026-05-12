@@ -4,37 +4,21 @@
 // ================================================================
 // DSA.h  –  All Data Structures & Algorithms used in the game
 // ================================================================
-//  1. Queue       – game event pipeline (FIFO / circular)
-//  2. LinkedList  – level catalogue (doubly linked) + Undo/Redo
-//  3. QuickSort   – leaderboard sort (all list sizes)
-//  4. LinearSearch– gem proximity detection
-//  5. BinarySearch– find player rank in leaderboard
-//  6. Dijkstra    – grid-based hint pathfinding through gems
-//  7. Priority Queue (Min-Heap) – events + nearest gem finder
-//  8. Hash Map    – O(1) button→gate lookup
-//  9. BST Map     – tile storage & lookup
-// 10. State History (Doubly Linked List) – Undo/Redo
-// 11. Singly Linked List – gem collection trail
+//  1. Doubly Linked List  – level catalogue + Undo/Redo history
+//  2. QuickSort           – leaderboard sort
+//  3. Linear Search       – gem proximity detection
+//  4. Binary Search       – player rank in leaderboard
+//  5. Dijkstra            – grid-based hint pathfinding
+//  6. Priority Queue (Min-Heap) – event processing by urgency
+//  7. Gate Hash Map       – O(1) button→gate lookup
+//  8. Teleport Hash Map   – O(1) pad ID→index lookup
+//  9. BST Map             – sparse tile storage & lookup
+// 10. State History       – Undo/Redo snapshots
+// 11. Singly Linked List  – gem collection trail
 // ================================================================
 
 // ── Limits ───────────────────────────────────────────────────
-#define QUEUE_MAX  128
 #define MAX_HINT_PATH   400
-
-// ================================================================
-// 2. QUEUE  (FIFO – First In, First Out, circular array)
-// Used to process game events (gem collect, death, win…)
-// ================================================================
-struct EventQueue {
-    GameEvent items[QUEUE_MAX];
-    int front, rear, count;
-};
-
-void      queueInit    (EventQueue* q);
-bool      queueIsEmpty (EventQueue* q);
-bool      queueIsFull  (EventQueue* q);
-void      queueEnqueue (EventQueue* q, GameEvent e);
-GameEvent queueDequeue (EventQueue* q);
 
 // ================================================================
 // 3. DOUBLY LINKED LIST

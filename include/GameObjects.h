@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 
 // ── Tile types ──────────────────────────────────────────────
 #define TILE_EMPTY    0
@@ -23,11 +22,10 @@ using namespace std;
 #define STATE_GAMEOVER 5
 
 // ── Event types ─────────────────────────────────────────────
-#define EVT_GEM_COLLECT    1
-#define EVT_PLAYER_DEAD    2
-#define EVT_LEVEL_COMPLETE 3
-#define EVT_GATE_TOGGLE    4
-#define EVT_TELEPORT       5
+#define EVT_GEM_COLLECT    1   // player picked up a gem
+#define EVT_PLAYER_DEAD    2   // player touched a deadly hazard
+#define EVT_LEVEL_COMPLETE 3   // both doors opened at the same time
+#define EVT_TELEPORT       4   // player stepped on a teleport pad
 
 // ── Map & size constants ─────────────────────────────────────
 #define TILE_SIZE     40

@@ -45,7 +45,6 @@ GameRenderer::GameRenderer(GameEngine* e, QWidget* parent)
     // Load UI and hint icons
     pmUndo       = QPixmap("assets/images/undo.png");
     pmRedo       = QPixmap("assets/images/redo.png");
-    pmArrow      = QPixmap("assets/images/arrow.png");
     pmTeleportFire  = QPixmap("assets/images/portal_fire.png");
     pmTeleportWater = QPixmap("assets/images/portal_water.png");
     pmFireArrow  = QPixmap("assets/images/fire_arrow.png");

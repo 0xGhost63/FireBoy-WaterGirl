@@ -61,10 +61,6 @@ public:
     // DSA: Min-Heap – nearest gem index per player (-1 = none)
     int nearestFbGem, nearestWgGem;
 
-    // Cheat code tracker
-
-    // Effective tilemap (base tiles + closed gates overlaid)
-
 
     LevelData* currentLevel();
 
@@ -82,6 +78,8 @@ private:
     void buildEffectiveTileMap();
     void rebuildGateMap();
     void rebuildTeleportMap();
+    void resetLevelState();                      // resets gems/doors/gates/conveyors + rebuilds maps
+    void applySnapshot(const GameSnapshot& snap);// restores player+gem state from a history snapshot
     void checkButtons();
     void checkConveyors();
     void checkTeleports(Player* p);

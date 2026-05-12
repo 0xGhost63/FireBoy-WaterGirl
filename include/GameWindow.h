@@ -42,7 +42,7 @@ private:
     QAudioOutput* audioOutput;
 #endif
 
-    // Leaderboard data (DSA: sorted with QuickSort/BubbleSort)
+    // Leaderboard data (sorted with QuickSort, searched with BinarySearch)
     ScoreEntry scores[MAX_SCORES];
     int        scoreCount;
 

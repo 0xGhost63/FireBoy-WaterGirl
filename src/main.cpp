@@ -27,42 +27,33 @@ int main(int argc, char* argv[])
 
     int splash_timer = 3000; // Time in milliseconds (3 seconds)
 
-    if (splash_timer > 0) 
-    {
-        QPixmap splashPix("assets/images/splash.png");
-        if (splashPix.isNull()) {
-            splashPix = QPixmap(800, 600);
-            splashPix.fill(Qt::black);
-        } else {
-            splashPix = splashPix.scaled(800, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        }
-
-        QSplashScreen* splash = new QSplashScreen(splashPix);
-        splash->show();
-        app.processEvents();
-
-        QElapsedTimer timer;
-        timer.start();
-
-        // Initialize the game window while splash is shown
-        GameWindow* win = new GameWindow();
-
-        // Wait for the remaining time if initialization was faster than splash_timer
-        qint64 elapsed = timer.elapsed();
-        if (elapsed < splash_timer) {
-            QThread::msleep(splash_timer - elapsed);
-        }
-
-        splash->finish(win);
-        win->show();
-        splash->deleteLater();
-    } 
-    else 
-    {
-        // Step 3: Create and show the game window directly
-        GameWindow* win = new GameWindow();
-        win->show();
+    QPixmap splashPix("assets/images/splash.png");
+    if (splashPix.isNull()) {
+        splashPix = QPixmap(800, 600);
+        splashPix.fill(Qt::black);
+    } else {
+        splashPix = splashPix.scaled(800, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
+
+    QSplashScreen* splash = new QSplashScreen(splashPix);
+    splash->show();
+    app.processEvents();
+
+    QElapsedTimer timer;
+    timer.start();
+
+    // Initialize the game window while splash is shown
+    GameWindow* win = new GameWindow();
+
+    // Wait for the remaining time if initialization was faster than splash_timer
+    qint64 elapsed = timer.elapsed();
+    if (elapsed < splash_timer) {
+        QThread::msleep(splash_timer - elapsed);
+    }
+
+    splash->finish(win);
+    win->show();
+    splash->deleteLater();
 
     // Step 4: Start the Qt event loop
     return app.exec();

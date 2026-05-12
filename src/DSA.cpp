@@ -5,46 +5,7 @@ using namespace std;
 
 
 // ════════════════════════════════════════════════════════════
-// 2. QUEUE (circular array)
-// ════════════════════════════════════════════════════════════
-void queueInit(EventQueue* q)
-{
-    q->front = 0;
-    q->rear  = -1;
-    q->count = 0;
-}
-
-bool queueIsEmpty(EventQueue* q)
-{
-    return q->count == 0;
-}
-
-bool queueIsFull(EventQueue* q)
-{
-    return q->count == QUEUE_MAX;
-}
-
-void queueEnqueue(EventQueue* q, GameEvent e)
-{
-    if (queueIsFull(q)) return;
-    q->rear = (q->rear + 1) % QUEUE_MAX;
-    q->items[q->rear] = e;
-    q->count++;
-}
-
-GameEvent queueDequeue(EventQueue* q)
-{
-    GameEvent e;
-    e.type = 0;
-    if (queueIsEmpty(q)) return e;
-    e = q->items[q->front];
-    q->front = (q->front + 1) % QUEUE_MAX;
-    q->count--;
-    return e;
-}
-
-// ════════════════════════════════════════════════════════════
-// 3. DOUBLY LINKED LIST
+// 1. DOUBLY LINKED LIST
 // ════════════════════════════════════════════════════════════
 void listInit(LevelList* lst)
 {

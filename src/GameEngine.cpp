@@ -99,6 +99,49 @@ void GameEngine::rebuildTeleportMap()
         teleportMapInsert(&teleportMap, lv->pads[i].id, i);
 }
 
+// ── resetLevelState ───────────────────────────────────────────
+// Resets all per-level objects (gems, doors, gates, buttons, conveyor
+// queues) back to their initial state, then rebuilds the three lookup
+// structures (gate map, teleport map, effective tile map).
+// Called by start(), resetLevel(), and nextLevel().
+void GameEngine::resetLevelState()
+{
+    LevelData* lv = currentLevel();
+    if (!lv) return;
+
+    for (int i = 0; i < lv->gemCount;        i++) lv->gems[i].collected  = false;
+    for (int i = 0; i < 2;                   i++) lv->doors[i].open      = false;
+    for (int i = 0; i < lv->gateCount;       i++) { lv->gates[i].open = false; lv->gates[i].openAnim = 0; }
+    for (int i = 0; i < lv->buttonCount;     i++) lv->buttons[i].pressed = false;
+    for (int i = 0; i < lv->conveyorCount;   i++) conveyorQueueInit(&lv->conveyors[i].queue);
+
+    rebuildGateMap();
+    rebuildTeleportMap();
+    buildEffectiveTileMap();
+}
+
+// ── applySnapshot ────────────────────────────────────────────
+// Restores player positions, velocities, on-ground flag, gem states,
+// and score from a saved snapshot. Used by both Undo and Redo.
+void GameEngine::applySnapshot(const GameSnapshot& snap)
+{
+    fireboy.x        = snap.fbX;  fireboy.vx       = snap.fbVX;
+    fireboy.y        = snap.fbY;  fireboy.vy       = snap.fbVY;
+    fireboy.onGround = snap.fbOnGround;
+
+    watergirl.x        = snap.wgX;  watergirl.vx       = snap.wgVX;
+    watergirl.y        = snap.wgY;  watergirl.vy       = snap.wgVY;
+    watergirl.onGround = snap.wgOnGround;
+
+    LevelData* lv = currentLevel();
+    if (lv)
+        for (int i = 0; i < snap.gemCount && i < lv->gemCount; i++)
+            lv->gems[i].collected = snap.gemCollected[i];
+
+    score = snap.score;
+    emit scoreChanged(score);
+}
+
 // Build effective tilemap: base tiles + closed gates overlaid as SOLID
 void GameEngine::buildEffectiveTileMap()
 {
@@ -168,29 +211,22 @@ void GameEngine::start()
     playerInit(&fireboy,   FIREBOY,   lv->fireboyStartX,   lv->fireboyStartY);
     playerInit(&watergirl, WATERGIRL, lv->watergirlStartX, lv->watergirlStartY);
 
-    // Reset all gems, doors, gates, buttons, conveyors, teleport cooldowns
-    for (int i = 0; i < lv->gemCount;      i++) lv->gems[i].collected    = false;
-    for (int i = 0; i < 2;                 i++) lv->doors[i].open        = false;
-    for (int i = 0; i < lv->gateCount;    i++) { lv->gates[i].open = false; lv->gates[i].openAnim = 0; }
-    for (int i = 0; i < lv->buttonCount;  i++) lv->buttons[i].pressed   = false;
-    for (int i = 0; i < lv->conveyorCount;i++) conveyorQueueInit(&lv->conveyors[i].queue);
-    for (int i = 0; i < lv->teleportCount;i++) lv->pads[i].cooldown     = 0.0f;
+    // Reset teleport cooldowns (fresh start only)
+    for (int i = 0; i < lv->teleportCount; i++) lv->pads[i].cooldown = 0.0f;
 
-    score   = 0;
-    lives   = 3;
+    score          = 0;
+    lives          = 3;
     levelBaseScore = 0;
 
-    rebuildGateMap();
-    rebuildTeleportMap();
-    buildEffectiveTileMap();
-
-    // Clear undo history at the start of each level
+    // Clear undo history and gem trail
     historyFree(&history);
     gemTrailFree(&gemTrail);
-    nearestFbGem = -1;
-    nearestWgGem = -1;
+    nearestFbGem  = -1;
+    nearestWgGem  = -1;
     snapTimer     = 0;
     undoRedoFlash = 0;
+
+    resetLevelState(); // resets gems, doors, gates, buttons, conveyors + rebuilds maps
 
     state = STATE_PLAYING;
     emit stateChanged(state);
@@ -227,20 +263,11 @@ void GameEngine::resetLevel()
     playerInit(&fireboy,   FIREBOY,   lv->fireboyStartX,   lv->fireboyStartY);
     playerInit(&watergirl, WATERGIRL, lv->watergirlStartX, lv->watergirlStartY);
 
-    for (int i = 0; i < lv->gemCount;      i++) lv->gems[i].collected    = false;
-    for (int i = 0; i < 2;                 i++) lv->doors[i].open        = false;
-    for (int i = 0; i < lv->gateCount;    i++) { lv->gates[i].open = false; lv->gates[i].openAnim = 0; }
-    for (int i = 0; i < lv->buttonCount;  i++) lv->buttons[i].pressed   = false;
-    for (int i = 0; i < lv->conveyorCount;i++) conveyorQueueInit(&lv->conveyors[i].queue);
-
-    rebuildGateMap();
-    rebuildTeleportMap();
-    buildEffectiveTileMap();
+    resetLevelState();
 
     state = STATE_PLAYING;
     emit stateChanged(state);
     if (!timer->isActive()) timer->start();
-    
 }
 
 void GameEngine::nextLevel()
@@ -259,18 +286,9 @@ void GameEngine::nextLevel()
     playerInit(&fireboy,   FIREBOY,   lv->fireboyStartX,   lv->fireboyStartY);
     playerInit(&watergirl, WATERGIRL, lv->watergirlStartX, lv->watergirlStartY);
 
-    // New level starts — record the score baseline so we can show per-level gain
-    levelBaseScore = score;
+    levelBaseScore = score; // record baseline so win screen can show per-level gain
 
-    for (int i = 0; i < lv->gemCount;      i++) lv->gems[i].collected    = false;
-    for (int i = 0; i < 2;                 i++) lv->doors[i].open        = false;
-    for (int i = 0; i < lv->gateCount;    i++) { lv->gates[i].open = false; lv->gates[i].openAnim = 0; }
-    for (int i = 0; i < lv->buttonCount;  i++) lv->buttons[i].pressed   = false;
-    for (int i = 0; i < lv->conveyorCount;i++) conveyorQueueInit(&lv->conveyors[i].queue);
-
-    rebuildGateMap();
-    rebuildTeleportMap();
-    buildEffectiveTileMap();
+    resetLevelState();
 
     state = STATE_PLAYING;
     emit stateChanged(state);
@@ -294,30 +312,11 @@ void GameEngine::keyPress(int key)
 
     case Qt::Key_U:
     {
-        // UNDO – rewind 500ms
+        // UNDO – rewind to the previous 500ms snapshot
         GameSnapshot snap;
         if (historyUndo(&history, &snap))
         {
-            fireboy.x        = snap.fbX;
-            fireboy.y        = snap.fbY;
-            fireboy.vx       = snap.fbVX;
-            fireboy.vy       = snap.fbVY;
-            fireboy.onGround = snap.fbOnGround;
-
-            watergirl.x        = snap.wgX;
-            watergirl.y        = snap.wgY;
-            watergirl.vx       = snap.wgVX;
-            watergirl.vy       = snap.wgVY;
-            watergirl.onGround = snap.wgOnGround;
-
-            LevelData* lv = currentLevel();
-            if (lv)
-            {
-                for (int i = 0; i < snap.gemCount && i < lv->gemCount; i++)
-                    lv->gems[i].collected = snap.gemCollected[i];
-            }
-            score = snap.score;
-            emit scoreChanged(score);
+            applySnapshot(snap);
             undoRedoFlash   = 1.2f;
             lastUndoWasUndo = true;
             undoCooldown    = 1.5f;
@@ -328,30 +327,11 @@ void GameEngine::keyPress(int key)
 
     case Qt::Key_R:
     {
-        // REDO – forward one snapshot
+        // REDO – step forward one snapshot
         GameSnapshot snap;
         if (historyRedo(&history, &snap))
         {
-            fireboy.x        = snap.fbX;
-            fireboy.y        = snap.fbY;
-            fireboy.vx       = snap.fbVX;
-            fireboy.vy       = snap.fbVY;
-            fireboy.onGround = snap.fbOnGround;
-
-            watergirl.x        = snap.wgX;
-            watergirl.y        = snap.wgY;
-            watergirl.vx       = snap.wgVX;
-            watergirl.vy       = snap.wgVY;
-            watergirl.onGround = snap.wgOnGround;
-
-            LevelData* lv = currentLevel();
-            if (lv)
-            {
-                for (int i = 0; i < snap.gemCount && i < lv->gemCount; i++)
-                    lv->gems[i].collected = snap.gemCollected[i];
-            }
-            score = snap.score;
-            emit scoreChanged(score);
+            applySnapshot(snap);
             undoRedoFlash   = 1.2f;
             lastUndoWasUndo = false;
             undoCooldown    = 1.5f;
@@ -373,7 +353,6 @@ void GameEngine::keyPress(int key)
         if (listNext(&levels)) { start(); }
         break;
     }
-
     default: break;
     }
 }
