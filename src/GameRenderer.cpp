@@ -108,14 +108,8 @@ void GameRenderer::paintEvent(QPaintEvent*)
             int pw = (int)(TILE_SIZE * sx);
             int ph = (int)(TILE_SIZE * sy);
             
-            QPixmap* pm = (pad.id % 2 == 0) ? &pmTeleportFire : &pmTeleportWater;
-            if (!pm->isNull()) {
-                p.drawPixmap(QRect(px, py, pw, ph), *pm);
-            } else {
-                p.setBrush((pad.id % 2 == 0) ? QColor(255, 50, 50, 150) : QColor(50, 50, 255, 150));
-                p.setPen(Qt::white);
-                p.drawEllipse(px, py, pw, ph);
-            }
+            QPixmap& pm = (pad.id % 2 == 0) ? pmTeleportFire : pmTeleportWater;
+            p.drawPixmap(QRect(px, py, pw, ph), pm);
         }
         
         // 4. Draw interactables
@@ -167,30 +161,14 @@ void GameRenderer::paintEvent(QPaintEvent*)
         // 8. Draw Undo / Redo flash banner
         if (eng->undoRedoFlash > 0) {
             QPixmap& pm = eng->lastUndoWasUndo ? pmUndo : pmRedo;
-            float alpha = qMin(1.0f, eng->undoRedoFlash); // fade out effect
-
-            int bw, bh;
-            if (!pm.isNull()) {
-                bw = (int)(width() * 0.40f);
-                bh = (int)(bw * ((float)pm.height() / pm.width()));
-            } else {
-                bw = (int)(width() * 0.38f); 
-                bh = (int)(56 * sy);
-            }
+            float alpha = qMin(1.0f, eng->undoRedoFlash);
+            int bw = (int)(width() * 0.40f);
+            int bh = (int)(bw * ((float)pm.height() / pm.width()));
             int bx = (width()  - bw) / 2;
             int by = (int)(height() * 0.10f);
-            QRect bannerRect(bx, by, bw, bh);
-
             p.setOpacity(alpha);
-            if (!pm.isNull()) {
-                p.drawPixmap(bannerRect, pm);
-            } else {
-                p.fillRect(bannerRect, QColor(60, 0, 120));
-                p.setPen(Qt::white);
-                p.setFont(QFont("Inter", 15 * sy, QFont::Bold));
-                p.drawText(bannerRect, Qt::AlignCenter, eng->lastUndoWasUndo ? "UNDO" : "REDO");
-            }
-            p.setOpacity(1.0f); // restore full opacity
+            p.drawPixmap(QRect(bx, by, bw, bh), pm);
+            p.setOpacity(1.0f);
         }
     }
     
@@ -210,11 +188,8 @@ void GameRenderer::drawBackground(QPainter& p)
     int bg = lv->bgStyle;
     
     // Draw image if available, else draw a solid colour
-    if (bg >= 0 && bg < 3 && !pmBg[bg].isNull()) {
+    if (bg >= 0 && bg < 3)
         p.drawPixmap(area.toRect(), pmBg[bg]);
-    } else {
-        p.fillRect(area, QColor(20, 20, 30));
-    }
 }
 
 void GameRenderer::drawTiles(QPainter& p) 
@@ -229,15 +204,8 @@ void GameRenderer::drawTiles(QPainter& p)
             if (t == TILE_EMPTY) continue;
             
             QRectF tileRect(toSX(c*TILE_SIZE), toSY(r*TILE_SIZE), toSW(TILE_SIZE), toSH(TILE_SIZE));
-            if (t == TILE_SOLID) {
-                if (!pmTile.isNull()) {
-                    p.drawPixmap(tileRect.toRect(), pmTile);
-                } else {
-                    p.fillRect(tileRect, QColor(80,65,45));
-                    p.setPen(QPen(QColor(110,90,60), 1));
-                    p.drawRect(tileRect);
-                }
-            }
+            if (t == TILE_SOLID)
+                p.drawPixmap(tileRect.toRect(), pmTile);
         }
     }
 }
@@ -247,29 +215,16 @@ void GameRenderer::drawHazards(QPainter& p)
     LevelData* lv = eng->currentLevel();
     if (!lv) return;
     
-    // Animate the waves on the surface of the hazards
-    static float wave = 0; 
-    wave += 0.05f;
-    
     for (int i = 0; i < lv->hazardCount; i++) {
         HazardPool& h = lv->hazards[i];
         QRectF area(toSX(h.x), toSY(h.y), toSW(h.w), toSH(h.h));
 
         QPixmap* pm = nullptr;
-        if (h.type == TILE_LAVA)        pm = &pmLava;
+        if      (h.type == TILE_LAVA)   pm = &pmLava;
         else if (h.type == TILE_WATER)  pm = &pmWater;
         else if (h.type == TILE_POISON) pm = &pmPoison;
 
-        if (pm && !pm->isNull()) {
-            p.drawTiledPixmap(area.toRect(), *pm);
-        } else {
-            // Simple flat colour fallback if image fails to load
-            QColor col;
-            if (h.type == TILE_LAVA) col = QColor(255, 80, 0);
-            else if (h.type == TILE_WATER) col = QColor(0, 100, 255);
-            else col = QColor(0, 200, 50);
-            p.fillRect(area, col);
-        }
+        if (pm) p.drawTiledPixmap(area.toRect(), *pm);
     }
 }
 
@@ -286,16 +241,10 @@ void GameRenderer::drawGates(QPainter& p)
         if (visibleHeight < 2.0f) continue; // Fully open, don't draw
         
         QRectF area(toSX(g.x), toSY(g.y + g.h - visibleHeight), toSW(g.w), toSH(visibleHeight));
-        QPixmap* pm = (g.id % 2 == 0) ? &pmGateOrange : &pmGateBlue;
-        
-        if (!pm->isNull()) {
-            float ratio = visibleHeight / g.h;
-            QRect sourceRect(0, pm->height() * (1.0f - ratio), pm->width(), pm->height() * ratio);
-            p.drawPixmap(area, *pm, sourceRect);
-        } else {
-            QColor col = (g.id % 2 == 0) ? QColor(220, 120, 20) : QColor(40, 140, 220);
-            p.fillRect(area, col);
-        }
+        QPixmap& pm = (g.id % 2 == 0) ? pmGateOrange : pmGateBlue;
+        float ratio = visibleHeight / g.h;
+        QRect sourceRect(0, pm.height() * (1.0f - ratio), pm.width(), pm.height() * ratio);
+        p.drawPixmap(area, pm, sourceRect);
     }
 }
 
@@ -307,20 +256,11 @@ void GameRenderer::drawButtons(QPainter& p)
     for (int i = 0; i < lv->buttonCount; i++) {
         Button& btn = lv->buttons[i];
         QRectF area(toSX(btn.x), toSY(btn.y), toSW(btn.w), toSH(btn.h));
-        QPixmap* pm = (btn.gateId % 2 == 0) ? &pmBtnOrange : &pmBtnBlue;
-        
+        QPixmap& pm = (btn.gateId % 2 == 0) ? pmBtnOrange : pmBtnBlue;
         QRectF drawArea = area;
-        if (btn.pressed) {
-            // Push button down visually
+        if (btn.pressed) // push the button down visually when pressed
             drawArea.setTop(area.top() + area.height() * 0.4f);
-        }
-        
-        if (!pm->isNull()) {
-            p.drawPixmap(drawArea.toRect(), *pm);
-        } else {
-            QColor col = (btn.gateId % 2 == 0) ? QColor(220, 120, 20) : QColor(40, 140, 220);
-            p.fillRect(drawArea, col);
-        }
+        p.drawPixmap(drawArea.toRect(), pm);
     }
 }
 
@@ -333,20 +273,13 @@ void GameRenderer::drawConveyors(QPainter& p)
     anim += 0.08f;
 
     auto drawBelt = [&](QRectF area, float speed) {
-        if (!pmConveyor.isNull()) {
-            p.setClipRect(area);
-            float dir = (speed > 0) ? 1.0f : -1.0f;
-            float offset = fmodf(anim * toSW(40) * dir, toSW(TILE_SIZE));
-            
-            // Draw looping belt texture
-            for (float x = area.left() - toSW(TILE_SIZE) + offset; x < area.right() + toSW(TILE_SIZE); x += toSW(TILE_SIZE)) {
-                QRectF tileRect(x, area.top(), toSW(TILE_SIZE), toSH(TILE_SIZE));
-                p.drawPixmap(tileRect.toRect(), pmConveyor, pmConveyor.rect());
-            }
-            p.setClipping(false);
-        } else {
-            p.fillRect(area, QColor(80, 80, 90)); // Fallback grey belt
+        p.setClipRect(area);
+        float dir    = (speed > 0) ? 1.0f : -1.0f;
+        float offset = fmodf(anim * toSW(40) * dir, toSW(TILE_SIZE));
+        for (float x = area.left() - toSW(TILE_SIZE) + offset; x < area.right() + toSW(TILE_SIZE); x += toSW(TILE_SIZE)) {
+            p.drawPixmap(QRectF(x, area.top(), toSW(TILE_SIZE), toSH(TILE_SIZE)).toRect(), pmConveyor, pmConveyor.rect());
         }
+        p.setClipping(false);
     };
 
     // Draw manual conveyor regions
@@ -378,13 +311,7 @@ void GameRenderer::drawGems(QPainter& p)
         float bounce = sinf(g.animPhase) * 3.0f;
         QRectF area(toSX(g.x), toSY(g.y - bounce), toSW(20), toSH(20));
         QPixmap& pm = (g.owner == FIREBOY) ? pmGemFire : pmGemWater;
-        
-        if (!pm.isNull()) {
-            p.drawPixmap(area.toRect(), pm);
-        } else {
-            QColor col = (g.owner == FIREBOY) ? QColor(255,80,30) : QColor(40,150,255);
-            p.fillRect(area, col); // simple square fallback
-        }
+        p.drawPixmap(area.toRect(), pm);
     }
 }
 
@@ -397,19 +324,9 @@ void GameRenderer::drawDoors(QPainter& p)
         Door& d = lv->doors[i];
         QRectF area(toSX(d.x), toSY(d.y), toSW(TILE_SIZE), toSH(d.h));
         QPixmap& pm = (d.owner == FIREBOY) ? pmDoorFire : pmDoorWater;
-        
-        if (!pm.isNull()) {
-            p.drawPixmap(area.toRect(), pm, pm.rect());
-            if (d.open) {
-                // If open, draw a bright white glow over the door
-                p.fillRect(area, QColor(255, 255, 255, 60));
-            }
-        } else {
-            QColor col = (d.owner == FIREBOY) ? QColor(220,80,20) : QColor(30,120,220);
-            p.setBrush(d.open ? col.lighter(180) : QColor(40,40,40));
-            p.setPen(QPen(col, 3)); 
-            p.drawRoundedRect(area, 4, 4);
-        }
+        p.drawPixmap(area.toRect(), pm, pm.rect());
+        if (d.open)
+            p.fillRect(area, QColor(255, 255, 255, 60)); // bright glow when open
     }
 }
 
@@ -419,16 +336,7 @@ void GameRenderer::drawPlayer(QPainter& p, Player* pl)
     
     QRectF area(toSX(pl->x), toSY(pl->y), toSW(PLAYER_W), toSH(PLAYER_H));
     QPixmap& pm = (pl->type == FIREBOY) ? pmFireboy : pmWatergirl;
-    
-    if (!pm.isNull()) {
-        p.drawPixmap(area.toRect(), pm);
-    } else {
-        // Simple oval fallback if the PNG didn't load
-        QColor col = (pl->type == FIREBOY) ? QColor(255,80,0) : QColor(40,140,255);
-        p.setBrush(col);
-        p.setPen(Qt::NoPen); 
-        p.drawEllipse(area);
-    }
+    p.drawPixmap(area.toRect(), pm);
 }
 
 void GameRenderer::drawHints(QPainter& p) 
@@ -566,12 +474,7 @@ void GameRenderer::drawOverlay(QPainter& p)
                 }
                 
                 QPixmap& gemPm = (n->playerType == FIREBOY) ? pmGemFire : pmGemWater;
-                if (!gemPm.isNull()) {
-                    p.drawPixmap(QRect(drawX, rowY, iconW, iconH), gemPm);
-                } else {
-                    p.setPen(n->playerType == FIREBOY ? QColor(255,80,30) : QColor(30,140,255));
-                    p.drawText(QRect(drawX, rowY, iconW, iconH), Qt::AlignCenter, "G");
-                }
+                p.drawPixmap(QRect(drawX, rowY, iconW, iconH), gemPm);
                 drawX += iconW;
                 first = false;
                 n = n->next; // Move to next node in the linked list
