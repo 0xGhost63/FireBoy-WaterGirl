@@ -17,12 +17,19 @@
 // Sets up the main window, the game engine, and the media players.
 GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0)
 {
-    currentPlayerName = "Anonymous";
+    currentPlayerName = "PlayerX";
     setWindowTitle("Fireboy & Watergirl :)");
     resize(1000, 760);
-    
+
+    // Initialize the screen navigation stack (DSA: Stack)
+    screenStackInit(&screenHistory);
+
     // Create the game engine and connect its signals to our functions
     eng = new GameEngine(this);
+
+    // QT SIGNAL SLOT SYSTEM
+    // connecting Signals to our slots
+    // connect(WHO_FIRES, WHAT_EVENT, WHO_HANDLES, WHICH_METHOD)
     connect(eng, &GameEngine::frameReady,   this, &GameWindow::onFrameReady);
     connect(eng, &GameEngine::stateChanged, this, &GameWindow::onStateChanged);
 
@@ -34,7 +41,8 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0)
     bgMusic = new QMediaPlayer(this);
     bgMusic->setPlaylist(playlist);
     bgMusic->setVolume(50);
-    QTimer::singleShot(0, this, [this]() { if (bgMusic) bgMusic->play(); });
+    // Run playBGM() once after event loop starts
+    QTimer::singleShot(0, this, &GameWindow::playBGM);
 #else
     bgMusic = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
@@ -42,7 +50,8 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0)
     bgMusic->setSource(QUrl("qrc:/sounds/bgm.mp3"));
     audioOutput->setVolume(0.5);
     bgMusic->setLoops(-1);
-    QTimer::singleShot(0, this, [this]() { if (bgMusic) bgMusic->play(); });
+    // Run playBGM() once after event loop starts
+    QTimer::singleShot(0, this, &GameWindow::playBGM);
 #endif
 
     // Build the user interface and load previous scores
@@ -50,9 +59,43 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0)
     loadScores();
 }
 
+// ── playBGM ───────────────────────────────────────────────────
+// Starts the background music. Called once after the Qt event loop starts.
+void GameWindow::playBGM()
+{
+    if (bgMusic) {
+        bgMusic->play();
+    }
+}
+
+// ── Screen Navigation (DSA: Stack) ────────────────────────────
+// navigateTo: pushes the current screen onto the stack, then switches
+// navigateBack: pops the stack and goes to the previous screen
+void GameWindow::navigateTo(int screenIndex)
+{
+    int currentScreen = stack->currentIndex();
+    screenStackPush(&screenHistory, currentScreen);
+    stack->setCurrentIndex(screenIndex);
+}
+
+void GameWindow::navigateBack()
+{
+    int previousScreen = screenStackPop(&screenHistory);
+    if (previousScreen >= 0) {
+        stack->setCurrentIndex(previousScreen);
+    } else {
+        // Stack is empty — go to main menu as default
+        stack->setCurrentIndex(1);
+    }
+}
+
 // ── buildUI ───────────────────────────────────────────────────
-// Builds the 4 main screens (Game, Menu, Leaderboard, Name Entry)
-// using a QStackedWidget to easily switch between them.
+// Builds the 4 main screens using a QStackedWidget.
+// Screen indices:
+//   0 = Game Screen    (the actual gameplay)
+//   1 = Main Menu      (Play, Leaderboard, Quit buttons)
+//   2 = Leaderboard    (high scores table)
+//   3 = Name Entry     (player enters their name on first launch)
 void GameWindow::buildUI()
 {
     stack = new QStackedWidget(this);
@@ -70,16 +113,16 @@ void GameWindow::buildUI()
     QWidget* menuPage = new QWidget;
     menuPage->setObjectName("menuPage");
     QVBoxLayout* ml = new QVBoxLayout(menuPage);
-    ml->setAlignment(Qt::AlignCenter); 
+    ml->setAlignment(Qt::AlignCenter);
     ml->setSpacing(16);
 
     QLabel* title = new QLabel(" Fireboy  &  Watergirl");
-    title->setObjectName("titleLabel"); 
+    title->setObjectName("titleLabel");
     title->setAlignment(Qt::AlignCenter);
     ml->addWidget(title);
 
     QLabel* sub = new QLabel("Forest Temple Edition");
-    sub->setObjectName("subLabel"); 
+    sub->setObjectName("subLabel");
     sub->setAlignment(Qt::AlignCenter);
     ml->addWidget(sub);
     ml->addSpacing(24);
@@ -99,6 +142,7 @@ void GameWindow::buildUI()
     btnQuit->setObjectName("btnQuit");
     btnQuit->setFixedSize(240, 50);
     ml->addWidget(btnQuit, 0, Qt::AlignCenter);
+    // connect(WHO_FIRES, WHAT_EVENT, WHO_HANDLES, WHICH_METHOD)
 
     connect(btnPlay, &QPushButton::clicked, this, &GameWindow::startGame);
     connect(btnLB,   &QPushButton::clicked, this, &GameWindow::showLeaderboard);
@@ -110,7 +154,7 @@ void GameWindow::buildUI()
         " Fireboy : ← ↑ →<br>"
         " Watergirl : A W D<br>"
         "Hint path : H &nbsp;|&nbsp; Pause : Esc");
-    ctrl->setObjectName("ctrlLabel"); 
+    ctrl->setObjectName("ctrlLabel");
     ctrl->setAlignment(Qt::AlignCenter);
     ml->addWidget(ctrl);
     stack->addWidget(menuPage);
@@ -119,11 +163,11 @@ void GameWindow::buildUI()
     QWidget* lbPage = new QWidget;
     lbPage->setObjectName("lbPage");
     QVBoxLayout* ll = new QVBoxLayout(lbPage);
-    ll->setContentsMargins(40,30,40,30); 
+    ll->setContentsMargins(40,30,40,30);
     ll->setSpacing(14);
 
     QLabel* lbTitle = new QLabel("  Leaderboard");
-    lbTitle->setObjectName("titleLabel"); 
+    lbTitle->setObjectName("titleLabel");
     lbTitle->setAlignment(Qt::AlignCenter);
     ll->addWidget(lbTitle);
 
@@ -136,8 +180,9 @@ void GameWindow::buildUI()
     lbTable->setAlternatingRowColors(true);
     ll->addWidget(lbTable);
 
-    QPushButton* back = new QPushButton("◀  Back to Menu");
-    back->setObjectName("btnSecondary"); 
+    // Back button — always returns to the Main Menu (index 1)
+    QPushButton* back = new QPushButton("◀  Back");
+    back->setObjectName("btnSecondary");
     back->setFixedSize(200, 44);
     ll->addWidget(back, 0, Qt::AlignCenter);
     connect(back, &QPushButton::clicked, this, &GameWindow::showMenu);
@@ -147,16 +192,16 @@ void GameWindow::buildUI()
     QWidget* namePage = new QWidget;
     namePage->setObjectName("namePage");
     QVBoxLayout* nl = new QVBoxLayout(namePage);
-    nl->setAlignment(Qt::AlignCenter); 
+    nl->setAlignment(Qt::AlignCenter);
     nl->setSpacing(20);
 
     QLabel* nameTitle = new QLabel("Welcome to Fireboy & Watergirl!");
-    nameTitle->setObjectName("titleLabel"); 
+    nameTitle->setObjectName("titleLabel");
     nameTitle->setAlignment(Qt::AlignCenter);
     nl->addWidget(nameTitle);
 
     QLabel* nameSub = new QLabel("Please enter your player name:");
-    nameSub->setObjectName("subLabel"); 
+    nameSub->setObjectName("subLabel");
     nameSub->setAlignment(Qt::AlignCenter);
     nl->addWidget(nameSub);
 
@@ -190,76 +235,89 @@ void GameWindow::buildUI()
     stack->addWidget(namePage);
 
     // Start by showing the name entry screen
-    stack->setCurrentIndex(3); 
+    stack->setCurrentIndex(3);
 }
 
 // ── Screen Transitions ────────────────────────────────────────
-void GameWindow::startGame() 
-{ 
+void GameWindow::startGame()
+{
     eng->levels.current = eng->levels.head;
-    stack->setCurrentIndex(0); 
-    renderer->setFocus(); // ensure key presses go to the game
-    eng->start(); 
+    navigateTo(0);              // push current screen, switch to game
+    renderer->setFocus();       // ensure key presses go to the game
+    eng->start();
 }
 
-void GameWindow::showMenu() 
-{ 
-    stack->setCurrentIndex(1); 
+void GameWindow::showMenu()
+{
+    navigateTo(1);              // push current screen, switch to menu
 }
 
-void GameWindow::showLeaderboard() 
-{ 
-    refreshLeaderboard(); 
-    stack->setCurrentIndex(2); 
+void GameWindow::showLeaderboard()
+{
+    refreshLeaderboard();
+    navigateTo(2);              // push current screen, switch to leaderboard
 }
 
-void GameWindow::submitName() 
+void GameWindow::submitName()
 {
     QString name = nameInput->text().trimmed();
     if (!name.isEmpty()) {
         currentPlayerName = name;
     }
-    stack->setCurrentIndex(1); // Go to main menu
+    navigateTo(1);              // push current screen, switch to menu
 }
 
 // ── Game Engine Callbacks ─────────────────────────────────────
-void GameWindow::onFrameReady() 
-{ 
+void GameWindow::onFrameReady()
+{
     renderer->update(); // tell the renderer to redraw the screen
 }
 
-void GameWindow::onStateChanged(int s) 
+void GameWindow::onStateChanged(int s)
 {
     renderer->update();
-    // Save score only on game over OR on final level win (no next level)
-    bool isFinalWin = (s == STATE_WIN) &&
-                      !(eng->levels.current && eng->levels.current->next);
+
+    // Check if this is the final level win (no next level exists)
+    bool hasNextLevel = false;
+    if (eng->levels.current != nullptr) {
+        if (eng->levels.current->next != nullptr) {
+            hasNextLevel = true;
+        }
+    }
+    bool isFinalWin = (s == STATE_WIN) && !hasNextLevel;
+
+    // Save score on game over OR final level win
     if (isFinalWin || s == STATE_GAMEOVER) {
-        int levelNum = eng->levels.current ? eng->levels.current->data.num : 1;
+        int levelNum = 1;
+        if (eng->levels.current != nullptr) {
+            levelNum = eng->levels.current->data.num;
+        }
         saveScore(currentPlayerName, eng->score, levelNum);
     }
 }
 
 // ── Leaderboard Logic ─────────────────────────────────────────
-void GameWindow::saveScore(const QString& name, int score, int level) 
+void GameWindow::saveScore(const QString& name, int score, int level)
 {
     // Add new score if we have room
     if (scoreCount < MAX_SCORES) {
-        ScoreEntry& e = scores[scoreCount++];
-        strncpy(e.name, name.toUtf8().constData(), 31); 
+        ScoreEntry& e = scores[scoreCount];
+        strncpy(e.name, name.toUtf8().constData(), 31);
         e.name[31] = 0;
-        e.score   = score; 
-        e.level   = level; 
+        e.score = score;
+        e.level = level;
+        scoreCount++;
     } else {
+        // Replace the lowest score if the new one is higher
         if (score > scores[MAX_SCORES - 1].score) {
             ScoreEntry& e = scores[MAX_SCORES - 1];
-            strncpy(e.name, name.toUtf8().constData(), 31); 
+            strncpy(e.name, name.toUtf8().constData(), 31);
             e.name[31] = 0;
-            e.score   = score; 
-            e.level   = level; 
+            e.score = score;
+            e.level = level;
         }
     }
-    
+
     // Sort all scores highest to lowest using QuickSort
     quickSort(scores, 0, scoreCount - 1);
 
@@ -268,45 +326,52 @@ void GameWindow::saveScore(const QString& name, int score, int level)
     if (f.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&f);
         for (int i = 0; i < scoreCount; i++) {
-            out << scores[i].name << "," << scores[i].score << "," 
+            out << scores[i].name << "," << scores[i].score << ","
                 << scores[i].level << "\n";
         }
     }
 }
 
-void GameWindow::loadScores() 
+void GameWindow::loadScores()
 {
     scoreCount = 0;
     QFile f("scores.txt");
-    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return;
-    
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return;
+    }
+
     QTextStream in(&f);
     while (!in.atEnd() && scoreCount < MAX_SCORES) {
-        QStringList p = in.readLine().split(",");
-        if (p.size() < 3) continue;
-        strncpy(scores[scoreCount].name, p[0].toUtf8().constData(), 31);
-        scores[scoreCount].score   = p[1].toInt();
-        scores[scoreCount].level   = p[2].toInt();
+        QStringList parts = in.readLine().split(",");
+        if (parts.size() < 3) {
+            continue;
+        }
+        strncpy(scores[scoreCount].name, parts[0].toUtf8().constData(), 31);
+        scores[scoreCount].score = parts[1].toInt();
+        scores[scoreCount].level = parts[2].toInt();
         scoreCount++;
     }
-    if (scoreCount > 0) quickSort(scores, 0, scoreCount - 1);
+    if (scoreCount > 0) {
+        quickSort(scores, 0, scoreCount - 1);
+    }
 }
 
-void GameWindow::refreshLeaderboard() 
+void GameWindow::refreshLeaderboard()
 {
     lbTable->setRowCount(scoreCount);
     for (int i = 0; i < scoreCount; i++) {
         // Find the rank using Binary Search
         int rank = binarySearch(scores, scoreCount, scores[i].score) + 1;
-        
+
         lbTable->setItem(i, 0, new QTableWidgetItem(QString::number(rank)));
         lbTable->setItem(i, 1, new QTableWidgetItem(scores[i].name));
         lbTable->setItem(i, 2, new QTableWidgetItem(QString::number(scores[i].score)));
         lbTable->setItem(i, 3, new QTableWidgetItem(QString::number(scores[i].level)));
-        
+
         // Center text in all cells
         for (int c = 0; c < 4; c++) {
-            if (auto* item = lbTable->item(i, c)) {
+            QTableWidgetItem* item = lbTable->item(i, c);
+            if (item != nullptr) {
                 item->setTextAlignment(Qt::AlignCenter);
             }
         }
@@ -314,16 +379,28 @@ void GameWindow::refreshLeaderboard()
 }
 
 // ── Keyboard Controls ─────────────────────────────────────────
-void GameWindow::keyPressEvent(QKeyEvent* e) 
+void GameWindow::keyPressEvent(QKeyEvent* e)
 {
     int s = eng->state;
-    
+
     // Enter/Space can start or resume the game
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Space) {
-        if (s == STATE_MENU)   { startGame(); return; }
-        if (s == STATE_PAUSED) { eng->resume(); return; }
+        if (s == STATE_MENU) {
+            startGame();
+            return;
+        }
+        if (s == STATE_PAUSED) {
+            eng->resume();
+            return;
+        }
         if (s == STATE_WIN) {
-            if (eng->levels.current && eng->levels.current->next) {
+            bool hasNextLevel = false;
+            if (eng->levels.current != nullptr) {
+                if (eng->levels.current->next != nullptr) {
+                    hasNextLevel = true;
+                }
+            }
+            if (hasNextLevel) {
                 // More levels remain — advance
                 eng->nextLevel();
             } else {
@@ -334,36 +411,43 @@ void GameWindow::keyPressEvent(QKeyEvent* e)
             return;
         }
     }
-    
+
     // R restarts the game
-    if (e->key() == Qt::Key_R && (s == STATE_DEAD || s == STATE_GAMEOVER || s == STATE_WIN)) { 
-        eng->start(); 
-        return; 
+    if (e->key() == Qt::Key_R) {
+        if (s == STATE_DEAD || s == STATE_GAMEOVER || s == STATE_WIN) {
+            eng->start();
+            return;
+        }
     }
-    
+
     // Esc pauses the game
-    if (e->key() == Qt::Key_Escape && s == STATE_PAUSED) { 
-        eng->resume(); 
-        return; 
+    if (e->key() == Qt::Key_Escape) {
+        if (s == STATE_PAUSED) {
+            eng->resume();
+            return;
+        }
     }
-    
+
     // Cheat code: Ctrl+L = extra life
-    if (e->key() == Qt::Key_L && (e->modifiers() & Qt::ControlModifier) && s == STATE_PLAYING) {
-        eng->lives++;
-        emit eng->scoreChanged(eng->score); 
-        return;
+    if (e->key() == Qt::Key_L) {
+        bool ctrlHeld = (e->modifiers() & Qt::ControlModifier);
+        if (ctrlHeld && s == STATE_PLAYING) {
+            eng->lives++;
+            emit eng->scoreChanged(eng->score);
+            return;
+        }
     }
-    
+
     // Pass other keys to the game engine
     eng->keyPress(e->key());
 }
 
-void GameWindow::keyReleaseEvent(QKeyEvent* e) 
-{ 
-    eng->keyRelease(e->key()); 
+void GameWindow::keyReleaseEvent(QKeyEvent* e)
+{
+    eng->keyRelease(e->key());
 }
 
-void GameWindow::closeEvent(QCloseEvent* e) 
-{ 
+void GameWindow::closeEvent(QCloseEvent* e)
+{
     e->accept(); // Let the window close normally
 }

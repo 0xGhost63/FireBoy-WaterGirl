@@ -652,3 +652,42 @@ bool historyRedo(StateHistory* h, GameSnapshot* out)
     *out = h->current->snap;
     return true;
 }
+
+// ════════════════════════════════════════════════════════════
+// 12. SCREEN STACK (Array-Based)
+// ════════════════════════════════════════════════════════════
+void screenStackInit(ScreenStack* s)
+{
+    s->top = -1;
+}
+
+bool screenStackEmpty(ScreenStack* s)
+{
+    return s->top == -1;
+}
+
+bool screenStackFull(ScreenStack* s)
+{
+    return s->top == SCREEN_STACK_MAX - 1;
+}
+
+void screenStackPush(ScreenStack* s, int screenIndex)
+{
+    if (screenStackFull(s)) return;
+    s->top++;
+    s->items[s->top] = screenIndex;
+}
+
+int screenStackPop(ScreenStack* s)
+{
+    if (screenStackEmpty(s)) return -1;
+    int val = s->items[s->top];
+    s->top--;
+    return val;
+}
+
+int screenStackPeek(ScreenStack* s)
+{
+    if (screenStackEmpty(s)) return -1;
+    return s->items[s->top];
+}

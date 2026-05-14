@@ -4,7 +4,7 @@
 // This file starts the Qt application and opens the game window.
 // Qt apps always need a QApplication object before anything else.
 
-#include <QApplication>   // Manages the whole Qt app lifecycle
+#include <QApplication>   //FOR GUI,EVENT LOOP & WINDOWS
 #include <QFile>          // Used to read the stylesheet file
 #include <QSplashScreen>
 #include <QPixmap>

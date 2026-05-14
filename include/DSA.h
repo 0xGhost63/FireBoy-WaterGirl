@@ -15,6 +15,7 @@
 //  9. BST Map             – sparse tile storage & lookup
 // 10. State History       – Undo/Redo snapshots
 // 11. Singly Linked List  – gem collection trail
+// 12. Screen Stack        – UI screen navigation history
 // ================================================================
 
 // ── Limits ───────────────────────────────────────────────────
@@ -206,3 +207,24 @@ void historyPush  (StateHistory* h, const GameSnapshot& snap);
 bool historyUndo  (StateHistory* h, GameSnapshot* out);
 // Returns true and fills *out if there is a next state
 bool historyRedo  (StateHistory* h, GameSnapshot* out);
+
+// ================================================================
+// 12. SCREEN STACK (Array-Based Stack)
+// Tracks which UI screens the user has visited.
+// Push a screen index when navigating forward;
+// pop to go back to the previous screen.
+// Works like the browser Back button.
+// ================================================================
+#define SCREEN_STACK_MAX 10
+
+struct ScreenStack {
+    int items[SCREEN_STACK_MAX];
+    int top;  // index of the top element (-1 = empty)
+};
+
+void screenStackInit (ScreenStack* s);
+bool screenStackEmpty(ScreenStack* s);
+bool screenStackFull (ScreenStack* s);
+void screenStackPush (ScreenStack* s, int screenIndex);
+int  screenStackPop  (ScreenStack* s);  // returns -1 if empty
+int  screenStackPeek (ScreenStack* s);  // returns top without removing, -1 if empty

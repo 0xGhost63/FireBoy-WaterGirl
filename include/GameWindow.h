@@ -27,6 +27,7 @@ private slots:
     void showLeaderboard();
     void startGame();
     void submitName();
+    void playBGM();  // starts background music after event loop is ready
 private:
     GameEngine*    eng;
     GameRenderer*  renderer;
@@ -50,4 +51,9 @@ private:
     void refreshLeaderboard();
     void saveScore(const QString& name, int score, int level);
     void loadScores();
+
+    // DSA: Screen Stack — tracks navigation history for back-button support
+    ScreenStack screenHistory;
+    void navigateTo(int screenIndex);  // push current screen, switch to new one
+    void navigateBack();               // pop stack, switch to previous screen
 };
