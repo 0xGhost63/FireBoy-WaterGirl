@@ -3,7 +3,6 @@
 #include <QPainterPath>
 #include <QFont>
 #include <cmath>
-using namespace std;
 
 // ── GameRenderer Constructor ──────────────────────────────────
 // This class handles all the drawing on the screen.

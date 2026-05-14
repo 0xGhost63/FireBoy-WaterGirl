@@ -7,7 +7,6 @@
 
 #include "../include/Player.h"
 #include <cmath>
-using namespace std;
 
 // ── Physics constants ──────────────────────────────────────────
 // These numbers control how the players feel to control.

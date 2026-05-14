@@ -1,7 +1,6 @@
 #include "Levels.h"
 #include "../include/DSA.h"
 #include <cstring>
-using namespace std;
 
 // Tile shorthand macros — local to this .cpp ONLY (never in the header)
 // to avoid colliding with Qt template parameter names.

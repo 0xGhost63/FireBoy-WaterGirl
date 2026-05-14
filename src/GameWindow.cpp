@@ -1,11 +1,9 @@
 #include "../include/GameWindow.h"
 #include "../include/DSA.h"
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QPushButton>
 #include <QLabel>
 #include <QKeyEvent>
-#include <QInputDialog>
 #include <QHeaderView>
 #include <QFile>
 #include <QTextStream>
@@ -14,7 +12,6 @@
 #include <cstring>
 #include <QUrl>
 #include <QTimer>
-using namespace std;
 
 // ── GameWindow Constructor ─────────────────────────────────────
 // Sets up the main window, the game engine, and the media players.
@@ -87,18 +84,21 @@ void GameWindow::buildUI()
     ml->addWidget(sub);
     ml->addSpacing(24);
 
-    // Helper to make menu buttons easily
-    auto makeBtn = [&](const QString& txt, const char* id) {
-        QPushButton* b = new QPushButton(txt);
-        b->setObjectName(id); 
-        b->setFixedSize(240, 50);
-        ml->addWidget(b, 0, Qt::AlignCenter); 
-        return b;
-    };
-    
-    QPushButton* btnPlay = makeBtn("  Play Game",   "btnPlay");
-    QPushButton* btnLB   = makeBtn("  Leaderboard", "btnSecondary");
-    QPushButton* btnQuit = makeBtn("  Quit",        "btnQuit");
+    // Menu buttons — each button is created, sized, centered, and connected
+    QPushButton* btnPlay = new QPushButton("  Play Game");
+    btnPlay->setObjectName("btnPlay");
+    btnPlay->setFixedSize(240, 50);
+    ml->addWidget(btnPlay, 0, Qt::AlignCenter);
+
+    QPushButton* btnLB = new QPushButton("  Leaderboard");
+    btnLB->setObjectName("btnSecondary");
+    btnLB->setFixedSize(240, 50);
+    ml->addWidget(btnLB, 0, Qt::AlignCenter);
+
+    QPushButton* btnQuit = new QPushButton("  Quit");
+    btnQuit->setObjectName("btnQuit");
+    btnQuit->setFixedSize(240, 50);
+    ml->addWidget(btnQuit, 0, Qt::AlignCenter);
 
     connect(btnPlay, &QPushButton::clicked, this, &GameWindow::startGame);
     connect(btnLB,   &QPushButton::clicked, this, &GameWindow::showLeaderboard);

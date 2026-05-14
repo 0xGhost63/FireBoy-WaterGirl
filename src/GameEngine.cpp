@@ -4,7 +4,6 @@
 #include <cstring>
 #include <QUrl>
 #include <QDebug>
-using namespace std;
 
 static const int TICK_MS = 16; // game updates every 16ms (~60fps)
 

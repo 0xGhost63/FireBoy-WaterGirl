@@ -1,7 +1,6 @@
 #include "DSA.h"
 #include <cstring>
 #include <cstdlib>
-using namespace std;
 
 
 // ════════════════════════════════════════════════════════════

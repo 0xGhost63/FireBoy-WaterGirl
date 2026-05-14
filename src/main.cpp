@@ -28,12 +28,7 @@ int main(int argc, char* argv[])
     int splash_timer = 3000; // Time in milliseconds (3 seconds)
 
     QPixmap splashPix("assets/images/splash.png");
-    if (splashPix.isNull()) {
-        splashPix = QPixmap(800, 600);
-        splashPix.fill(Qt::black);
-    } else {
-        splashPix = splashPix.scaled(800, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    }
+    splashPix = splashPix.scaled(800, 600, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     QSplashScreen* splash = new QSplashScreen(splashPix);
     splash->show();
