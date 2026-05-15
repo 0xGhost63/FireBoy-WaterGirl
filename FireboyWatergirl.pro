@@ -31,3 +31,5 @@ HEADERS += \
     levels/Levels.h
 
 RESOURCES += resources.qrc
+
+FORMS += ui/GameWindow.ui

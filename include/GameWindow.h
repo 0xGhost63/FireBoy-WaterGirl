@@ -2,6 +2,7 @@
 #include <QMainWindow>
 #include <QStackedWidget>
 #include <QTableWidget>
+#include <QLineEdit>
 #include "../include/GameEngine.h"
 #include "../include/GameRenderer.h"
 #include <QMediaPlayer>
@@ -12,10 +13,14 @@
 #include <QAudioOutput>
 #endif
 
+// Forward-declare the generated UI class
+namespace Ui { class GameWindowUI; }
+
 class GameWindow : public QMainWindow {
     Q_OBJECT
 public:
     explicit GameWindow(QWidget* parent = nullptr);
+    ~GameWindow();
 protected:
     void keyPressEvent  (QKeyEvent* e) override;
     void keyReleaseEvent(QKeyEvent* e) override;
@@ -29,11 +34,10 @@ private slots:
     void submitName();
     void playBGM();  // starts background music after event loop is ready
 private:
+    Ui::GameWindowUI* ui;  // auto-generated from GameWindow.ui
     GameEngine*    eng;
     GameRenderer*  renderer;
-    QStackedWidget* stack;
-    QTableWidget*  lbTable;
-    class QLineEdit* nameInput; // Forward declaration or include QLineEdit
+
     QString currentPlayerName;
 
     QMediaPlayer* bgMusic;
@@ -47,7 +51,7 @@ private:
     ScoreEntry scores[MAX_SCORES];
     int        scoreCount;
 
-    void buildUI();
+    void setupConnections();
     void refreshLeaderboard();
     void saveScore(const QString& name, int score, int level);
     void loadScores();

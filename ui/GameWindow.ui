@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GameWindowUI</class>
+ <widget class="QMainWindow" name="GameWindowUI">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>1000</width><height>760</height></rect>
+  </property>
+  <property name="windowTitle">
+   <string>Fireboy &amp; Watergirl :)</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="centralLayout">
+    <property name="leftMargin"><number>0</number></property>
+    <property name="topMargin"><number>0</number></property>
+    <property name="rightMargin"><number>0</number></property>
+    <property name="bottomMargin"><number>0</number></property>
+    <item>
+     <widget class="QStackedWidget" name="stack">
+      <property name="currentIndex"><number>3</number></property>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- Page 0: Game Screen (placeholder — real renderer  -->
+      <!-- is injected in code since it's a custom widget)   -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <widget class="QWidget" name="gamePage">
+       <layout class="QVBoxLayout" name="gameLayout">
+        <property name="leftMargin"><number>0</number></property>
+        <property name="topMargin"><number>0</number></property>
+        <property name="rightMargin"><number>0</number></property>
+        <property name="bottomMargin"><number>0</number></property>
+       </layout>
+      </widget>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- Page 1: Main Menu                                 -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <widget class="QWidget" name="menuPage">
+       <layout class="QVBoxLayout" name="menuLayout">
+        <property name="spacing"><number>16</number></property>
+        <item>
+         <spacer name="menuTopSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="titleLabel_menu">
+          <property name="objectName"><string>titleLabel</string></property>
+          <property name="text"><string> Fireboy  &amp;  Watergirl</string></property>
+          <property name="alignment"><set>Qt::AlignCenter</set></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="subLabel_menu">
+          <property name="objectName"><string>subLabel</string></property>
+          <property name="text"><string>Forest Temple Edition</string></property>
+          <property name="alignment"><set>Qt::AlignCenter</set></property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="menuMidSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>24</height></size></property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+          <item>
+           <widget class="QPushButton" name="btnPlay">
+            <property name="text"><string>  Play Game</string></property>
+            <property name="minimumSize"><size><width>240</width><height>50</height></size></property>
+            <property name="maximumSize"><size><width>240</width><height>50</height></size></property>
+           </widget>
+          </item>
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+          <item>
+           <widget class="QPushButton" name="btnLeaderboard">
+            <property name="objectName"><string>btnSecondary</string></property>
+            <property name="text"><string>  Leaderboard</string></property>
+            <property name="minimumSize"><size><width>240</width><height>50</height></size></property>
+            <property name="maximumSize"><size><width>240</width><height>50</height></size></property>
+           </widget>
+          </item>
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+          <item>
+           <widget class="QPushButton" name="btnQuit_menu">
+            <property name="objectName"><string>btnQuit</string></property>
+            <property name="text"><string>  Quit</string></property>
+            <property name="minimumSize"><size><width>240</width><height>50</height></size></property>
+            <property name="maximumSize"><size><width>240</width><height>50</height></size></property>
+           </widget>
+          </item>
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="menuBtnSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>20</height></size></property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="ctrlLabel">
+          <property name="text"><string>&lt;b&gt;Controls&lt;/b&gt;&lt;br&gt; Fireboy : ← ↑ →&lt;br&gt; Watergirl : A W D&lt;br&gt;Hint path : H &amp;nbsp;|&amp;nbsp; Pause : Esc</string></property>
+          <property name="alignment"><set>Qt::AlignCenter</set></property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="menuBotSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- Page 2: Leaderboard                               -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <widget class="QWidget" name="lbPage">
+       <layout class="QVBoxLayout" name="lbLayout">
+        <property name="leftMargin"><number>40</number></property>
+        <property name="topMargin"><number>30</number></property>
+        <property name="rightMargin"><number>40</number></property>
+        <property name="bottomMargin"><number>30</number></property>
+        <property name="spacing"><number>14</number></property>
+        <item>
+         <widget class="QLabel" name="titleLabel_lb">
+          <property name="objectName"><string>titleLabel</string></property>
+          <property name="text"><string>  Leaderboard</string></property>
+          <property name="alignment"><set>Qt::AlignCenter</set></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="lbTable">
+          <property name="columnCount"><number>4</number></property>
+          <property name="alternatingRowColors"><bool>true</bool></property>
+          <property name="editTriggers"><set>QAbstractItemView::NoEditTriggers</set></property>
+          <column><property name="text"><string>Rank</string></property></column>
+          <column><property name="text"><string>Name</string></property></column>
+          <column><property name="text"><string>Score</string></property></column>
+          <column><property name="text"><string>Level</string></property></column>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+          <item>
+           <widget class="QPushButton" name="btnBack">
+            <property name="objectName"><string>btnSecondary</string></property>
+            <property name="text"><string>◀  Back</string></property>
+            <property name="minimumSize"><size><width>200</width><height>44</height></size></property>
+            <property name="maximumSize"><size><width>200</width><height>44</height></size></property>
+           </widget>
+          </item>
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- Page 3: Name Entry                                -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <widget class="QWidget" name="namePage">
+       <layout class="QVBoxLayout" name="nameLayout">
+        <property name="spacing"><number>20</number></property>
+        <item>
+         <spacer name="nameTopSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="titleLabel_name">
+          <property name="objectName"><string>titleLabel</string></property>
+          <property name="text"><string>Welcome to Fireboy &amp; Watergirl!</string></property>
+          <property name="alignment"><set>Qt::AlignCenter</set></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="subLabel_name">
+          <property name="objectName"><string>subLabel</string></property>
+          <property name="text"><string>Please enter your player name:</string></property>
+          <property name="alignment"><set>Qt::AlignCenter</set></property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+          <item>
+           <widget class="QLineEdit" name="nameInput">
+            <property name="placeholderText"><string>Enter Name...</string></property>
+            <property name="alignment"><set>Qt::AlignCenter</set></property>
+            <property name="minimumSize"><size><width>300</width><height>50</height></size></property>
+            <property name="maximumSize"><size><width>300</width><height>50</height></size></property>
+           </widget>
+          </item>
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+          <item>
+           <widget class="QPushButton" name="btnSubmit">
+            <property name="text"><string>Continue</string></property>
+            <property name="minimumSize"><size><width>200</width><height>50</height></size></property>
+            <property name="maximumSize"><size><width>200</width><height>50</height></size></property>
+           </widget>
+          </item>
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+          <item>
+           <widget class="QPushButton" name="btnNameLB">
+            <property name="objectName"><string>btnSecondary</string></property>
+            <property name="text"><string>Leaderboard</string></property>
+            <property name="minimumSize"><size><width>200</width><height>50</height></size></property>
+            <property name="maximumSize"><size><width>200</width><height>50</height></size></property>
+           </widget>
+          </item>
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+          <item>
+           <widget class="QPushButton" name="btnNameQuit">
+            <property name="objectName"><string>btnQuit</string></property>
+            <property name="text"><string>Quit</string></property>
+            <property name="minimumSize"><size><width>200</width><height>50</height></size></property>
+            <property name="maximumSize"><size><width>200</width><height>50</height></size></property>
+           </widget>
+          </item>
+          <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="nameBotSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+
+     </widget><!-- end QStackedWidget -->
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
