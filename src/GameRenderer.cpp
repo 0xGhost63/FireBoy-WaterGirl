@@ -57,7 +57,10 @@ GameRenderer::GameRenderer(GameEngine* e, QWidget* parent)
 }
 
 // Recalculate scale whenever the window is resized
-void GameRenderer::resizeEvent(QResizeEvent*) { computeScale(); }
+void GameRenderer::resizeEvent(QResizeEvent*) 
+{ 
+    computeScale();
+}
 
 
 // ══════════════════════════════════════════════════════════════
@@ -140,6 +143,11 @@ void GameRenderer::paintEvent(QPaintEvent*)
 // ── Background ───────────────────────────────────────────────
 void GameRenderer::drawBackground(QPainter& p) 
 {
+    /*
+        0 = forest
+        1 = cave
+        2 = ruins
+    */
     LevelData* lv = eng->currentLevel();
     if (!lv) return;
     
@@ -523,7 +531,7 @@ void GameRenderer::drawOverlay(QPainter& p)
         
     case STATE_WIN:
         if (eng->levels.current && eng->levels.current->next) { 
-            title = "Level Complete!"; 
+            title = "FIN !"; 
             sub   = QString("Total Score: %1\nEnter \u2192 Next Level   P/N \u2192 Prev/Next").arg(eng->score); 
         } else { 
             title = "You Win! ";    
