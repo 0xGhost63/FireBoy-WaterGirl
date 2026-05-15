@@ -71,7 +71,7 @@ void listFree(LevelList* lst)
 static int partition(ScoreEntry arr[], int lo, int hi)
 {
     int pivot = arr[hi].score;
-    int i     = lo - 1;
+    int i = lo - 1;
     for (int j = lo; j < hi; j++)
     {
         if (arr[j].score >= pivot)

@@ -28,11 +28,13 @@ Use a 'Current' pointer to track where you are in history so Redo also works! (D
 
 9-Remove the level-editor logic from the code (DONE)
 
-10-Make sure the hint function works in all levels (DONE-Only hint 1 is not working in the last level)
+10-Make sure the hint function works in all levels (DONE-Only hint 1 is not working in the last level) (DONE)
 
 11-REMOVE THE FALLBACKS,EXTRA CODE(MOVING TILES)AND THE extra DATA STRUCTURES
 and Simplify The Code (DONE)
 
-12-Make the scores and high scores presentable
+12-Make the scores and high scores presentable (DONE)
 
-13-Fix the level numbers on the top right corner in lvls
+13-Fix the level numbers on the top right corner in lvls (DONE)
+
+

@@ -1,2 +1,7 @@
 The level 3 have a bug after the lives runs out the player both the fireboy and watergirl spawns together...while the spawn position of the watergirl is different
 (solved !)
+
+
+POSSIBLE ISSUE WHEN THE PLAYER TELEPORTS  THROUGH THE
+PORTAL & TELEPORTS BACK,ITS GEM MIGHT GER REINTIALIZED!! TO 0!!
+IF THIS ISSUE IS FOUND FIX IT!!

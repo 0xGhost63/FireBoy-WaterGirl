@@ -1,9 +1,4 @@
-// ============================================================
-// Player.cpp — Handles player physics & movement
-// ============================================================
-// This file controls how Fireboy and Watergirl move around.
-// It uses simple physics: gravity pulls them down, they can
-// jump, walk left/right, and collide with solid tiles.
+
 
 #include "../include/Player.h"
 #include <cmath>
@@ -44,7 +39,7 @@ void playerReset(Player* p, float x, float y)
     p->vy = 0;           // clear vertical speed
 
     p->dead      = false; // player is alive
-    p->onGround  = false; // not standing on anything yet
+    p->onGround  = true; // not standing on anything yet
 
     p->moveLeft  = false; // no movement keys held
     p->moveRight = false;
