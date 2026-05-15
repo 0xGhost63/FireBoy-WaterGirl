@@ -99,8 +99,11 @@ void GameWindow::setupConnections()
     // Name Entry buttons
     connect(ui->btnSubmit,   &QPushButton::clicked, this, &GameWindow::submitName);
     connect(ui->nameInput,   &QLineEdit::returnPressed, this, &GameWindow::submitName);
-    connect(ui->btnNameLB,   &QPushButton::clicked, this, &GameWindow::showLeaderboard);
-    connect(ui->btnNameQuit, &QPushButton::clicked, qApp, &QApplication::quit);
+
+    // Menu Back button
+    connect(ui->btnBack_menu, &QPushButton::clicked, this, [this]() {
+        navigateTo(3);
+    });
 }
 
 // ── playBGM ───────────────────────────────────────────────────
@@ -128,8 +131,8 @@ void GameWindow::navigateBack()
     if (previousScreen >= 0) {
         ui->stack->setCurrentIndex(previousScreen);
     } else {
-        // Stack is empty — go to main menu as default
-        ui->stack->setCurrentIndex(1);
+        // Stack is empty — go to Name Entry as default
+        ui->stack->setCurrentIndex(3);
     }
 }
 
@@ -276,6 +279,12 @@ void GameWindow::refreshLeaderboard()
 // ── Keyboard Controls ─────────────────────────────────────────
 void GameWindow::keyPressEvent(QKeyEvent* e)
 {
+    // Only handle game-related key shortcuts when the game page is active
+    if (ui->stack->currentIndex() != 0) {
+        QMainWindow::keyPressEvent(e);
+        return;
+    }
+
     int s = eng->state;
 
     // Enter/Space can start or resume the game

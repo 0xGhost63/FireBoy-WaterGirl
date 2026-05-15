@@ -4,10 +4,12 @@
 
 /* ── Global ─────────────────────────────────────────── */
 QWidget {
-    background-color: #0a0a14;
     color: #e8e8f0;
     font-family: "Segoe UI", "Ubuntu", "Arial", sans-serif;
     font-size: 13px;
+}
+QLabel {
+    background: transparent;
 }
 
 QMainWindow {
@@ -45,8 +47,8 @@ QLabel#controlsLabel {
     line-height: 1.8;
 }
 
-/* ── Primary Play Button ─────────────────────────────── */
-QPushButton#btnPlay, QPushButton#btnSubmit {
+/* ── Primary Buttons (Continue, Play, Leaderboard, Quit) ── */
+QPushButton#btnPrimary {
     background: rgba(220, 110, 40, 0.15);
     color: #ffd0a0;
     border: 2px solid rgba(220, 110, 40, 0.4);
@@ -55,16 +57,16 @@ QPushButton#btnPlay, QPushButton#btnSubmit {
     font-weight: 700;
     padding: 8px 24px;
 }
-QPushButton#btnPlay:hover, QPushButton#btnSubmit:hover {
+QPushButton#btnPrimary:hover {
     background: rgba(220, 110, 40, 0.28);
     border-color: rgba(255, 150, 60, 0.7);
     color: #ffeedd;
 }
-QPushButton#btnPlay:pressed, QPushButton#btnSubmit:pressed {
+QPushButton#btnPrimary:pressed {
     background: rgba(180, 80, 20, 0.35);
 }
 
-/* ── Secondary Buttons ───────────────────────────────── */
+/* ── Secondary Buttons (Back) ───────────────────────── */
 QPushButton#btnSecondary {
     background: rgba(60, 120, 200, 0.15);
     color: #80c0ff;
@@ -75,28 +77,12 @@ QPushButton#btnSecondary {
     padding: 8px 24px;
 }
 QPushButton#btnSecondary:hover {
-    background: rgba(60, 120, 200, 0.28);
+    background: rgba(179, 200, 60, 0.94);
     border-color: rgba(60, 150, 255, 0.7);
     color: #b0d8ff;
 }
 QPushButton#btnSecondary:pressed {
     background: rgba(40, 90, 160, 0.35);
-}
-
-/* ── Quit Button ─────────────────────────────────────── */
-QPushButton#btnQuit {
-    background: rgba(180, 30, 30, 0.12);
-    color: #ff7070;
-    border: 2px solid rgba(180, 30, 30, 0.3);
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 700;
-    padding: 8px 24px;
-}
-QPushButton#btnQuit:hover {
-    background: rgba(200, 40, 40, 0.25);
-    border-color: rgba(220, 60, 60, 0.6);
-    color: #ffaaaa;
 }
 
 /* ── Leaderboard Table ───────────────────────────────── */

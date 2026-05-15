@@ -1,3 +1,16 @@
+/*
+QTimer fires
+      ↓
+Game state updates
+      ↓
+update()
+      ↓
+paintEvent()
+      ↓
+QPainter draws everything
+      ↓
+Frame appears on screen
+*/
 #include "../include/GameRenderer.h"
 #include <QPainter>
 #include <QPainterPath>
@@ -81,11 +94,7 @@ void GameRenderer::paintEvent(QPaintEvent*)
     p.setRenderHint(QPainter::Antialiasing); // Make graphics smooth
     p.fillRect(rect(), QColor(10, 10, 20));  // Draw black borders
 
-    // If we are on the main menu, only draw the overlay
-    if (eng->state == STATE_MENU) { 
-        drawOverlay(p); 
-        return; 
-    }
+    // No built-in menu overlay needed anymore — GameWindow handles UI menus!
 
     LevelData* lv = eng->currentLevel();
     if (lv) 
@@ -406,11 +415,6 @@ void GameRenderer::drawOverlay(QPainter& p)
     QColor col;
     
     switch (eng->state) {
-    case STATE_MENU:
-        title = "Fireboy &  Watergirl"; 
-        col   = QColor(255,200,50);
-        sub   = "Press Enter to Start\n\nFireboy: \u2190 \u2192 \u2191\nWatergirl: A D W\nHint: H    Undo: U    Redo: R"; 
-        break;
     case STATE_PAUSED:
         title = "PAUSED"; 
         col   = QColor(180,220,255);
