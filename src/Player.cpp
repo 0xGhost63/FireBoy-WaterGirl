@@ -53,15 +53,6 @@ void playerReset(Player* p, float x, float y)
 float playerCenterX(Player* p) { return p->x + PLAYER_W / 2.0f; }
 float playerCenterY(Player* p) { return p->y + PLAYER_H / 2.0f; }
 
-// ── playerSaveCheckpoint ─────────────────────────────────────
-// Remembers the player's current position as the new spawn point.
-// Used before a teleport so the player can undo back to it.
-void playerSaveCheckpoint(Player* p)
-{
-    p->spawnX = p->x;
-    p->spawnY = p->y;
-}
-
 // ── playerRestoreCheckpoint ──────────────────────────────────
 // Teleports the player back to their saved spawn position.
 // Clears velocity and marks them alive again.
@@ -82,7 +73,8 @@ static bool isSolid(int tileType)
 {
     return tileType == TILE_SOLID
         || tileType == TILE_CONVEYOR_R
-        || tileType == TILE_CONVEYOR_L;
+        || tileType == TILE_CONVEYOR_L
+        // || tileType == TILE_EMPTY;
 }
 
 // ── tileAt ────────────────────────────────────────────────────

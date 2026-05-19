@@ -19,7 +19,6 @@ struct Player {
 void  playerInit             (Player* p, int type, float x, float y);
 void  playerReset            (Player* p, float x, float y);
 void  playerUpdate           (Player* p, int map[MAP_ROWS][MAP_COLS]);
-void  playerSaveCheckpoint   (Player* p);       // saves current pos as spawn
 bool  playerRestoreCheckpoint(Player* p);       // teleports back to spawnX/Y
 float playerCenterX          (Player* p);
 float playerCenterY          (Player* p);
