@@ -361,13 +361,10 @@ void gemTrailFree(GemTrail* t)
 // Lower numerical values represent HIGHER priority:
 //
 // - Priority 0: Player Death (EVT_PLAYER_DEAD) - HIGHEST
-//   Must override everything. Stops all other event processing.
 //
 // - Priority 1: Teleports & Level Win (EVT_TELEPORT / EVT_LEVEL_COMPLETE)
-//   Critical game-state changes, but overridden by death.
 //
 // - Priority 2: Gem Collection (EVT_GEM_COLLECT) - LOWEST
-//   Minor background events (score update & sound effect).
 // ════════════════════════════════════════════════════════════
 void pqInit(PriorityQueue* pq)
 {

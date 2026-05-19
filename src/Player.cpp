@@ -74,6 +74,7 @@ static bool isSolid(int tileType)
     return tileType == TILE_SOLID
         || tileType == TILE_CONVEYOR_R
         || tileType == TILE_CONVEYOR_L;
+        // || tileType == TILE_EMPTY;
 }
 
 // ── tileAt ────────────────────────────────────────────────────
