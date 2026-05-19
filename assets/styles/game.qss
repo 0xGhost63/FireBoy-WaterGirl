@@ -28,7 +28,6 @@ QLabel#titleLabel {
     font-weight: 900;
     color: #ffcc00;
     padding: 8px 0px;
-    background: transparent;
 }
 
 QLabel#subLabel {
@@ -36,7 +35,6 @@ QLabel#subLabel {
     color: #8899aa;
     letter-spacing: 3px;
     font-weight: 600;
-    background: transparent;
 }
 
 QLabel#controlsLabel {
@@ -49,7 +47,7 @@ QLabel#controlsLabel {
     line-height: 1.8;
 }
 
-/* ── Primary Play Button ─────────────────────────────── */
+/* ── Primary Buttons (Continue, Play, Leaderboard, Quit) ── */
 QPushButton#btnPrimary {
     background: rgba(220, 110, 40, 0.15);
     color: #ffd0a0;
@@ -68,7 +66,7 @@ QPushButton#btnPrimary:pressed {
     background: rgba(180, 80, 20, 0.35);
 }
 
-/* ── Secondary Buttons ───────────────────────────────── */
+/* ── Secondary Buttons (Back) ───────────────────────── */
 QPushButton#btnSecondary {
     background: rgba(60, 120, 200, 0.15);
     color: #80c0ff;
@@ -79,7 +77,7 @@ QPushButton#btnSecondary {
     padding: 8px 24px;
 }
 QPushButton#btnSecondary:hover {
-    background: rgba(60, 120, 200, 0.28);
+    background: rgba(179, 200, 60, 0.94);
     border-color: rgba(60, 150, 255, 0.7);
     color: #b0d8ff;
 }

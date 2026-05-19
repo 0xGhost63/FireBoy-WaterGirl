@@ -1,0 +1,37 @@
+LEVEL LOAD
+    │
+    ▼
+ BST (tileTree)           ← canonical storage, sparse, memory-efficient
+    │
+    │  bstGet() — at level load
+    ▼
+ effectiveTileMap[][]     ← live physics map, fast O(1), gate-aware
+    │
+    ├──► Player physics (60/sec)    → isSolid() reads effectiveTileMap
+    │
+    ├──► GateHashMap                → gates[gateId].open = true
+    │         ↓ gate opens
+    │    effectiveTileMap rebuilt   → gate cells cleared to walkable
+    │
+    ├──► TeleportHashMap            → instant O(1) warp lookup
+    │
+    │  buildGrid() — when hints shown
+    ▼
+ fbGrid / wgGrid[][]      ← binary walkability, player-specific
+    │
+    ▼
+ Dijkstra                 ← pathfinding on binary grid
+    │
+    ▼
+ Min-Heap                 ← finds nearest gem by path cost
+    │
+    ▼
+ Hint arrows drawn on screen
+
+Structure	Role	Speed
+BST	Permanent level storage (sparse)	O(log n)
+effectiveTileMap	Live physics + gate state	O(1)
+Dijkstra Grid	Player-specific walkability for pathfinding	O(1) read
+GateHashMap	Button → gate lookup	O(1)
+TeleportHashMap	Pad → partner lookup	O(1)
+Min-Heap	Closest gem by actual path cost

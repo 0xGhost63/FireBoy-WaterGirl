@@ -38,6 +38,14 @@
 #define MAX_BUTTONS   20
 #define MAX_CONVEYORS 50
 #define CONVEYOR_QUEUE_MAX 8
+#define CONVEYOR_BELT_SPEED 1.8f  // world-units per tick (gameplay + scroll)
+
+// ── Dijkstra pathfinding (see buildGrid + dijkstraGridFind) ───
+#define DIJKSTRA_PASSABLE    0     // grid cell walkable for this player
+#define DIJKSTRA_BLOCKED     1     // grid cell impassable (infinite cost)
+#define DIJKSTRA_STEP_COST   1.0f  // edge weight: one cardinal step (N/S/E/W)
+#define DIJKSTRA_TELEPORT_COST 0.0f // edge weight: teleport pad -> partner tile
+#define DIJKSTRA_UNREACHABLE 1e9f  // initial dist[] before any path is found
 #define MAX_GATES     20
 #define MAX_TELEPORTS  8   // max teleport pads per level (pairs)
 #define MAX_SCORES    10

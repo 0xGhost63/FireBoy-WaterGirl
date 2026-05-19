@@ -7,6 +7,9 @@
 
 static const int TICK_MS = 16; // game updates every 16ms (~60fps)
 
+// ── GameEngine (constructor) ──────────────────────────────────
+// Wires the game loop timer, builds the level doubly-linked list,
+// loads sound effects, and initializes all DSA structures.
 GameEngine::GameEngine(QObject* parent) : QObject(parent)
 {
     // Create a timer that fires every 16ms to drive the game loop
@@ -60,13 +63,15 @@ GameEngine::GameEngine(QObject* parent) : QObject(parent)
 
     state    = STATE_MENU;
     score    = 0;
-    lives    = 3;
+    lives    = 5;
     showHint = false;
 
     fireboyHint.len   = 0;
     watergirlHint.len = 0;
 }
 
+// ── ~GameEngine (destructor) ─────────────────────────────────
+// Releases level list (including BST tile trees), undo history, and gem trail.
 GameEngine::~GameEngine()
 {
     listFree(&levels);
@@ -74,12 +79,16 @@ GameEngine::~GameEngine()
     gemTrailFree(&gemTrail);
 }
 
+// ── currentLevel ──────────────────────────────────────────────
+// Returns a pointer to the active level data, or nullptr if none is loaded.
 LevelData* GameEngine::currentLevel()
 {
     return levels.current ? &levels.current->data : nullptr;
 }
 
-// Rebuild the gate hash map from scratch (call after level load)
+// ── rebuildGateMap ────────────────────────────────────────────
+// Clears and repopulates the gate direct-address hash map from lv->gates[].
+// Call after every level load or reset so gateMapGet is O(1).
 void GameEngine::rebuildGateMap()
 {
     gateMapInit(&gateMap);
@@ -89,7 +98,9 @@ void GameEngine::rebuildGateMap()
         gateMapInsert(&gateMap, lv->gates[i].id, i);
 }
 
-// Rebuild the teleport hash map from scratch (call after level load)
+// ── rebuildTeleportMap ────────────────────────────────────────
+// Clears and repopulates the teleport pad hash map from lv->pads[].
+// Enables O(1) partner lookup during checkTeleports / applyTeleport.
 void GameEngine::rebuildTeleportMap()
 {
     teleportMapInit(&teleportMap);
@@ -142,7 +153,9 @@ void GameEngine::applySnapshot(const GameSnapshot& snap)
     emit scoreChanged(score);
 }
 
-// Build effective tilemap: base tiles + closed gates overlaid as SOLID
+// ── buildEffectiveTileMap ─────────────────────────────────────
+// Flattens the BST tile tree into effectiveTileMap[], overlays closed gates
+// as TILE_SOLID, and fills teleportEdges[][] with zero-cost warp destinations.
 void GameEngine::buildEffectiveTileMap()
 {
     LevelData* lv = currentLevel();
@@ -202,6 +215,9 @@ void GameEngine::buildEffectiveTileMap()
     }
 }
 
+// ── start ─────────────────────────────────────────────────────
+// Begins (or restarts) the current level: resets players, score, lives,
+// undo history, gem trail, and all per-level objects, then starts the timer.
 void GameEngine::start()
 {
     LevelData* lv = currentLevel();
@@ -215,7 +231,7 @@ void GameEngine::start()
     for (int i = 0; i < lv->teleportCount; i++) lv->pads[i].cooldown = 0.0f;
 
     score          = 0;
-    lives          = 3;
+    lives          = 5;
     levelBaseScore = 0;
 
     // Clear undo history and gem trail
@@ -233,6 +249,8 @@ void GameEngine::start()
     timer->start();
 }
 
+// ── pause ─────────────────────────────────────────────────────
+// Stops the game loop and hazard walk sounds while in STATE_PLAYING.
 void GameEngine::pause()
 {
     if (state == STATE_PLAYING)
@@ -245,6 +263,8 @@ void GameEngine::pause()
     }
 }
 
+// ── resume ────────────────────────────────────────────────────
+// Restarts the timer and returns to STATE_PLAYING from a paused state.
 void GameEngine::resume()
 {
     if (state == STATE_PAUSED)
@@ -255,6 +275,9 @@ void GameEngine::resume()
     }
 }
 
+// ── resetLevel ────────────────────────────────────────────────
+// Respawns both players at level start and resets objects without
+// changing score, lives, or level progression.
 void GameEngine::resetLevel()
 {
     LevelData* lv = currentLevel();
@@ -270,6 +293,10 @@ void GameEngine::resetLevel()
     if (!timer->isActive()) timer->start();
 }
 
+// ── nextLevel ─────────────────────────────────────────────────
+// Advances the doubly-linked level list to the next node.
+// On success: respawns players and resets level objects.
+// On failure (last level): transitions to STATE_WIN.
 void GameEngine::nextLevel()
 {
     // Move to the next node in the doubly-linked level list
@@ -295,6 +322,9 @@ void GameEngine::nextLevel()
     if (!timer->isActive()) timer->start();
 }
 
+// ── keyPress ──────────────────────────────────────────────────
+// Handles movement, jump, hint toggle, pause, undo/redo, and level navigation.
+// Undo (U) and redo (R) restore snapshots from the state history DSA.
 void GameEngine::keyPress(int key)
 {
     if (state != STATE_PLAYING) return;
@@ -357,6 +387,8 @@ void GameEngine::keyPress(int key)
     }
 }
 
+// ── keyRelease ────────────────────────────────────────────────
+// Clears held movement flags when keys are released.
 void GameEngine::keyRelease(int key)
 {
     switch (key)
@@ -369,6 +401,9 @@ void GameEngine::keyRelease(int key)
     }
 }
 
+// ── tick ──────────────────────────────────────────────────────
+// Main game loop (called every TICK_MS). Runs interaction checks, physics,
+// event processing, gate/gem animation, periodic undo snapshots, and emits frameReady.
 void GameEngine::tick()
 {
     if (state != STATE_PLAYING) return;
@@ -467,7 +502,9 @@ void GameEngine::tick()
     emit frameReady();
 }
 
-// ── Button pressure detection ─────────────────────────────────
+// ── checkButtons ──────────────────────────────────────────────
+// Two-pass button logic: first marks which gate IDs should be open based on
+// player overlap, then applies that state to lv->gates[].
 void GameEngine::checkButtons()
 {
     LevelData* lv = currentLevel();
@@ -507,7 +544,9 @@ void GameEngine::checkButtons()
 }
 
 
-// ── Conveyor Belt update (Queue DSA) ──────────────────────────
+// ── checkConveyors ────────────────────────────────────────────
+// Queue DSA: enqueues players standing on ConveyorBelt regions, then each tick
+// dequeues, applies belt.speed to X, and re-enqueues until the queue is drained.
 void GameEngine::checkConveyors()
 {
     LevelData* lv = currentLevel();
@@ -556,7 +595,9 @@ void GameEngine::checkConveyors()
     }
 }
 
-// ── Conveyor tiles: push players standing on TILE_CONVEYOR_R/L ─
+// ── updateConveyorTiles ───────────────────────────────────────
+// Pushes grounded players horizontally when standing on TILE_CONVEYOR_R/L tiles.
+// Uses CONVEYOR_BELT_SPEED for the per-tick displacement amount.
 void GameEngine::updateConveyorTiles()
 {
     LevelData* lv = currentLevel();
@@ -574,8 +615,8 @@ void GameEngine::updateConveyorTiles()
         for (int c = colL; c <= colR; c++)
         {
             int tile = bstGet(&lv->tileTree, footRow, c);
-            if (tile == TILE_CONVEYOR_R) { pl.x += 1.8f; break; }
-            else if (tile == TILE_CONVEYOR_L) { pl.x -= 1.8f; break; }
+            if (tile == TILE_CONVEYOR_R) { pl.x += CONVEYOR_BELT_SPEED; break; }
+            else if (tile == TILE_CONVEYOR_L) { pl.x -= CONVEYOR_BELT_SPEED; break; }
         }
     };
 
@@ -583,7 +624,9 @@ void GameEngine::updateConveyorTiles()
     pushPlayer(watergirl);
 }
 
-// ── TELEPORTS (Hash Map & Stack) ──────────────────────────────────
+// ── checkTeleports ────────────────────────────────────────────
+// Detects when a player stands on a teleport pad, then queues an EVT_TELEPORT
+// event. Partner lookup uses the teleport hash map (O(1)).
 void GameEngine::checkTeleports(Player* p)
 {
     LevelData* lv = currentLevel();
@@ -633,6 +676,9 @@ void GameEngine::checkTeleports(Player* p)
     }
 }
 
+// ── applyTeleport ─────────────────────────────────────────────
+// Warps the given player to destPadIndex, zeroing velocity.
+// Pushes a history snapshot so the warp can be undone.
 void GameEngine::applyTeleport(int playerType, int destPadIndex)
 {
     LevelData* lv = currentLevel();
@@ -665,6 +711,9 @@ void GameEngine::applyTeleport(int playerType, int destPadIndex)
     p->vy = 0;
 }
 
+// ── checkHazards ──────────────────────────────────────────────
+// AABB-tests each player against hazard pools. Lethal hits enqueue
+// EVT_PLAYER_DEAD (priority 0). Safe hazard contact plays walk sounds.
 void GameEngine::checkHazards()
 {
     LevelData* lv = currentLevel();
@@ -718,6 +767,9 @@ void GameEngine::checkHazards()
     else           { if (sndWaterWalk->isPlaying())   sndWaterWalk->stop(); }
 }
 
+// ── checkGems ─────────────────────────────────────────────────
+// Linear-search DSA: finds a gem in pickup range, awards score if owned by
+// the player, appends to the gem trail list, and queues EVT_GEM_COLLECT.
 void GameEngine::checkGems()
 {
     LevelData* lv = currentLevel();
@@ -758,6 +810,9 @@ void GameEngine::checkGems()
     }
 }
 
+// ── checkDoors ────────────────────────────────────────────────
+// Opens a door when its owner player overlaps it. If both doors are open,
+// awards bonus score and queues EVT_LEVEL_COMPLETE.
 void GameEngine::checkDoors()
 {
     LevelData* lv = currentLevel();
@@ -796,6 +851,9 @@ void GameEngine::checkDoors()
     }
 }
 
+// ── processEvents ─────────────────────────────────────────────
+// Priority-queue DSA: pops events in priority order (death > teleport/win > gem).
+// Death and level-complete stop further processing for the frame.
 void GameEngine::processEvents()
 {
     // DSA: PriorityQueue — process highest-priority events first
@@ -831,6 +889,9 @@ void GameEngine::processEvents()
     }
 }
 
+// ── handleDeath ───────────────────────────────────────────────
+// Decrements lives on player death. At zero lives -> STATE_GAMEOVER.
+// Otherwise restores checkpoint positions or fully resets the level.
 void GameEngine::handleDeath()
 {
     sndLavaWalk->stop();
@@ -857,6 +918,11 @@ void GameEngine::handleDeath()
     }
 }
 
+// ── buildGrid ─────────────────────────────────────────────────
+// Converts effectiveTileMap into a passability grid for Dijkstra (DIJKSTRA_PASSABLE
+// vs DIJKSTRA_BLOCKED). Edge step costs are applied later in dijkstraGridFind().
+// Blocked: SOLID, conveyors, POISON, and hazards lethal to this player.
+// Passable: EMPTY, safe hazards (lava for Fireboy, water for Watergirl).
 void GameEngine::buildGrid(int who, int grid[MAP_ROWS][MAP_COLS])
 {
     LevelData* lv = currentLevel();
@@ -874,11 +940,14 @@ void GameEngine::buildGrid(int who, int grid[MAP_ROWS][MAP_COLS])
                            (t == TILE_LAVA    && who == WATERGIRL) ||
                            (t == TILE_WATER   && who == FIREBOY)   ||
                            (t == TILE_POISON);
-            grid[r][c] = blocked ? 1 : 0;
+            grid[r][c] = blocked ? DIJKSTRA_BLOCKED : DIJKSTRA_PASSABLE;
         }
     }
 }
 
+// ── computeHints ──────────────────────────────────────────────
+// Dijkstra DSA: builds greedy gem-to-gem paths then a final path to each door.
+// Results are stored in fireboyHint and watergirlHint for the renderer.
 void GameEngine::computeHints()
 {
     if (!showHint)

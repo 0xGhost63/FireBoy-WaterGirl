@@ -4,70 +4,80 @@
 
 
 // ════════════════════════════════════════════════════════════
-// 1. DOUBLY LINKED LIST
+// 1. DOUBLY LINKED LIST – Level catalog navigation
 // ════════════════════════════════════════════════════════════
-void listInit(LevelList* lst)
+
+// Clears the level list to an empty state (head, tail, current = nullptr).
+void listInit(LevelList* levelCatalog)
 {
-    lst->head    = nullptr;
-    lst->tail    = nullptr;
-    lst->current = nullptr;
-    lst->count   = 0;
+    levelCatalog->head    = nullptr;
+    levelCatalog->tail    = nullptr;
+    levelCatalog->current = nullptr;
+    levelCatalog->count   = 0;
 }
 
-void listAppend(LevelList* lst, LevelData d)
+// Appends a new level node at the tail. Sets current to the first node if unset.
+void listAppend(LevelList* levelCatalog, LevelData levelData)
 {
-    LevelNode* node = new LevelNode();
-    node->data = d;
-    node->next = nullptr;
-    node->prev = lst->tail;
-    if (lst->tail)
-        lst->tail->next = node;
+    LevelNode* newLevelNode = new LevelNode();
+    newLevelNode->data = levelData;
+    newLevelNode->next = nullptr;
+    newLevelNode->prev = levelCatalog->tail;
+    if (levelCatalog->tail)
+        levelCatalog->tail->next = newLevelNode;
     else
-        lst->head = node;
-    lst->tail = node;
-    lst->count++;
-    if (!lst->current)
-        lst->current = node;
+        levelCatalog->head = newLevelNode;
+    levelCatalog->tail = newLevelNode;
+    levelCatalog->count++;
+    if (!levelCatalog->current)
+        levelCatalog->current = newLevelNode;
 }
 
-bool listNext(LevelList* lst)
+// Advances current to the next node. Returns false if already at the last level.
+bool listNext(LevelList* levelCatalog)
 {
-    if (!lst->current || !lst->current->next) return false;
-    lst->current = lst->current->next;
+    if (!levelCatalog->current || !levelCatalog->current->next) return false;
+    levelCatalog->current = levelCatalog->current->next;
     return true;
 }
 
-bool listPrev(LevelList* lst)
+// Moves current to the previous node. Returns false if already at the first level.
+bool listPrev(LevelList* levelCatalog)
 {
-    if (!lst->current || !lst->current->prev) return false;
-    lst->current = lst->current->prev;
+    if (!levelCatalog->current || !levelCatalog->current->prev) return false;
+    levelCatalog->current = levelCatalog->current->prev;
     return true;
 }
 
-bool listHasNext(LevelList* lst)
+// Returns true if there is a level after the current one.
+bool listHasNext(LevelList* levelCatalog)
 {
-    return lst->current && lst->current->next;
+    return levelCatalog->current && levelCatalog->current->next;
 }
 
-void listFree(LevelList* lst)
+// Frees every level node and its BST tile tree. Resets the list to empty.
+void listFree(LevelList* levelCatalog)
 {
-    LevelNode* cur = lst->head;
-    while (cur)
+    LevelNode* currentLevelNode = levelCatalog->head;
+    while (currentLevelNode)
     {
-        LevelNode* nxt = cur->next;
-        bstFree(cur->data.tileTree.root); // Free the BST to prevent memory leaks
-        delete cur;
-        cur = nxt;
+        LevelNode* nextLevelNode = currentLevelNode->next;
+        bstFree(currentLevelNode->data.tileTree.root);
+        delete currentLevelNode;
+        currentLevelNode = nextLevelNode;
     }
-    lst->head    = nullptr;
-    lst->tail    = nullptr;
-    lst->current = nullptr;
-    lst->count   = 0;
+    levelCatalog->head    = nullptr;
+    levelCatalog->tail    = nullptr;
+    levelCatalog->current = nullptr;
+    levelCatalog->count   = 0;
 }
 
 // ════════════════════════════════════════════════════════════
-// 4. QUICK SORT  O(n log n) – used for ALL leaderboard sizes
+// 4. QUICK SORT  O(n log n) – Leaderboard score ordering
 // ════════════════════════════════════════════════════════════
+
+// Partitions arr[lo..hi] around the pivot score at arr[hi].
+// Returns the final pivot index after partitioning.
 static int partition(ScoreEntry arr[], int lo, int hi)
 {
     int pivot = arr[hi].score;
@@ -88,6 +98,8 @@ static int partition(ScoreEntry arr[], int lo, int hi)
     return i + 1;
 }
 
+// Sorts score entries in descending order (highest score first).
+// Used by the leaderboard for all table sizes.
 void quickSort(ScoreEntry arr[], int lo, int hi)
 {
     if (lo < hi)
@@ -99,8 +111,11 @@ void quickSort(ScoreEntry arr[], int lo, int hi)
 }
 
 // ════════════════════════════════════════════════════════════
-// 5. LINEAR SEARCH
+// 5. LINEAR SEARCH – Gem pickup detection
 // ════════════════════════════════════════════════════════════
+
+// Scans all gems for one within pickup radius of (px, py).
+// Skips collected gems. Returns gem index, or -1 if none found.
 int linearSearchGem(Gem gems[], int count, float px, float py)
 {
     float radius = 22.0f;
@@ -116,8 +131,11 @@ int linearSearchGem(Gem gems[], int count, float px, float py)
 }
 
 // ════════════════════════════════════════════════════════════
-// 6. BINARY SEARCH
+// 6. BINARY SEARCH – Sorted leaderboard lookup
 // ════════════════════════════════════════════════════════════
+
+// Binary-searches a descending-sorted score array for the given score.
+// Returns the index where the score would be inserted (or exact match index).
 int binarySearch(ScoreEntry arr[], int n, int score)
 {
     int lo = 0, hi = n - 1;
@@ -132,8 +150,13 @@ int binarySearch(ScoreEntry arr[], int n, int score)
 }
 
 // ════════════════════════════════════════════════════════════
-// 7. DIJKSTRA WEIGHTED PATHFINDING (Grid-Based)
+// 7. DIJKSTRA – Grid pathfinding for hints and nearest gem
 // ════════════════════════════════════════════════════════════
+
+// Finds the shortest walkable path on grid from (srcCol,srcRow) to (dstCol,dstRow).
+// Passability is set by GameEngine::buildGrid() (DIJKSTRA_PASSABLE / DIJKSTRA_BLOCKED).
+// Edge weights: DIJKSTRA_STEP_COST per cardinal step, DIJKSTRA_TELEPORT_COST for warps.
+// Returns a PathResult with tile coordinates from source to destination.
 PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
                             int srcCol, int srcRow,
                             int dstCol, int dstRow,
@@ -153,7 +176,7 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
     {
         for (int c = 0; c < MAP_COLS; c++)
         {
-            dist[r][c]    = 1e9f;
+            dist[r][c]    = DIJKSTRA_UNREACHABLE;
             parentX[r][c] = -1;
             parentY[r][c] = -1;
             closed[r][c]  = false;
@@ -170,9 +193,8 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
 
     for (int iter = 0; iter < nodes; iter++)
     {
-        // Find the unvisited node with the smallest distance
         int cx = -1, cy = -1;
-        float best = 1e9f;
+        float best = DIJKSTRA_UNREACHABLE;
         for (int r = 0; r < MAP_ROWS; r++)
         {
             for (int c = 0; c < MAP_COLS; c++)
@@ -186,18 +208,17 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
             }
         }
 
-        if (cx < 0 || best == 1e9f) break;
+        if (cx < 0 || best == DIJKSTRA_UNREACHABLE) break;
         if (cx == dstCol && cy == dstRow) { found = true; break; }
         closed[cy][cx] = true;
 
-        // Check all 4 neighbours
         for (int d = 0; d < 4; d++)
         {
             int nx = cx + dx[d];
             int ny = cy + dy[d];
             if (nx < 0 || ny < 0 || nx >= MAP_COLS || ny >= MAP_ROWS) continue;
-            if (closed[ny][nx] || grid[ny][nx] != 0) continue;
-            float alt = dist[cy][cx] + 1.0f;
+            if (closed[ny][nx] || grid[ny][nx] != DIJKSTRA_PASSABLE) continue;
+            float alt = dist[cy][cx] + DIJKSTRA_STEP_COST;
             if (alt < dist[ny][nx])
             {
                 dist[ny][nx]    = alt;
@@ -206,14 +227,13 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
             }
         }
 
-        // ── DSA: Zero-cost Teleport Edge ────────────────────────
         if (teleportEdges && teleportEdges[cy][cx][0] != -1)
         {
             int tx = teleportEdges[cy][cx][0];
             int ty = teleportEdges[cy][cx][1];
             if (!closed[ty][tx])
             {
-                float alt = dist[cy][cx]; // zero cost to warp
+                float alt = dist[cy][cx] + DIJKSTRA_TELEPORT_COST;
                 if (alt < dist[ty][tx])
                 {
                     dist[ty][tx]    = alt;
@@ -226,7 +246,6 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
 
     if (!found) return res;
 
-    // Reconstruct path from destination back to source
     int tmpX[MAX_HINT_PATH], tmpY[MAX_HINT_PATH], tLen = 0;
     int cx = dstCol, cy = dstRow;
     while (!(cx == srcCol && cy == srcRow) && tLen < MAX_HINT_PATH)
@@ -243,7 +262,6 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
     tmpY[tLen] = srcRow;
     tLen++;
 
-    // Reverse the path so it goes from source to destination
     for (int i = 0; i < tLen && i < MAX_HINT_PATH; i++)
     {
         res.px[i] = tmpX[tLen - 1 - i];
@@ -254,10 +272,12 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
 }
 
 // ════════════════════════════════════════════════════════════
-// 8. MIN-HEAP – Nearest Gem Finder
+// 8. MIN-HEAP – Nearest reachable gem (by Dijkstra path length)
 // ════════════════════════════════════════════════════════════
+
 struct HeapEntry { float dist; int idx; };
 
+// Swaps two heap entries in place.
 static void heapSwap(HeapEntry a[], int i, int j)
 {
     HeapEntry tmp = a[i];
@@ -265,6 +285,7 @@ static void heapSwap(HeapEntry a[], int i, int j)
     a[j] = tmp;
 }
 
+// Restores min-heap property by sinking entry at index i toward the leaves.
 static void heapifyDown(HeapEntry a[], int n, int i)
 {
     int s = i, l = 2*i+1, r = 2*i+2;
@@ -277,6 +298,8 @@ static void heapifyDown(HeapEntry a[], int n, int i)
     }
 }
 
+// Builds a min-heap of uncollected gems owned by playerType, keyed by
+// Dijkstra path length from the player. Returns the closest gem index, or -1.
 int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
                    int grid[MAP_ROWS][MAP_COLS],
                    int teleportEdges[MAP_ROWS][MAP_COLS][2])
@@ -303,7 +326,6 @@ int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
         if (gRow < 0) gRow = 0;
         if (gRow >= MAP_ROWS) gRow = MAP_ROWS-1;
 
-        // DSA: Dijkstra path length = actual traversal cost
         PathResult pr = dijkstraGridFind(grid, pCol, pRow, gCol, gRow, teleportEdges);
         float distVal = (pr.len > 0) ? (float)pr.len : 1e30f;
         heap[hn].dist = distVal;
@@ -312,389 +334,411 @@ int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
     }
 
     if (hn == 0) return -1;
-    // Build min-heap: root = gem with shortest actual path
     for (int i = hn/2 - 1; i >= 0; i--)
         heapifyDown(heap, hn, i);
     return heap[0].idx;
 }
 
 // ════════════════════════════════════════════════════════════
-// 12. SINGLY LINKED LIST – Gem Collection Trail
-// Each collected gem is appended; iterated on the win screen.
+// 9. SINGLY LINKED LIST – Gem collection trail (win screen)
 // ════════════════════════════════════════════════════════════
-void gemTrailInit(GemTrail* t)
+
+// Initializes an empty gem trail list.
+void gemTrailInit(GemTrail* trailCatalog)
 {
-    t->head  = nullptr;
-    t->tail  = nullptr;
-    t->count = 0;
+    trailCatalog->head  = nullptr;
+    trailCatalog->tail  = nullptr;
+    trailCatalog->count = 0;
 }
 
-void gemTrailAppend(GemTrail* t, int gemIndex, int playerType)
+// Appends a collected gem (index + player type) to the trail in chronological order.
+void gemTrailAppend(GemTrail* trailCatalog, int gemIndex, int playerType)
 {
-    GemTrailNode* node = (GemTrailNode*)malloc(sizeof(GemTrailNode));
-    node->gemIndex   = gemIndex;
-    node->playerType = playerType;
-    node->next       = nullptr;
-    if (!t->head)
-        t->head = node;
+    GemTrailNode* newTrailNode = (GemTrailNode*)malloc(sizeof(GemTrailNode));
+    newTrailNode->gemIndex   = gemIndex;
+    newTrailNode->playerType = playerType;
+    newTrailNode->next       = nullptr;
+    if (!trailCatalog->head)
+        trailCatalog->head = newTrailNode;
     else
-        t->tail->next = node;
-    t->tail = node;
-    t->count++;
+        trailCatalog->tail->next = newTrailNode;
+    trailCatalog->tail = newTrailNode;
+    trailCatalog->count++;
 }
 
-void gemTrailFree(GemTrail* t)
+// Frees all trail nodes and resets the list to empty.
+void gemTrailFree(GemTrail* trailCatalog)
 {
-    GemTrailNode* n = t->head;
-    while (n)
+    GemTrailNode* currentTrailNode = trailCatalog->head;
+    while (currentTrailNode)
     {
-        GemTrailNode* nx = n->next;
-        free(n);
-        n = nx;
+        GemTrailNode* nextTrailNode = currentTrailNode->next;
+        free(currentTrailNode);
+        currentTrailNode = nextTrailNode;
     }
-    gemTrailInit(t);
+    gemTrailInit(trailCatalog);
 }
 
 // ════════════════════════════════════════════════════════════
-// 10. PRIORITY QUEUE (Min-Heap)
-// Ensures critical events are processed before minor ones.
-// Lower numerical values represent HIGHER priority:
-//
-// - Priority 0: Player Death (EVT_PLAYER_DEAD) - HIGHEST
-//
-// - Priority 1: Teleports & Level Win (EVT_TELEPORT / EVT_LEVEL_COMPLETE)
-//
-// - Priority 2: Gem Collection (EVT_GEM_COLLECT) - LOWEST
+// 10. PRIORITY QUEUE (Min-Heap) – Game event ordering
+// Lower priority number = processed first:
+//   0 = death, 1 = teleport/win, 2 = gem collect
 // ════════════════════════════════════════════════════════════
-void pqInit(PriorityQueue* pq)
+
+// Resets the event queue to empty.
+void pqInit(PriorityQueue* eventPriorityQueue)
 {
-    pq->size = 0;
+    eventPriorityQueue->size = 0;
 }
 
-bool pqEmpty(PriorityQueue* pq)
+// Returns true when no events are queued.
+bool pqEmpty(PriorityQueue* eventPriorityQueue)
 {
-    return pq->size == 0;
+    return eventPriorityQueue->size == 0;
 }
 
-// Heapify-up: after inserting at end, bubble item up to keep min-heap
-void pqPush(PriorityQueue* pq, GameEvent e)
+// Inserts an event and bubbles it up to maintain min-heap order by priority.
+void pqPush(PriorityQueue* eventPriorityQueue, GameEvent gameEvent)
 {
-    if (pq->size >= PQUEUE_MAX) return;
-    int i = pq->size;
-    pq->size++;
-    pq->items[i] = e;
-    // Bubble up
-    while (i > 0)
+    if (eventPriorityQueue->size >= PQUEUE_MAX) return;
+    int itemIndex = eventPriorityQueue->size;
+    eventPriorityQueue->size++;
+    eventPriorityQueue->items[itemIndex] = gameEvent;
+    while (itemIndex > 0)
     {
-        int parent = (i - 1) / 2;
-        if (pq->items[parent].priority <= pq->items[i].priority) break;
-        GameEvent tmp        = pq->items[parent];
-        pq->items[parent]    = pq->items[i];
-        pq->items[i]         = tmp;
-        i = parent;
+        int parentIndex = (itemIndex - 1) / 2;
+        if (eventPriorityQueue->items[parentIndex].priority <= eventPriorityQueue->items[itemIndex].priority) break;
+        GameEvent tempEvent                         = eventPriorityQueue->items[parentIndex];
+        eventPriorityQueue->items[parentIndex]      = eventPriorityQueue->items[itemIndex];
+        eventPriorityQueue->items[itemIndex]         = tempEvent;
+        itemIndex = parentIndex;
     }
 }
 
-// Heapify-down: after removing root, restore heap property
-GameEvent pqPop(PriorityQueue* pq)
+// Removes and returns the highest-priority (lowest number) event from the heap.
+GameEvent pqPop(PriorityQueue* eventPriorityQueue)
 {
-    GameEvent result = pq->items[0];
-    pq->size--;
-    pq->items[0] = pq->items[pq->size];
-    int i = 0;
+    GameEvent highestPriorityEvent = eventPriorityQueue->items[0];
+    eventPriorityQueue->size--;
+    eventPriorityQueue->items[0] = eventPriorityQueue->items[eventPriorityQueue->size];
+    int itemIndex = 0;
     while (true)
     {
-        int left    = 2*i + 1;
-        int right   = 2*i + 2;
-        int smallest = i;
-        if (left  < pq->size && pq->items[left].priority  < pq->items[smallest].priority) smallest = left;
-        if (right < pq->size && pq->items[right].priority < pq->items[smallest].priority) smallest = right;
-        if (smallest == i) break;
-        GameEvent tmp         = pq->items[i];
-        pq->items[i]          = pq->items[smallest];
-        pq->items[smallest]   = tmp;
-        i = smallest;
+        int leftChildIndex    = 2*itemIndex + 1;
+        int rightChildIndex   = 2*itemIndex + 2;
+        int smallestChildIndex = itemIndex;
+        if (leftChildIndex  < eventPriorityQueue->size && eventPriorityQueue->items[leftChildIndex].priority  < eventPriorityQueue->items[smallestChildIndex].priority) smallestChildIndex = leftChildIndex;
+        if (rightChildIndex < eventPriorityQueue->size && eventPriorityQueue->items[rightChildIndex].priority < eventPriorityQueue->items[smallestChildIndex].priority) smallestChildIndex = rightChildIndex;
+        if (smallestChildIndex == itemIndex) break;
+        GameEvent tempEvent                          = eventPriorityQueue->items[itemIndex];
+        eventPriorityQueue->items[itemIndex]          = eventPriorityQueue->items[smallestChildIndex];
+        eventPriorityQueue->items[smallestChildIndex]   = tempEvent;
+        itemIndex = smallestChildIndex;
     }
-    return result;
+    return highestPriorityEvent;
 }
 
 // ════════════════════════════════════════════════════════════
-// 10. GATE HASH MAP (Direct-Address Table)
-// O(1) gate lookup by ID — no need to loop through all gates
+// 10.a GATE HASH MAP (Direct-Address Table) – O(1) gate lookup
 // ════════════════════════════════════════════════════════════
-void gateMapInit(GateHashMap* m)
+
+// Sets all gate slots to -1 (empty).
+void gateMapInit(GateHashMap* gateMap)
 {
-    m->size = 0;
+    gateMap->size = 0;
     for (int i = 0; i < MAX_GATES; i++)
-        m->table[i] = -1;
+        gateMap->table[i] = -1;
 }
 
-void gateMapInsert(GateHashMap* m, int gateId, int index)
+// Maps gateIdKey -> index in lv->gates[]. O(1) insert.
+void gateMapInsert(GateHashMap* gateMap, int gateIdKey, int index)
 {
-    if (gateId >= 0 && gateId < MAX_GATES)
+    if (gateIdKey >= 0 && gateIdKey < MAX_GATES)
     {
-        m->table[gateId] = index;
-        m->size++;
+        gateMap->table[gateIdKey] = index;
+        gateMap->size++;
     }
 }
 
-int gateMapGet(GateHashMap* m, int gateId)
+// Returns the gates[] index for gateIdKey, or -1 if not registered.
+int gateMapGet(GateHashMap* gateMap, int gateIdKey)
 {
-    if (gateId >= 0 && gateId < MAX_GATES)
-        return m->table[gateId];
+    if (gateIdKey >= 0 && gateIdKey < MAX_GATES)
+        return gateMap->table[gateIdKey];
     return -1;
 }
 
 // ════════════════════════════════════════════════════════════
-// 10.b TELEPORT HASH MAP (Direct-Address Table)
-// Fast lookup of teleport pads by ID.
+// 10.b TELEPORT HASH MAP (Direct-Address Table) – O(1) pad lookup
 // ════════════════════════════════════════════════════════════
-void teleportMapInit(TeleportHashMap* m)
+
+// Sets all teleport pad slots to -1 (empty).
+void teleportMapInit(TeleportHashMap* teleportMap)
 {
-    m->size = 0;
+    teleportMap->size = 0;
     for (int i = 0; i < MAX_TELEPORTS; i++)
-        m->table[i] = -1;
+        teleportMap->table[i] = -1;
 }
 
-void teleportMapInsert(TeleportHashMap* m, int padId, int index)
+// Maps padIdKey -> index in lv->pads[]. O(1) insert.
+void teleportMapInsert(TeleportHashMap* teleportMap, int padIdKey, int index)
 {
-    if (padId >= 0 && padId < MAX_TELEPORTS)
+    if (padIdKey >= 0 && padIdKey < MAX_TELEPORTS)
     {
-        m->table[padId] = index;
-        m->size++;
+        teleportMap->table[padIdKey] = index;
+        teleportMap->size++;
     }
 }
 
-int teleportMapGet(TeleportHashMap* m, int padId)
+// Returns the pads[] index for padIdKey, or -1 if not registered.
+int teleportMapGet(TeleportHashMap* teleportMap, int padIdKey)
 {
-    if (padId >= 0 && padId < MAX_TELEPORTS)
-        return m->table[padId];
+    if (padIdKey >= 0 && padIdKey < MAX_TELEPORTS)
+        return teleportMap->table[padIdKey];
     return -1;
 }
 
 // ════════════════════════════════════════════════════════════
-// 11. CONVEYOR QUEUE (Circular Array FIFO for Conveyor Belt)
-// Each tick: dequeue item -> modify X by belt speed -> enqueue back
+// 11. CONVEYOR QUEUE (Circular Array FIFO)
+// Each tick: dequeue -> move X by belt speed -> enqueue back
 // ════════════════════════════════════════════════════════════
-void conveyorQueueInit(ConveyorQueue* q)
+
+// Resets the circular queue to empty (front=0, rear=-1, count=0).
+void conveyorQueueInit(ConveyorQueue* conveyorQueue)
 {
-    q->front = 0;
-    q->rear  = -1;
-    q->count = 0;
+    conveyorQueue->front = 0;
+    conveyorQueue->rear  = -1;
+    conveyorQueue->count = 0;
 }
 
-bool conveyorQueueEmpty(ConveyorQueue* q)
+// Returns true when the queue holds no items.
+bool conveyorQueueEmpty(ConveyorQueue* conveyorQueue)
 {
-    return q->count == 0;
+    return conveyorQueue->count == 0;
 }
 
-bool conveyorQueueFull(ConveyorQueue* q)
+// Returns true when the queue cannot accept more items.
+bool conveyorQueueFull(ConveyorQueue* conveyorQueue)
 {
-    return q->count == CONVEYOR_QUEUE_MAX;
+    return conveyorQueue->count == CONVEYOR_QUEUE_MAX;
 }
 
-void conveyorQueueEnqueue(ConveyorQueue* q, ConveyorItem item)
+// Adds an item at the rear. No-op if the queue is full.
+void conveyorQueueEnqueue(ConveyorQueue* conveyorQueue, ConveyorItem conveyorItem)
 {
-    if (conveyorQueueFull(q)) return;
-    q->rear = (q->rear + 1) % CONVEYOR_QUEUE_MAX;
-    q->items[q->rear] = item;
-    q->count++;
+    if (conveyorQueueFull(conveyorQueue)) return;
+    conveyorQueue->rear = (conveyorQueue->rear + 1) % CONVEYOR_QUEUE_MAX;
+    conveyorQueue->items[conveyorQueue->rear] = conveyorItem;
+    conveyorQueue->count++;
 }
 
-ConveyorItem conveyorQueueDequeue(ConveyorQueue* q)
+// Removes and returns the front item. Returns id=-1 if the queue is empty.
+ConveyorItem conveyorQueueDequeue(ConveyorQueue* conveyorQueue)
 {
-    ConveyorItem item;
-    item.id = -1;
-    item.x  = 0;
-    item.y  = 0;
-    if (conveyorQueueEmpty(q)) return item;
-    item = q->items[q->front];
-    q->front = (q->front + 1) % CONVEYOR_QUEUE_MAX;
-    q->count--;
-    return item;
+    ConveyorItem conveyorItem;
+    conveyorItem.id = -1;
+    conveyorItem.x  = 0;
+    conveyorItem.y  = 0;
+    if (conveyorQueueEmpty(conveyorQueue)) return conveyorItem;
+    conveyorItem = conveyorQueue->items[conveyorQueue->front];
+    conveyorQueue->front = (conveyorQueue->front + 1) % CONVEYOR_QUEUE_MAX;
+    conveyorQueue->count--;
+    return conveyorItem;
 }
 
 // ════════════════════════════════════════════════════════════
-// 11. SPARSE MATRIX BST (Map Layout)
+// 12. SPARSE MATRIX BST – Level tile map storage
+// Key = row * MAP_COLS + col; only non-empty tiles are stored.
 // ════════════════════════════════════════════════════════════
-void bstInit(BSTMap* tree)
+
+// Clears the BST root (does not free existing nodes; use bstFree first if needed).
+void bstInit(BSTMap* tileTree)
 {
-    tree->root = nullptr;
+    tileTree->root = nullptr;
 }
 
-static BSTNode* bstInsertNode(BSTNode* node, int key, int type)
+// Recursive helper: inserts or updates a node with the given key and tile type.
+static BSTNode* bstInsertNode(BSTNode* treeNode, int key, int type)
 {
-    if (!node)
+    if (!treeNode)
     {
-        BSTNode* n  = new BSTNode();
-        n->key      = key;
-        n->type     = type;
-        n->left     = nullptr;
-        n->right    = nullptr;
-        return n;
+        BSTNode* newBstNode  = new BSTNode();
+        newBstNode->key      = key;
+        newBstNode->type     = type;
+        newBstNode->left     = nullptr;
+        newBstNode->right    = nullptr;
+        return newBstNode;
     }
-    if (key < node->key)
-        node->left  = bstInsertNode(node->left,  key, type);
-    else if (key > node->key)
-        node->right = bstInsertNode(node->right, key, type);
+    if (key < treeNode->key)
+        treeNode->left  = bstInsertNode(treeNode->left,  key, type);
+    else if (key > treeNode->key)
+        treeNode->right = bstInsertNode(treeNode->right, key, type);
     else
-        node->type  = type; // update existing
-    return node;
+        treeNode->type  = type;
+    return treeNode;
 }
 
-void bstInsert(BSTMap* tree, int r, int c, int type)
+// Inserts a tile at (row, col). TILE_EMPTY tiles are not stored.
+void bstInsert(BSTMap* tileTree, int row, int col, int type)
 {
-    if (type == TILE_EMPTY) return; // Don't store empty space
-    int key = r * MAP_COLS + c;
-    tree->root = bstInsertNode(tree->root, key, type);
+    if (type == TILE_EMPTY) return;
+    int key = row * MAP_COLS + col;
+    tileTree->root = bstInsertNode(tileTree->root, key, type);
 }
 
-int bstGet(BSTMap* tree, int r, int c)
+// Looks up the tile type at (row, col).
+// Out-of-bounds returns TILE_SOLID; missing key returns TILE_EMPTY.
+int bstGet(BSTMap* tileTree, int row, int col)
 {
-    if (r < 0 || r >= MAP_ROWS || c < 0 || c >= MAP_COLS)
-        return TILE_SOLID; // out of bounds
-    int key = r * MAP_COLS + c;
-    BSTNode* curr = tree->root;
-    while (curr)
+    if (row < 0 || row >= MAP_ROWS || col < 0 || col >= MAP_COLS)
+        return TILE_SOLID;
+    int key = row * MAP_COLS + col;
+    BSTNode* currentBstNode = tileTree->root;
+    while (currentBstNode)
     {
-        if (key == curr->key) return curr->type;
-        if (key < curr->key)  curr = curr->left;
-        else                  curr = curr->right;
+        if (key == currentBstNode->key) return currentBstNode->type;
+        if (key < currentBstNode->key)  currentBstNode = currentBstNode->left;
+        else                            currentBstNode = currentBstNode->right;
     }
-    return TILE_EMPTY; // not found means empty space
+    return TILE_EMPTY;
 }
 
-void bstFree(BSTNode* node)
+// Post-order recursive free of the entire BST subtree.
+void bstFree(BSTNode* treeNode)
 {
-    if (!node) return;
-    bstFree(node->left);
-    bstFree(node->right);
-    delete node;
+    if (!treeNode) return;
+    bstFree(treeNode->left);
+    bstFree(treeNode->right);
+    delete treeNode;
 }
-
-// ================================================================
 
 // ════════════════════════════════════════════════════════════
-// 13. STATE HISTORY  (Doubly Linked List – Undo / Redo)
+// 13. STATE HISTORY (Doubly Linked List) – Undo / Redo
 // ════════════════════════════════════════════════════════════
-void historyInit(StateHistory* h)
+
+// Initializes an empty undo/redo history list.
+void historyInit(StateHistory* gameHistory)
 {
-    h->head    = nullptr;
-    h->tail    = nullptr;
-    h->current = nullptr;
-    h->count   = 0;
+    gameHistory->head    = nullptr;
+    gameHistory->tail    = nullptr;
+    gameHistory->current = nullptr;
+    gameHistory->count   = 0;
 }
 
-void historyFree(StateHistory* h)
+// Frees all history nodes and resets the list to empty.
+void historyFree(StateHistory* gameHistory)
 {
-    HistoryNode* n = h->head;
-    while (n)
+    HistoryNode* currentHistoryNode = gameHistory->head;
+    while (currentHistoryNode)
     {
-        HistoryNode* next = n->next;
-        free(n);
-        n = next;
+        HistoryNode* nextHistoryNode = currentHistoryNode->next;
+        free(currentHistoryNode);
+        currentHistoryNode = nextHistoryNode;
     }
-    historyInit(h);
+    historyInit(gameHistory);
 }
 
-// Push a new snapshot.
-// If we are NOT at the tail (i.e. the player undid some steps and then
-// continued playing), discard everything after current — just like any
-// real undo system (branching history is not supported).
-// If count reaches HISTORY_MAX, evict the oldest node from the head.
-void historyPush(StateHistory* h, const GameSnapshot& snap)
+// Appends a game snapshot at the tail. Discards any redo branch if the player
+// had undone and then acted again. Evicts the oldest node when count > HISTORY_MAX.
+void historyPush(StateHistory* gameHistory, const GameSnapshot& snap)
 {
-    // Discard future (forward) nodes when new action is taken after undo
-    if (h->current && h->current != h->tail)
+    if (gameHistory->current && gameHistory->current != gameHistory->tail)
     {
-        HistoryNode* toDelete = h->current->next;
-        h->current->next = nullptr;
-        h->tail = h->current;
-        while (toDelete)
+        HistoryNode* nodeToDelete = gameHistory->current->next;
+        gameHistory->current->next = nullptr;
+        gameHistory->tail = gameHistory->current;
+        while (nodeToDelete)
         {
-            HistoryNode* nx = toDelete->next;
-            free(toDelete);
-            h->count--;
-            toDelete = nx;
+            HistoryNode* nextHistoryNode = nodeToDelete->next;
+            free(nodeToDelete);
+            gameHistory->count--;
+            nodeToDelete = nextHistoryNode;
         }
     }
 
-    // Allocate new node
-    HistoryNode* node = (HistoryNode*)malloc(sizeof(HistoryNode));
-    node->snap = snap;
-    node->next = nullptr;
-    node->prev = h->tail;
+    HistoryNode* newHistoryNode = (HistoryNode*)malloc(sizeof(HistoryNode));
+    newHistoryNode->snap = snap;
+    newHistoryNode->next = nullptr;
+    newHistoryNode->prev = gameHistory->tail;
 
-    if (h->tail)  h->tail->next = node;
-    else          h->head = node; // first ever node
-    h->tail    = node;
-    h->current = node;
-    h->count++;
+    if (gameHistory->tail)  gameHistory->tail->next = newHistoryNode;
+    else                    gameHistory->head = newHistoryNode;
+    gameHistory->tail    = newHistoryNode;
+    gameHistory->current = newHistoryNode;
+    gameHistory->count++;
 
-    // Evict oldest if over cap
-    if (h->count > HISTORY_MAX)
+    if (gameHistory->count > HISTORY_MAX)
     {
-        HistoryNode* old = h->head;
-        h->head = old->next;
-        if (h->head) h->head->prev = nullptr;
-        free(old);
-        h->count--;
+        HistoryNode* evictedHistoryNode = gameHistory->head;
+        gameHistory->head = evictedHistoryNode->next;
+        if (gameHistory->head) gameHistory->head->prev = nullptr;
+        free(evictedHistoryNode);
+        gameHistory->count--;
     }
 }
 
-// Move current backward (undo). Returns false if already at beginning.
-bool historyUndo(StateHistory* h, GameSnapshot* out)
+// Moves current one step backward and copies that snapshot into restoredSnapshot.
+// Returns false if already at the oldest state.
+bool historyUndo(StateHistory* gameHistory, GameSnapshot* restoredSnapshot)
 {
-    if (!h->current || !h->current->prev) return false;
-    h->current = h->current->prev;
-    *out = h->current->snap;
+    if (!gameHistory->current || !gameHistory->current->prev) return false;
+    gameHistory->current = gameHistory->current->prev;
+    *restoredSnapshot = gameHistory->current->snap;
     return true;
 }
 
-// Move current forward (redo). Returns false if already at most recent.
-bool historyRedo(StateHistory* h, GameSnapshot* out)
+// Moves current one step forward and copies that snapshot into restoredSnapshot.
+// Returns false if already at the newest state.
+bool historyRedo(StateHistory* gameHistory, GameSnapshot* restoredSnapshot)
 {
-    if (!h->current || !h->current->next) return false;
-    h->current = h->current->next;
-    *out = h->current->snap;
+    if (!gameHistory->current || !gameHistory->current->next) return false;
+    gameHistory->current = gameHistory->current->next;
+    *restoredSnapshot = gameHistory->current->snap;
     return true;
 }
 
 // ════════════════════════════════════════════════════════════
-// 12. SCREEN STACK (Array-Based)
+// 14. SCREEN STACK (Array-Based) – UI navigation
 // ════════════════════════════════════════════════════════════
-void screenStackInit(ScreenStack* s)
+
+// Resets the stack to empty (top = -1).
+void screenStackInit(ScreenStack* navigationStack)
 {
-    s->top = -1;
+    navigationStack->top = -1;
 }
 
-bool screenStackEmpty(ScreenStack* s)
+// Returns true when the stack has no screens.
+bool screenStackEmpty(ScreenStack* navigationStack)
 {
-    return s->top == -1;
+    return navigationStack->top == -1;
 }
 
-bool screenStackFull(ScreenStack* s)
+// Returns true when the stack cannot accept another push.
+bool screenStackFull(ScreenStack* navigationStack)
 {
-    return s->top == SCREEN_STACK_MAX - 1;
+    return navigationStack->top == SCREEN_STACK_MAX - 1;
 }
 
-void screenStackPush(ScreenStack* s, int screenIndex)
+// Pushes screenIndex onto the stack. No-op if full.
+void screenStackPush(ScreenStack* navigationStack, int screenIndex)
 {
-    if (screenStackFull(s)) return;
-    s->top++;
-    s->items[s->top] = screenIndex;
+    if (screenStackFull(navigationStack)) return;
+    navigationStack->top++;
+    navigationStack->items[navigationStack->top] = screenIndex;
 }
 
-int screenStackPop(ScreenStack* s)
+// Pops and returns the top screen index, or -1 if empty.
+int screenStackPop(ScreenStack* navigationStack)
 {
-    if (screenStackEmpty(s)) return -1;
-    int val = s->items[s->top];
-    s->top--;
-    return val;
+    if (screenStackEmpty(navigationStack)) return -1;
+    int poppedScreen = navigationStack->items[navigationStack->top];
+    navigationStack->top--;
+    return poppedScreen;
 }
 
-int screenStackPeek(ScreenStack* s)
+// Returns the top screen index without removing it, or -1 if empty.
+int screenStackPeek(ScreenStack* navigationStack)
 {
-    if (screenStackEmpty(s)) return -1;
-    return s->items[s->top];
+    if (screenStackEmpty(navigationStack)) return -1;
+    return navigationStack->items[navigationStack->top];
 }

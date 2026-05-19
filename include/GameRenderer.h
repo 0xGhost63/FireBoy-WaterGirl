@@ -36,6 +36,8 @@ private:
     float sx, sy;       // scale factor (world units -> pixels)
     int   ox, oy;       // pixel offset to center the game area
 
+    float conveyorScrollOffset;  // scroll position driven by CONVEYOR_BELT_SPEED
+
     void computeScale();
 
     // Convert world coordinates to screen pixel coordinates

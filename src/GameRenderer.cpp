@@ -12,7 +12,7 @@ How rendering works:
 // Constructor — loads all PNG sprites once at startup
 // ══════════════════════════════════════════════════════════════
 GameRenderer::GameRenderer(GameEngine* e, QWidget* parent)
-    : QWidget(parent), eng(e) 
+    : QWidget(parent), eng(e), conveyorScrollOffset(0.0f)
 {
     setMinimumSize(800, 640);
     setFocusPolicy(Qt::StrongFocus);
@@ -251,16 +251,13 @@ void GameRenderer::drawButtons(QPainter& p)
 // Draws a single conveyor belt with scrolling animation
 void GameRenderer::drawOneConveyorBelt(QPainter& p, QRectF area, float speed)
 {
-    static float anim = 0;
-    anim += 0.08f;
-
     p.setClipRect(area);
 
-    // Scroll direction based on speed sign
     float direction = (speed > 0) ? 1.0f : -1.0f;
     float tileW = toSW(TILE_SIZE);
     float tileH = toSH(TILE_SIZE);
-    float offset = fmodf(anim * toSW(40) * direction, tileW);
+    float speedRatio = fabsf(speed) / CONVEYOR_BELT_SPEED;
+    float offset = fmodf(conveyorScrollOffset * toSW(speedRatio) * direction, tileW);
 
     // Tile the conveyor sprite across the belt area
     for (float x = area.left() - tileW + offset; x < area.right() + tileW; x += tileW) {
@@ -275,6 +272,8 @@ void GameRenderer::drawConveyors(QPainter& p)
     LevelData* lv = eng->currentLevel();
     if (!lv) return;
 
+    conveyorScrollOffset += CONVEYOR_BELT_SPEED;
+
     // Draw manually placed conveyor regions
     for (int i = 0; i < lv->conveyorCount; i++) {
         ConveyorBelt& belt = lv->conveyors[i];
@@ -288,7 +287,7 @@ void GameRenderer::drawConveyors(QPainter& p)
             int tile = bstGet(&lv->tileTree, row, col);
             if (tile == TILE_CONVEYOR_R || tile == TILE_CONVEYOR_L) {
                 QRectF area(toSX(col * TILE_SIZE), toSY(row * TILE_SIZE), toSW(TILE_SIZE), toSH(TILE_SIZE));
-                float speed = (tile == TILE_CONVEYOR_R) ? 60.0f : -60.0f;
+                float speed = (tile == TILE_CONVEYOR_R) ? CONVEYOR_BELT_SPEED : -CONVEYOR_BELT_SPEED;
                 drawOneConveyorBelt(p, area, speed);
             }
         }

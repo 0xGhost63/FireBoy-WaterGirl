@@ -38,12 +38,12 @@ struct LevelList {
     int        count;
 };
 
-void listInit   (LevelList* lst);
-void listAppend (LevelList* lst, LevelData d);
-bool listNext   (LevelList* lst);
-bool listPrev   (LevelList* lst);
-bool listHasNext(LevelList* lst);
-void listFree   (LevelList* lst);
+void listInit   (LevelList* levelCatalog);
+void listAppend (LevelList* levelCatalog, LevelData levelData);
+bool listNext   (LevelList* levelCatalog);
+bool listPrev   (LevelList* levelCatalog);
+bool listHasNext(LevelList* levelCatalog);
+void listFree   (LevelList* levelCatalog);
 
 // ================================================================
 // 4. QUICK SORT  O(n log n)  – used for ALL leaderboard sorts
@@ -100,9 +100,9 @@ struct GemTrail {
     int           count;
 };
 
-void gemTrailInit  (GemTrail* t);
-void gemTrailAppend(GemTrail* t, int gemIndex, int playerType);
-void gemTrailFree  (GemTrail* t);
+void gemTrailInit  (GemTrail* trailCatalog);
+void gemTrailAppend(GemTrail* trailCatalog, int gemIndex, int playerType);
+void gemTrailFree  (GemTrail* trailCatalog);
 
 // ================================================================
 // 9. PRIORITY QUEUE  (Min-Heap, array-based)
@@ -116,10 +116,10 @@ struct PriorityQueue {
     int size;
 };
 
-void      pqInit   (PriorityQueue* pq);
-bool      pqEmpty  (PriorityQueue* pq);
-void      pqPush   (PriorityQueue* pq, GameEvent e);
-GameEvent pqPop    (PriorityQueue* pq);  // returns lowest-priority-value first
+void      pqInit   (PriorityQueue* eventPriorityQueue);
+bool      pqEmpty  (PriorityQueue* eventPriorityQueue);
+void      pqPush   (PriorityQueue* eventPriorityQueue, GameEvent gameEvent);
+GameEvent pqPop    (PriorityQueue* eventPriorityQueue);  // returns lowest-priority-value first
 
 // ================================================================
 // 10. GATE HASH MAP  (Direct-Address Table)
@@ -132,38 +132,38 @@ struct GateHashMap {
     int size;
 };
 
-void gateMapInit  (GateHashMap* m);
-void gateMapInsert(GateHashMap* m, int gateId, int index);
-int  gateMapGet   (GateHashMap* m, int gateId); // returns -1 if not found
+void gateMapInit  (GateHashMap* gateMap);
+void gateMapInsert(GateHashMap* gateMap, int gateIdKey, int index);
+int  gateMapGet   (GateHashMap* gateMap, int gateIdKey); // returns -1 if not found
 
 // ================================================================
-// 10.b HASH MAP (Direct Addressing) – Teleport Pad pairs
-// Fast O(1) lookup: teleport pad ID -> index in lv->pads[] array.
+// 10.b HASH MAP (Direct-Address Table) – Teleport Pad pairs
+// Key = padId used directly as index. O(1) insert and lookup.
 // ================================================================
 struct TeleportHashMap {
-    int table[MAX_TELEPORTS]; // table[padId] = index in lv->pads[]
+    int table[MAX_TELEPORTS]; // table[padId] = index in lv->pads[] (-1 = empty)
     int size;
 };
 
-void teleportMapInit  (TeleportHashMap* m);
-void teleportMapInsert(TeleportHashMap* m, int padId, int index);
-int  teleportMapGet   (TeleportHashMap* m, int padId); // returns -1 if not found
+void teleportMapInit  (TeleportHashMap* teleportMap);
+void teleportMapInsert(TeleportHashMap* teleportMap, int padIdKey, int index);
+int  teleportMapGet   (TeleportHashMap* teleportMap, int padIdKey); // returns -1 if not found
 
 // ================================================================
 // 11. CONVEYOR QUEUE (FIFO – Circular Array for Conveyor Belt)
 // Items on the belt are enqueued/dequeued each tick.
 // Dequeue → move X by belt speed → Enqueue back.
 // ================================================================
-void         conveyorQueueInit   (ConveyorQueue* q);
-bool         conveyorQueueEmpty  (ConveyorQueue* q);
-bool         conveyorQueueFull   (ConveyorQueue* q);
-void         conveyorQueueEnqueue(ConveyorQueue* q, ConveyorItem item);
-ConveyorItem conveyorQueueDequeue(ConveyorQueue* q);
+void         conveyorQueueInit   (ConveyorQueue* conveyorQueue);
+bool         conveyorQueueEmpty  (ConveyorQueue* conveyorQueue);
+bool         conveyorQueueFull   (ConveyorQueue* conveyorQueue);
+void         conveyorQueueEnqueue(ConveyorQueue* conveyorQueue, ConveyorItem item);
+ConveyorItem conveyorQueueDequeue(ConveyorQueue* conveyorQueue);
 
-void bstInit(BSTMap* tree);
-void bstInsert(BSTMap* tree, int r, int c, int type);
-int  bstGet(BSTMap* tree, int r, int c); // Returns TILE_EMPTY if not found
-void bstFree(BSTNode* node);
+void bstInit(BSTMap* tileTree);
+void bstInsert(BSTMap* tileTree, int row, int col, int type);
+int  bstGet(BSTMap* tileTree, int row, int col); // Returns TILE_EMPTY if not found
+void bstFree(BSTNode* treeNode);
 
 // ================================================================
 // 13. STATE HISTORY  (Doubly Linked List – Undo / Redo)
@@ -200,13 +200,13 @@ struct StateHistory {
     int           count;
 };
 
-void historyInit  (StateHistory* h);
-void historyFree  (StateHistory* h);
-void historyPush  (StateHistory* h, const GameSnapshot& snap);
-// Returns true and fills *out if there is a previous state
-bool historyUndo  (StateHistory* h, GameSnapshot* out);
-// Returns true and fills *out if there is a next state
-bool historyRedo  (StateHistory* h, GameSnapshot* out);
+void historyInit  (StateHistory* gameHistory);
+void historyFree  (StateHistory* gameHistory);
+void historyPush  (StateHistory* gameHistory, const GameSnapshot& snap);
+// Returns true and fills *restoredSnapshot if there is a previous state
+bool historyUndo  (StateHistory* gameHistory, GameSnapshot* restoredSnapshot);
+// Returns true and fills *restoredSnapshot if there is a next state
+bool historyRedo  (StateHistory* gameHistory, GameSnapshot* restoredSnapshot);
 
 // ================================================================
 // 12. SCREEN STACK (Array-Based Stack)
@@ -222,9 +222,9 @@ struct ScreenStack {
     int top;  // index of the top element (-1 = empty)
 };
 
-void screenStackInit (ScreenStack* s);
-bool screenStackEmpty(ScreenStack* s);
-bool screenStackFull (ScreenStack* s);
-void screenStackPush (ScreenStack* s, int screenIndex);
-int  screenStackPop  (ScreenStack* s);  // returns -1 if empty
-int  screenStackPeek (ScreenStack* s);  // returns top without removing, -1 if empty
+void screenStackInit (ScreenStack* navigationStack);
+bool screenStackEmpty(ScreenStack* navigationStack);
+bool screenStackFull (ScreenStack* navigationStack);
+void screenStackPush (ScreenStack* navigationStack, int screenIndex);
+int  screenStackPop  (ScreenStack* navigationStack);  // returns -1 if empty
+int  screenStackPeek (ScreenStack* navigationStack);  // returns top without removing, -1 if empty

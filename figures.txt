@@ -1,0 +1,98 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    FIREBOY & WATERGIRL — FACTS & FIGURES                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+[1] SYSTEM TIMING & ENGINE LOOP
+────────────────────────────────────────────────────────────────────────────────
+  • Target Frame Rate       : 60 FPS
+  • Update Engine Loop      : 16 ms (TICK_MS interval driven by QTimer)
+  • Physics Updates         : 60 times/second (continuous collision checks)
+  • Teleport Cooldown Timer : 2.0 seconds (anti-bounce cooldown applied to 
+                              both starting and partner pads upon warping)
+
+[2] MAP & GRAPHICS DIMENSIONS
+────────────────────────────────────────────────────────────────────────────────
+  • Tile Size               : 40 × 40 pixels
+  • Map Grid Layout         : 16 Rows × 20 Columns
+  • Total Grid Cells        : 320 tiles per level
+  • Canvas Dimensions       : 800 (Width) × 640 (Height) pixels
+  • Player Footprint        : 28 (Width) × 40 (Height) pixels
+  • Gem Active Radius       : 22.0f pixels (for linear collision detection)
+
+[3] PLAYER PHYSICS & TUNING
+────────────────────────────────────────────────────────────────────────────────
+  • Gravity                 :  0.55f pixels/frame² (downward acceleration)
+  • Walk Speed (Horizontal) :  4.50f pixels/frame (constant speed left/right)
+  • Jump Impulse (Vertical) : -13.00f pixels/frame (instant upward velocity)
+  • Terminal Velocity (Max) :  16.00f pixels/frame (maximum downward fall limit)
+
+[4] GAMEPLAY RULES & SCORE VALUE
+────────────────────────────────────────────────────────────────────────────────
+  • Starting & Maximum Lives: 3 hearts
+  • Point Value per Gem     : 100 points
+  • Point Value per Level   : 500 points (awarded upon completing the level)
+  • Win Condition           : Both exit doors open & matching players inside 
+                              simultaneously (Fireboy = Door 0, Watergirl = Door 1)
+
+[5] TECHNICAL CAPACITIES & STRUCT LIMITS
+────────────────────────────────────────────────────────────────────────────────
+  • Max Gems per Level      : 50 gems
+  • Max Hazards per Level   : 50 hazard zones (Lava, Water, Poison pools)
+  • Max Buttons per Level   : 20 pressure plates
+  • Max Conveyors per Level : 50 conveyor belts
+  • Max Sliding Gates       : 20 gates
+  • Max Teleport Pads       : 16 portals (8 portal pairs maximum)
+  • Max Leaderboard Entries : 10 high-scores saved in 'scores.txt'
+
+[6] CUSTOM DATA STRUCTURES CAPACITIES (DSA)
+────────────────────────────────────────────────────────────────────────────────
+  • Event Priority Queue    : 64 concurrent game events (PQUEUE_MAX min-heap)
+  • Undo/Redo State History : 20 complete game snapshots (HISTORY_MAX)
+  • Screen Navigation Stack : 10 active UI panels (SCREEN_STACK_MAX stack)
+  • Conveyor circular Queue : 8 concurrent items (CONVEYOR_QUEUE_MAX queue)
+  • Maximum Hint Path Length: 400 path nodes (MAX_HINT_PATH Dijkstra result)
+  • Sparse Tile Storage BST : 1 key-value node per non-empty tile 
+                              (row * MAP_COLS + col)
+
+[7] DIJKSTRA PATHFINDING — TILE WEIGHTS & PASSABILITY
+────────────────────────────────────────────────────────────────────────────────
+  Weights are decided in TWO places (not per tile-type in GameObjects.h):
+
+  (A) PASSABILITY — GameEngine::buildGrid(who, grid[])
+      Location : src/GameEngine.cpp
+      Each cell is DIJKSTRA_PASSABLE (0) or DIJKSTRA_BLOCKED (1).
+      Blocked cells are never entered (infinite cost / skipped).
+
+      Tile type          │ Fireboy grid │ Watergirl grid │ Step cost if passable
+      ───────────────────┼──────────────┼────────────────┼──────────────────────
+      TILE_EMPTY    (0)  │  PASSABLE    │  PASSABLE      │  1.0 (see B below)
+      TILE_SOLID    (1)  │  BLOCKED     │  BLOCKED       │  —
+      TILE_LAVA     (2)  │  PASSABLE    │  BLOCKED       │  1.0
+      TILE_WATER    (3)  │  BLOCKED     │  PASSABLE      │  1.0
+      TILE_POISON   (4)  │  BLOCKED     │  BLOCKED       │  —
+      TILE_CONVEYOR_R(5) │  BLOCKED     │  BLOCKED       │  —
+      TILE_CONVEYOR_L(6) │  BLOCKED     │  BLOCKED       │  —
+      Closed gate        │  BLOCKED     │  BLOCKED       │  — (overlaid as SOLID)
+
+  (B) EDGE WEIGHTS — DSA::dijkstraGridFind()
+      Location : src/DSA.cpp
+      Constants in include/GameObjects.h:
+
+      • DIJKSTRA_STEP_COST     = 1.0f  — each cardinal move (N/S/E/W) to a
+                                         passable neighbour
+      • DIJKSTRA_TELEPORT_COST = 0.0f  — warp from pad tile to partner tile
+      • DIJKSTRA_UNREACHABLE   = 1e9f  — initial distance before relaxation
+
+      All passable tiles share the SAME step cost (1.0). There is no heavier
+      weight for lava, water, or empty — only blocked vs walkable matters.
+
+  (C) TELEPORT EDGES — GameEngine::buildEffectiveTileMap()
+      teleportEdges[row][col] = partner column/row, or (-1,-1) if none.
+      When stepping onto a pad, Dijkstra may relax the partner at cost +0.
+
+  (D) OUTPUT — PathResult.len
+      Total path cost = sum of edge weights ≈ number of tile steps (teleports
+      add 0). Used by computeHints() and gemMinHeapFind() for nearest gem.
+
+  Call chain : buildEffectiveTileMap() → buildGrid() → dijkstraGridFind()
+               (hints: computeHints)   (nearest gem arrow: gemMinHeapFind)
