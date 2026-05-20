@@ -1,12 +1,13 @@
 #pragma once
-#include <QObject>
+#include <QObject> //signals and slots -->emit 
 #include <QTimer>
 #include <QSoundEffect>
 #include "../include/GameObjects.h"
 #include "../include/DSA.h"
 #include "../include/Player.h"
 
-class GameEngine : public QObject {
+class GameEngine : public QObject 
+{
     Q_OBJECT
 public:
     explicit GameEngine(QObject* parent = nullptr);
@@ -23,7 +24,6 @@ public:
     // State
     int   state;
     int   score;
-    int   levelBaseScore; // Cumulative score at the start of the current level
     int   lives;
     bool  showHint;
 

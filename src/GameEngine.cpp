@@ -3,7 +3,6 @@
 #include <cmath>
 #include <cstring>
 #include <QUrl>
-#include <QDebug>
 
 static const int TICK_MS = 16; // game updates every 16ms (~60fps)
 
@@ -126,9 +125,12 @@ void GameEngine::resetLevelState()
     for (int i = 0; i < lv->buttonCount;     i++) lv->buttons[i].pressed = false;
     for (int i = 0; i < lv->conveyorCount;   i++) conveyorQueueInit(&lv->conveyors[i].queue);
 
+
     rebuildGateMap();
     rebuildTeleportMap();
     buildEffectiveTileMap();
+    score=0;
+    emit(stateChanged(score));
 }
 
 // ── applySnapshot ────────────────────────────────────────────
@@ -150,7 +152,6 @@ void GameEngine::applySnapshot(const GameSnapshot& snap)
             lv->gems[i].collected = snap.gemCollected[i];
 
     score = snap.score;
-    emit scoreChanged(score);
 }
 
 // ── buildEffectiveTileMap ─────────────────────────────────────
@@ -232,7 +233,6 @@ void GameEngine::start()
 
     score          = 0;
     lives          = 5;
-    levelBaseScore = 0;
 
     // Clear undo history and gem trail
     historyFree(&history);
@@ -312,8 +312,6 @@ void GameEngine::nextLevel()
     LevelData* lv = currentLevel();
     playerInit(&fireboy,   FIREBOY,   lv->fireboyStartX,   lv->fireboyStartY);
     playerInit(&watergirl, WATERGIRL, lv->watergirlStartX, lv->watergirlStartY);
-
-    levelBaseScore = score; // record baseline so win screen can show per-level gain
 
     resetLevelState();
 
@@ -906,16 +904,7 @@ void GameEngine::handleDeath()
         return;
     }
 
-    bool fb = playerRestoreCheckpoint(&fireboy);
-    bool wg = playerRestoreCheckpoint(&watergirl);
-
-    if (!fb || !wg)
-        resetLevel();
-    else
-    {
-        fireboy.dead   = false;
-        watergirl.dead = false;
-    }
+    resetLevel();
 }
 
 // ── buildGrid ─────────────────────────────────────────────────

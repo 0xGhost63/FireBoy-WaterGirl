@@ -53,18 +53,6 @@ void playerReset(Player* p, float x, float y)
 float playerCenterX(Player* p) { return p->x + PLAYER_W / 2.0f; }
 float playerCenterY(Player* p) { return p->y + PLAYER_H / 2.0f; }
 
-// ── playerRestoreCheckpoint ──────────────────────────────────
-// Teleports the player back to their saved spawn position.
-// Clears velocity and marks them alive again.
-bool playerRestoreCheckpoint(Player* p)
-{
-    p->x    = p->spawnX;
-    p->y    = p->spawnY;
-    p->vx   = 0;
-    p->vy   = 0;
-    p->dead = false;
-    return true;
-}
 
 // ── isSolid ───────────────────────────────────────────────────
 // Returns true if a tile type is solid (blocks movement).
