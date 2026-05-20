@@ -99,8 +99,8 @@ LevelData makeLevel1() {
 // ============================================================
 LevelData makeLevel2() {
     LevelData lv;
-    lv.num = 2; lv.bgStyle = 2;
-    strcpy(lv.name, "The Conveyor Gauntlet");
+    lv.num = 2; lv.bgStyle = 0;
+    strcpy(lv.name, "Custom Level");
 
     int map[MAP_ROWS][MAP_COLS] = {
         {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S},  // 0
@@ -115,7 +115,7 @@ LevelData makeLevel2() {
         {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S,E,E,S},  // 9
         {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S,E,S},  // 10
         {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S},  // 11
-        {S,E,E,S,W,W,W,S,E,E,E,E,S,L,L,L,S,E,E,S},  // 12
+        {S,E,E,S,P,P,P,S,E,E,E,E,S,P,P,P,S,E,E,S},  // 12
         {S,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,S,S},  // 13
         {S,E,E,E,L,L,L,E,E,E,E,E,E,W,W,W,E,E,S,S},  // 14
         {S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S,S}  // 15
@@ -146,19 +146,21 @@ LevelData makeLevel2() {
     lv.buttons[1] = {14*TILE_SIZE-6, (7+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};
 
     lv.gateCount = 1;
-    lv.gates[0] = {0, 8*TILE_SIZE, 6*TILE_SIZE,TILE_SIZE,2*TILE_SIZE, false, 0.0f};
+    lv.gates[0] = {0, 8*TILE_SIZE, 6*TILE_SIZE, TILE_SIZE, TILE_SIZE*2, false, 0.0f};
+
+    lv.teleportCount = 0;
 
     lv.hazardCount = 16;
     lv.hazards[0] = {5*TILE_SIZE, 4*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
     lv.hazards[1] = {10*TILE_SIZE, 4*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
     lv.hazards[2] = {11*TILE_SIZE, 4*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
     lv.hazards[3] = {17*TILE_SIZE, 4*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
-    lv.hazards[4] = {4*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
-    lv.hazards[5] = {5*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
-    lv.hazards[6] = {6*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
-    lv.hazards[7] = {13*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_LAVA};
-    lv.hazards[8] = {14*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_LAVA};
-    lv.hazards[9] = {15*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_LAVA};
+    lv.hazards[4] = {4*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[5] = {5*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[6] = {6*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[7] = {13*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[8] = {14*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
+    lv.hazards[9] = {15*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
     lv.hazards[10] = {4*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_LAVA};
     lv.hazards[11] = {5*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_LAVA};
     lv.hazards[12] = {6*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_LAVA};
@@ -166,8 +168,6 @@ LevelData makeLevel2() {
     lv.hazards[14] = {14*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
     lv.hazards[15] = {15*TILE_SIZE, 14*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_WATER};
 
-
-    lv.teleportCount = 0;
     return lv;
 }
 

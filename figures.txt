@@ -98,9 +98,28 @@
                (hints: computeHints)   (nearest gem arrow: gemMinHeapFind)
 
 
-#define STATE_MENU     0
-#define STATE_PLAYING  1
-#define STATE_PAUSED   2
-#define STATE_DEAD     3
-#define STATE_WIN      4
-#define STATE_GAMEOVER 5
+[8] TILE TYPE REPRESENTATIONS & INT VALUES
+────────────────────────────────────────────────────────────────────────────────
+  • TILE_EMPTY      (0) : Walkable empty space.
+  • TILE_SOLID      (1) : Impassable wall/floor obstacle.
+  • TILE_LAVA       (2) : Lethal pool to Watergirl; passable to Fireboy.
+  • TILE_WATER      (3) : Lethal pool to Fireboy; passable to Watergirl.
+  • TILE_POISON     (4) : Lethal pool to both players.
+  • TILE_CONVEYOR_R (5) : Solid terrain that pushes players to the right.
+  • TILE_CONVEYOR_L (6) : Solid terrain that pushes players to the left.
+
+[9] GAME STATE REPRESENTATIONS & INT VALUES
+────────────────────────────────────────────────────────────────────────────────
+  • STATE_MENU      (0) : Main menu display.
+  • STATE_PLAYING   (1) : Active gameplay loop.
+  • STATE_PAUSED    (2) : Suspended game clock and physics.
+  • STATE_DEAD      (3) : Mid-death player animation state.
+  • STATE_WIN       (4) : Level / game completion celebration state.
+  • STATE_GAMEOVER  (5) : All lives depleted screen.
+
+[10] UI SCREEN STACK REPRESENTATIONS & INT VALUES
+────────────────────────────────────────────────────────────────────────────────
+  • GAME_SCREEN     (0) : Main gameplay render window.
+  • MENU_SCREEN     (1) : Main options menu window.
+  • LEADERBOARD     (2) : Scoreboard and rank history list.
+  • NAME_ENTRY      (3) : Nickname submission and onboarding window.
