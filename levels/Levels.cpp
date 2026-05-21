@@ -23,6 +23,15 @@
 //   - Watergirl jumps up to Floor 4 and stands on Button 1.
 //   - Button 1 ALSO opens Gate 0, keeping it open!
 //   - Fireboy can now safely pass Gate 0 and jump up to Floor 4.
+// 
+// Tile Legend:
+//   - S = Solid Tile
+//   - E = Empty Space
+//   - L = Lava (Lethal to Watergirl, safe for Fireboy)
+//   - W = Water (Lethal to Fireboy, safe for Watergirl)
+//   - P = Poison (Lethal to both)
+//   - R = Conveyor Belt (Pushing Right)
+//   - Q = Conveyor Belt (Pushing Left)
 // ============================================================
 LevelData makeLevel1() {
     LevelData lv;
