@@ -68,3 +68,4 @@ private:
     void drawOneHintPath   (QPainter& p, PathResult& path, QColor color);
     void drawOneGemArrow   (QPainter& p, int gemIdx, QPixmap& arrowPm);
 };
+

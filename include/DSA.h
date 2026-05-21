@@ -228,3 +228,4 @@ bool screenStackFull (ScreenStack* navigationStack);
 void screenStackPush (ScreenStack* navigationStack, int screenIndex);
 int  screenStackPop  (ScreenStack* navigationStack);  // returns -1 if empty
 int  screenStackPeek (ScreenStack* navigationStack);  // returns top without removing, -1 if empty
+

@@ -175,3 +175,4 @@ struct LevelData {
 
     int bgStyle;  // 0=forest  1=cave  2=ruins
 };
+

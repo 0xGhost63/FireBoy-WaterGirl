@@ -101,3 +101,4 @@ private:
     QSoundEffect* sndLavaWalk;
     QSoundEffect* sndWaterWalk;
 };
+

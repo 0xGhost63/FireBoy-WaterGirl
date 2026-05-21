@@ -21,3 +21,4 @@ void  playerReset            (Player* p, float x, float y);
 void  playerUpdate           (Player* p, int map[MAP_ROWS][MAP_COLS]);
 float playerCenterX          (Player* p);
 float playerCenterY          (Player* p);
+

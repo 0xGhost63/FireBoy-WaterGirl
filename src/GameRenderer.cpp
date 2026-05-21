@@ -611,3 +611,4 @@ void GameRenderer::drawOverlay(QPainter& p)
         }
     }
 }
+

@@ -742,3 +742,4 @@ int screenStackPeek(ScreenStack* navigationStack)
     if (screenStackEmpty(navigationStack)) return -1;
     return navigationStack->items[navigationStack->top];
 }
+

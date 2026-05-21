@@ -355,3 +355,4 @@ void GameWindow::closeEvent(QCloseEvent* e)
 {
     e->accept(); // Let the window close normally
 }
+

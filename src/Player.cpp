@@ -202,3 +202,4 @@ void playerUpdate(Player* p, int map[MAP_ROWS][MAP_COLS])
     // Step 6: Check and fix collisions with solid tiles
     resolveCollisions(p, map);
 }
+

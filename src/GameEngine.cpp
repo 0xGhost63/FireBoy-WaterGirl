@@ -1029,3 +1029,4 @@ void GameEngine::computeHints()
     watergirlHint = getPath(WATERGIRL, watergirl.x, watergirl.y,
         (int)(lv->doors[1].x / TILE_SIZE), (int)(lv->doors[1].y / TILE_SIZE), wgGrid);
 }
+

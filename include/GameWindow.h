@@ -61,3 +61,4 @@ private:
     void navigateTo(int screenIndex);  // push current screen, switch to new one
     void navigateBack();               // pop stack, switch to previous screen
 };
+
