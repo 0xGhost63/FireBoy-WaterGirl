@@ -156,7 +156,7 @@ void GameEngine::applySnapshot(const GameSnapshot& snap)
 
 // ── buildEffectiveTileMap ─────────────────────────────────────
 // Flattens the BST tile tree into effectiveTileMap[], overlays closed gates
-// as TILE_SOLID, and fills teleportEdges[][] with zero-cost warp destinations.
+// as TILE_SOLID.
 void GameEngine::buildEffectiveTileMap()
 {
     LevelData* lv = currentLevel();
@@ -183,36 +183,6 @@ void GameEngine::buildEffectiveTileMap()
         for (int r = r0; r <= r1 && r < MAP_ROWS; r++)
             for (int c = c0; c <= c1 && c < MAP_COLS; c++)
                 effectiveTileMap[r][c] = TILE_SOLID;
-    }
-
-    // Initialize teleportEdges to -1 (no teleport)
-    for (int r = 0; r < MAP_ROWS; r++)
-    {
-        for (int c = 0; c < MAP_COLS; c++)
-        {
-            teleportEdges[r][c][0] = -1;
-            teleportEdges[r][c][1] = -1;
-        }
-    }
-
-    // Populate teleportEdges for each pad to point to its partner
-    for (int i = 0; i < lv->teleportCount; i++)
-    {
-        TeleportPad& pad = lv->pads[i];
-        int partnerIdx = teleportMapGet(&teleportMap, pad.partnerId);
-        if (partnerIdx >= 0)
-        {
-            TeleportPad& partner = lv->pads[partnerIdx];
-            int cx = (int)(pad.x / TILE_SIZE);
-            int cy = (int)(pad.y / TILE_SIZE);
-            int px = (int)(partner.x / TILE_SIZE);
-            int py = (int)(partner.y / TILE_SIZE);
-            if (cx >= 0 && cx < MAP_COLS && cy >= 0 && cy < MAP_ROWS)
-            {
-                teleportEdges[cy][cx][0] = px;
-                teleportEdges[cy][cx][1] = py;
-            }
-        }
     }
 }
 
@@ -487,9 +457,9 @@ void GameEngine::tick()
     if (showHint)
     {
         nearestFbGem = gemMinHeapFind(lv->gems, lv->gemCount,
-                           fireboy.x,   fireboy.y,   FIREBOY,   effectiveTileMap, teleportEdges);
+                           fireboy.x,   fireboy.y,   FIREBOY,   effectiveTileMap);
         nearestWgGem = gemMinHeapFind(lv->gems, lv->gemCount,
-                           watergirl.x, watergirl.y, WATERGIRL, effectiveTileMap, teleportEdges);
+                           watergirl.x, watergirl.y, WATERGIRL, effectiveTileMap);
     }
     else
     {
@@ -908,8 +878,8 @@ void GameEngine::handleDeath()
 }
 
 // ── buildGrid ─────────────────────────────────────────────────
-// Converts effectiveTileMap into a passability grid for Dijkstra (DIJKSTRA_PASSABLE
-// vs DIJKSTRA_BLOCKED). Edge step costs are applied later in dijkstraGridFind().
+// Converts effectiveTileMap into a passability grid for Dijkstra
+// (DIJKSTRA_PASSABLE vs DIJKSTRA_BLOCKED).
 // Blocked: SOLID, conveyors, POISON, and hazards lethal to this player.
 // Passable: EMPTY, safe hazards (lava for Fireboy, water for Watergirl).
 void GameEngine::buildGrid(int who, int grid[MAP_ROWS][MAP_COLS])
@@ -935,7 +905,7 @@ void GameEngine::buildGrid(int who, int grid[MAP_ROWS][MAP_COLS])
 }
 
 // ── computeHints ──────────────────────────────────────────────
-// Dijkstra DSA: builds greedy gem-to-gem paths then a final path to each door.
+// Builds greedy gem-to-gem paths then a final path to each door.
 // Results are stored in fireboyHint and watergirlHint for the renderer.
 void GameEngine::computeHints()
 {

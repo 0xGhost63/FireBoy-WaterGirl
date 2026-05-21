@@ -405,7 +405,7 @@ void GameRenderer::drawHints(QPainter& p)
     drawOneHintPath(p, eng->watergirlHint, QColor(60, 180, 255, 180));  // blue path
 }
 
-// ── DSA: Min-Heap + Dijkstra Arrow ──────────────────────────
+// ── Min-Heap Gem Arrow ─────────────────────────────
 // Draws an arrow pointing down at the nearest reachable gem
 
 // Draws one arrow above a specific gem
@@ -430,14 +430,14 @@ void GameRenderer::drawGemArrows(QPainter& p)
     LevelData* lv = eng->currentLevel();
     if (!lv) return;
 
-    // Use Dijkstra + Min-Heap to find nearest reachable gem for each player
+    // Use Min-Heap to find nearest reachable gem for each player
     int fbIdx = gemMinHeapFind(lv->gems, lv->gemCount,
                     eng->fireboy.x, eng->fireboy.y,
-                    FIREBOY, eng->effectiveTileMap, eng->teleportEdges);
+                    FIREBOY, eng->effectiveTileMap);
                     
     int wgIdx = gemMinHeapFind(lv->gems, lv->gemCount,
                     eng->watergirl.x, eng->watergirl.y,
-                    WATERGIRL, eng->effectiveTileMap, eng->teleportEdges);
+                    WATERGIRL, eng->effectiveTileMap);
 
     drawOneGemArrow(p, fbIdx, pmFireArrow);
     drawOneGemArrow(p, wgIdx, pmWaterArrow);

@@ -71,18 +71,16 @@ struct PathResult {
 
 PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
                             int srcCol, int srcRow,
-                            int dstCol, int dstRow,
-                            int teleportEdges[MAP_ROWS][MAP_COLS][2] = nullptr);
+                            int dstCol, int dstRow);
 
 // ================================================================
 // 8. MIN-HEAP – Nearest Gem Finder
 // Pushes uncollected gems keyed by distance; pops the closest.
 // Returns gem index, or -1 if none reachable.
 // ================================================================
-// grid = effectiveTileMap; Dijkstra path length is used as the heap key
+// grid = effectiveTileMap; path length is used as the heap key
 int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
-                   int grid[MAP_ROWS][MAP_COLS],
-                   int teleportEdges[MAP_ROWS][MAP_COLS][2] = nullptr);
+                   int grid[MAP_ROWS][MAP_COLS]);
 
 // ================================================================
 // 12. SINGLY LINKED LIST – Gem Collection Trail

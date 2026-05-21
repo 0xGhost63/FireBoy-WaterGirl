@@ -42,7 +42,6 @@ public:
     TeleportHashMap teleportMap;
 
     int effectiveTileMap[MAP_ROWS][MAP_COLS];
-    int teleportEdges[MAP_ROWS][MAP_COLS][2]; // [0]=col, [1]=row of partner
 
     // Dijkstra hint paths (via grid)
     PathResult fireboyHint;

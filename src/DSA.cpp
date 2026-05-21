@@ -155,12 +155,11 @@ int binarySearch(ScoreEntry arr[], int n, int score)
 
 // Finds the shortest walkable path on grid from (srcCol,srcRow) to (dstCol,dstRow).
 // Passability is set by GameEngine::buildGrid() (DIJKSTRA_PASSABLE / DIJKSTRA_BLOCKED).
-// Edge weights: DIJKSTRA_STEP_COST per cardinal step, DIJKSTRA_TELEPORT_COST for warps.
+// Edge weight: DIJKSTRA_STEP_COST per cardinal step.
 // Returns a PathResult with tile coordinates from source to destination.
 PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
                             int srcCol, int srcRow,
-                            int dstCol, int dstRow,
-                            int teleportEdges[MAP_ROWS][MAP_COLS][2])
+                            int dstCol, int dstRow)
 {
     PathResult res;
     res.len = 0;
@@ -225,24 +224,8 @@ PathResult dijkstraGridFind(int grid[MAP_ROWS][MAP_COLS],
                 parentX[ny][nx] = cx;
                 parentY[ny][nx] = cy;
             }
-        }
-
-        if (teleportEdges && teleportEdges[cy][cx][0] != -1)
-        {
-            int tx = teleportEdges[cy][cx][0];
-            int ty = teleportEdges[cy][cx][1];
-            if (!closed[ty][tx])
-            {
-                float alt = dist[cy][cx] + DIJKSTRA_TELEPORT_COST;
-                if (alt < dist[ty][tx])
-                {
-                    dist[ty][tx]    = alt;
-                    parentX[ty][tx] = cx;
-                    parentY[ty][tx] = cy;
-                }
-            }
-        }
-    }
+        }   // end for (int d...)
+    }       // end for (int iter...)
 
     if (!found) return res;
 
@@ -299,10 +282,9 @@ static void heapifyDown(HeapEntry a[], int n, int i)
 }
 
 // Builds a min-heap of uncollected gems owned by playerType, keyed by
-// Dijkstra path length from the player. Returns the closest gem index, or -1.
+// path length from the player. Returns the closest gem index, or -1.
 int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
-                   int grid[MAP_ROWS][MAP_COLS],
-                   int teleportEdges[MAP_ROWS][MAP_COLS][2])
+                   int grid[MAP_ROWS][MAP_COLS])
 {
     int pCol = (int)(px / TILE_SIZE);
     int pRow = (int)(py / TILE_SIZE);
@@ -326,7 +308,7 @@ int gemMinHeapFind(Gem gems[], int gemCount, float px, float py, int playerType,
         if (gRow < 0) gRow = 0;
         if (gRow >= MAP_ROWS) gRow = MAP_ROWS-1;
 
-        PathResult pr = dijkstraGridFind(grid, pCol, pRow, gCol, gRow, teleportEdges);
+        PathResult pr = dijkstraGridFind(grid, pCol, pRow, gCol, gRow);
         float distVal = (pr.len > 0) ? (float)pr.len : 1e30f;
         heap[hn].dist = distVal;
         heap[hn].idx  = i;
