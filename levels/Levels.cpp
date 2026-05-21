@@ -62,10 +62,12 @@ LevelData makeLevel1() {
     lv.fireboyStartX   = 1*TILE_SIZE; lv.fireboyStartY   = 15*TILE_SIZE - PLAYER_H;
     lv.watergirlStartX = 3*TILE_SIZE; lv.watergirlStartY = 15*TILE_SIZE - PLAYER_H;
 
+    // Door = {x, y, height, owner (0=Fireboy, 1=Watergirl), openState (false=closed)}
     lv.doors[0] = {2*TILE_SIZE, (2+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, FIREBOY, false};
     lv.doors[1] = {5*TILE_SIZE, (2+1)*TILE_SIZE - TILE_SIZE*2.0f, TILE_SIZE*2.0f, WATERGIRL, false};
 
     lv.gemCount = 7;
+    // Gem = {x, y, owner (0=Fireboy, 1=Watergirl), collectedState (false=uncollected), animPhase}
     lv.gems[0] = {16*TILE_SIZE+8, 2*TILE_SIZE+8, FIREBOY, false, 0.0f};
     lv.gems[1] = {1*TILE_SIZE+8, 6*TILE_SIZE+8, FIREBOY, false, 0.0f};
     lv.gems[2] = {16*TILE_SIZE+8, 6*TILE_SIZE+8, WATERGIRL, false, 0.0f};
@@ -76,15 +78,18 @@ LevelData makeLevel1() {
 
     lv.conveyorCount = 0;
     lv.buttonCount = 2;
+    // Button = {x, y, width, height, targetGateId, pressedState (false=unpressed)}
     lv.buttons[0] = {10*TILE_SIZE-6, (2+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};
     lv.buttons[1] = {7*TILE_SIZE-6, (6+1)*TILE_SIZE-20, TILE_SIZE+24, 20, 0, false};
 
     lv.gateCount = 1;
+    // Gate = {gateId, x, y, width, height, openState (false=closed), openAnimProgress}
     lv.gates[0] = {0, 10*TILE_SIZE, 4*TILE_SIZE, TILE_SIZE, TILE_SIZE*3, false, 0.0f};
 
     lv.teleportCount = 0;
 
     lv.hazardCount = 6;
+    // HazardPool = {x, y, width, height, hazardType (2=Lava, 3=Water, 4=Poison)}
     lv.hazards[0] = {13*TILE_SIZE, 11*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
     lv.hazards[1] = {14*TILE_SIZE, 11*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_POISON};
     lv.hazards[2] = {5*TILE_SIZE, 15*TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_LAVA};
@@ -322,6 +327,7 @@ LevelData makeLevel4() {
     lv.gates[1] = {1, 14*TILE_SIZE, 11*TILE_SIZE, TILE_SIZE, TILE_SIZE*2, false, 0.0f};
 
     lv.teleportCount = 8;
+    // TeleportPad = {x, y, portalId, partnerPortalId, cooldownSeconds}
     lv.pads[0] = {9*TILE_SIZE, 1*TILE_SIZE, 1, 0, 0.0f};
     lv.pads[1] = {11*TILE_SIZE, 1*TILE_SIZE, 3, 2, 0.0f};
     lv.pads[2] = {18*TILE_SIZE, 2*TILE_SIZE, 0, 1, 0.0f};
