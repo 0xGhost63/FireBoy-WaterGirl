@@ -40,45 +40,35 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0)
     connect(eng, &GameEngine::frameReady,   this, &GameWindow::onFrameReady);
     connect(eng, &GameEngine::stateChanged, this, &GameWindow::onStateChanged);
 
-    // Setup background music based on Qt version
+    // Setup background music
     QUrl bgmUrl;
-    QString localPath = "assets/sounds/bgm.mp3";
+    QString localPath = "assets/sounds/bgm.wav";
     if (QFile::exists(localPath)) {
         bgmUrl = QUrl::fromLocalFile(QFileInfo(localPath).absoluteFilePath());
     } else {
-        QString appDirPathPath = QApplication::applicationDirPath() + "/../assets/sounds/bgm.mp3";
+        QString appDirPathPath = QApplication::applicationDirPath() + "/../assets/sounds/bgm.wav";
         if (QFile::exists(appDirPathPath)) {
             bgmUrl = QUrl::fromLocalFile(QFileInfo(appDirPathPath).absoluteFilePath());
         } else {
-            QString appDirDirectPath = QApplication::applicationDirPath() + "/assets/sounds/bgm.mp3";
+            QString appDirDirectPath = QApplication::applicationDirPath() + "/assets/sounds/bgm.wav";
             if (QFile::exists(appDirDirectPath)) {
                 bgmUrl = QUrl::fromLocalFile(QFileInfo(appDirDirectPath).absoluteFilePath());
             } else {
-                bgmUrl = QUrl("qrc:/sounds/bgm.mp3");
+                bgmUrl = QUrl("qrc:/sounds/bgm.wav");
             }
         }
     }
     qDebug() << "Resolved BGM URL to:" << bgmUrl;
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    playlist = new QMediaPlaylist(this);
-    playlist->addMedia(bgmUrl);
-    playlist->setPlaybackMode(QMediaPlaylist::Loop);
-    bgMusic = new QMediaPlayer(this);
-    bgMusic->setPlaylist(playlist);
-    bgMusic->setVolume(50);
-    // Run playBGM() once after event loop starts
-    QTimer::singleShot(0, this, &GameWindow::playBGM);
-#else
-    bgMusic = new QMediaPlayer(this);
-    audioOutput = new QAudioOutput(this);
-    bgMusic->setAudioOutput(audioOutput);
+    bgMusic = new QSoundEffect(this);
+    connect(bgMusic, &QSoundEffect::statusChanged, this, [this]() {
+        qDebug() << "BGM status changed to:" << bgMusic->status();
+    });
     bgMusic->setSource(bgmUrl);
-    audioOutput->setVolume(0.5);
-    bgMusic->setLoops(-1);
+    bgMusic->setLoopCount(QSoundEffect::Infinite);
+    bgMusic->setVolume(0.5f);
     // Run playBGM() once after event loop starts
     QTimer::singleShot(0, this, &GameWindow::playBGM);
-#endif
 
     // ── Inject the GameRenderer into Page 0 ──────────────────
     // Page 0 is an empty placeholder in the .ui file because
@@ -133,7 +123,7 @@ void GameWindow::playBGM()
 {
     if (bgMusic) {
         bgMusic->play();
-        qDebug() << "BGM play() called. State:" << bgMusic->state() << "Error:" << bgMusic->error() << bgMusic->errorString();
+        qDebug() << "BGM play() called. Playing:" << bgMusic->isPlaying() << "Muted:" << bgMusic->isMuted() << "Status:" << bgMusic->status();
     }
 }
 

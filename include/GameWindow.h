@@ -5,13 +5,8 @@
 #include <QLineEdit>
 #include "../include/GameEngine.h"
 #include "../include/GameRenderer.h"
-#include <QMediaPlayer>
+#include <QSoundEffect>
 #include <QtGlobal>
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QMediaPlaylist>
-#else
-#include <QAudioOutput>
-#endif
 
 // Forward-declare the generated UI class
 namespace Ui { class GameWindowUI; }
@@ -40,12 +35,7 @@ private:
 
     QString currentPlayerName;
 
-    QMediaPlayer* bgMusic;
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QMediaPlaylist* playlist;
-#else
-    QAudioOutput* audioOutput;
-#endif
+    QSoundEffect* bgMusic;
 
     // Leaderboard data (sorted with QuickSort, searched with BinarySearch)
     ScoreEntry scores[MAX_SCORES];
