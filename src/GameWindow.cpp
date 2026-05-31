@@ -13,6 +13,8 @@
 #include <cstring>
 #include <QUrl>
 #include <QTimer>
+#include <QFileInfo>
+#include <QDebug>
 
 // ── GameWindow Constructor ─────────────────────────────────────
 // Sets up the main window, the game engine, and the media players.
@@ -39,9 +41,28 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0)
     connect(eng, &GameEngine::stateChanged, this, &GameWindow::onStateChanged);
 
     // Setup background music based on Qt version
+    QUrl bgmUrl;
+    QString localPath = "assets/sounds/bgm.mp3";
+    if (QFile::exists(localPath)) {
+        bgmUrl = QUrl::fromLocalFile(QFileInfo(localPath).absoluteFilePath());
+    } else {
+        QString appDirPathPath = QApplication::applicationDirPath() + "/../assets/sounds/bgm.mp3";
+        if (QFile::exists(appDirPathPath)) {
+            bgmUrl = QUrl::fromLocalFile(QFileInfo(appDirPathPath).absoluteFilePath());
+        } else {
+            QString appDirDirectPath = QApplication::applicationDirPath() + "/assets/sounds/bgm.mp3";
+            if (QFile::exists(appDirDirectPath)) {
+                bgmUrl = QUrl::fromLocalFile(QFileInfo(appDirDirectPath).absoluteFilePath());
+            } else {
+                bgmUrl = QUrl("qrc:/sounds/bgm.mp3");
+            }
+        }
+    }
+    qDebug() << "Resolved BGM URL to:" << bgmUrl;
+
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     playlist = new QMediaPlaylist(this);
-    playlist->addMedia(QUrl("qrc:/sounds/bgm.mp3"));
+    playlist->addMedia(bgmUrl);
     playlist->setPlaybackMode(QMediaPlaylist::Loop);
     bgMusic = new QMediaPlayer(this);
     bgMusic->setPlaylist(playlist);
@@ -52,7 +73,7 @@ GameWindow::GameWindow(QWidget* parent) : QMainWindow(parent), scoreCount(0)
     bgMusic = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
     bgMusic->setAudioOutput(audioOutput);
-    bgMusic->setSource(QUrl("qrc:/sounds/bgm.mp3"));
+    bgMusic->setSource(bgmUrl);
     audioOutput->setVolume(0.5);
     bgMusic->setLoops(-1);
     // Run playBGM() once after event loop starts
@@ -112,6 +133,7 @@ void GameWindow::playBGM()
 {
     if (bgMusic) {
         bgMusic->play();
+        qDebug() << "BGM play() called. State:" << bgMusic->state() << "Error:" << bgMusic->error() << bgMusic->errorString();
     }
 }
 
